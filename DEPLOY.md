@@ -474,7 +474,59 @@ questions were dropped during import rather than shipped broken.
 
 ---
 
-## 15. Troubleshooting
+## 15. A quick public deployment (VPS + DuckDNS)
+
+For a short-lived public demo on a VPS with a DuckDNS domain, two scripts do the
+work. Both are idempotent.
+
+```bash
+# 1. Bring the app up behind nginx for your domain, then enable HTTPS
+sudo bash /srv/ibshit/deploy/fix-duckdns.sh yourname.duckdns.org
+
+# 2. If anything still fails, find out exactly why (read-only)
+sudo bash /srv/ibshit/deploy/diagnose.sh
+```
+
+`fix-duckdns.sh` walks the causes of a 502 in the order they actually occur:
+
+| Step | Why it matters |
+| --- | --- |
+| Generate `SECRET_KEY` if absent | production refuses to start without it, which is the most common 502 cause |
+| `chown` the app directory | otherwise the CLI made root-owned files the service cannot read |
+| Install the flask wrapper | lets you run the CLI as the app user safely |
+| Restart the service and check it | rather than assuming it started |
+| Grant nginx access to the socket | `RuntimeDirectoryMode=0750` only admits the app group, so `www-data` is added to it |
+| Install the nginx site for your domain | replaces the placeholder `server_name` |
+| Verify `healthz` locally | proves the app answers before you blame DNS |
+| Open the firewall, run certbot | gets you HTTPS, and then sets `SESSION_COOKIE_SECURE`, `PREFERRED_URL_SCHEME` and `TRUST_PROXY_HEADERS` |
+
+A 502 from nginx with the app running almost always means the socket is not
+reachable by `www-data`, or the service never started. `diagnose.sh` tells you
+which, and prints the fix.
+
+### Authentication for a private repository
+
+`git clone` over HTTPS needs a credential if the repository is private, which is
+what makes an installer appear to hang or fail. Two ways to avoid making the
+repository public:
+
+```bash
+# Option A: a deploy key (recommended). Read-only, scoped to this repo.
+sudo -u ibshit ssh-keygen -t ed25519 -N '' -f /srv/ibshit/.ssh/id_ed25519
+sudo cat /srv/ibshit/.ssh/id_ed25519.pub
+# add that key in GitHub -> repo -> Settings -> Deploy keys (leave write off)
+sudo -u ibshit git -C /srv/ibshit remote set-url origin git@github.com:Dellis908/ibshit.git
+```
+
+```bash
+# Option B: a token in the URL for one clone
+sudo -u ibshit git clone https://<token>@github.com/Dellis908/ibshit.git /srv/ibshit
+```
+
+This repository contains no secrets (configuration comes from `/etc/ibshit.env`,
+which is not tracked), so keeping it public is also safe if that is simpler.
+
+## 16. Troubleshooting
 
 **`flask` says "Could not locate a Flask application"**
 `FLASK_APP` is not set. Pass it explicitly, as every command above does, or
