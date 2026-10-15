@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>{{ topic }}</h2>
+{% for q in questions %}
+<div class="question-card" data-question-id="{{ q.id }}">
+    <h3>Pytanie {{ loop.index }}</h3>
+    <p>{{ q.question_text | safe }}</p>
+    {% if q.image_path %}
+        <img src="{{ url_for('static', filename=q.image_path) }}" alt="diagram">
+    {% endif %}
+    <textarea class="answer-input" placeholder="Twoja odpowiedź..."></textarea>
+    <button class="submit-btn">Sprawdź</button>
+    <div class="feedback"></div>
+</div>
+{% endfor %}
+
+<script>
+document.querySelectorAll('.submit-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const card = this.closest('.question-card');
+        const qid = card.dataset.questionId;
+        const answer = card.querySelector('.answer-input').value;
+        fetch('/submit_answer', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({question_id: qid, answer: answer})
+        })
+        .then(r => r.json())
+        .then(data => {
+            const fb = card.querySelector('.feedback');
+            if (data.is_correct) {
+                fb.innerHTML = '✅ Poprawnie!';
+            } else {
+                fb.innerHTML = `❌ Błędnie. Poprawna odpowiedź: ${data.correct_answer}`;
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
