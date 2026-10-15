@@ -12,6 +12,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from app import create_app  # noqa: E402
+from app.auth import rate_limit_reset  # noqa: E402
 from app.content import sync_topics  # noqa: E402
 from app.extensions import db  # noqa: E402
 
@@ -77,10 +78,45 @@ SAMPLE_QUESTIONS = [
 ]
 
 
+def make_user(application, email: str, password: str = "correct-horse-battery", *, admin: bool = False):
+    """Create an account directly, bypassing the sign-up form."""
+    from app.models import User
+
+    with application.app_context():
+        user = User(email=email.lower(), is_admin=admin)
+        user.set_password(password)
+        db.session.add(user)
+        db.session.commit()
+        return user.id
+
+
+def login(client, email: str, password: str = "correct-horse-battery"):
+    """Sign in through the real form, so CSRF and sessions are exercised."""
+    import re
+
+    page = client.get("/auth/login")
+    token = re.search(
+        r'name="csrf-token" content="([^"]+)"', page.get_data(as_text=True)
+    ).group(1)
+    return client.post(
+        "/auth/login",
+        data={"email": email, "password": password, "csrf_token": token},
+        follow_redirects=True,
+    )
+
+
 @pytest.fixture()
 def app():
-    """A fresh app with an in-memory database and the sample bank loaded."""
+    """A fresh app with an in-memory database, the sample bank and one account."""
+    from app.models import User
+
+    rate_limit_reset()
     application = create_app("testing")
+    application.config.update(
+        ALLOW_REGISTRATION=True,
+        REGISTRATION_CODE=None,
+        WTF_CSRF_ENABLED=False,
+    )
     with application.app_context():
         db.create_all()
         sync_topics()
@@ -88,20 +124,84 @@ def app():
         from app.content import import_questions
 
         import_questions(SAMPLE_QUESTIONS, source="test-fixture")
+
+        #: The default account most tests act as.
+        owner = User(email="student@example.com", display_name="Student")
+        owner.set_password("correct-horse-battery")
+        db.session.add(owner)
+        db.session.commit()
+        application.config["TEST_USER_ID"] = owner.id
+
     yield application
     with application.app_context():
         db.session.remove()
         db.drop_all()
+    rate_limit_reset()
 
 
 @pytest.fixture()
 def client(app):
+    """A signed-in client. Prefer this unless a test is about authentication."""
+    test_client = app.test_client()
+    login(test_client, "student@example.com")
+    return test_client
+
+
+@pytest.fixture()
+def anon_client(app):
+    """A client with no session, for testing what visitors can reach."""
     return app.test_client()
 
 
 @pytest.fixture()
+def second_client(app):
+    """A second, independent account — used to prove progress is per user."""
+    from app.models import User
+
+    with app.app_context():
+        other = User(email="other@example.com", display_name="Other")
+        other.set_password("correct-horse-battery")
+        db.session.add(other)
+        db.session.commit()
+
+    test_client = app.test_client()
+    login(test_client, "other@example.com")
+    return test_client
+
+
+@pytest.fixture()
+def admin_client(app):
+    """A signed-in administrator, for the question-bank endpoints.
+
+    Import and export can replace or read the whole bank, so they are restricted
+    to administrators rather than any signed-in account.
+    """
+    from app.models import User
+
+    with app.app_context():
+        admin = User(email="admin@example.com", display_name="Admin", is_admin=True)
+        admin.set_password("correct-horse-battery")
+        db.session.add(admin)
+        db.session.commit()
+
+    test_client = app.test_client()
+    login(test_client, "admin@example.com")
+    return test_client
+
+
+@pytest.fixture()
+def admin_headers(admin_client):
+    """CSRF headers for the administrator client."""
+    import re
+
+    response = admin_client.get("/quiz?count=5")
+    match = re.search(r'name="csrf-token" content="([^"]+)"', response.get_data(as_text=True))
+    return {"X-CSRF-Token": match.group(1) if match else ""}
+
+
+@pytest.fixture()
 def csrf_headers(client):
-    """Fetch a page and return headers carrying its CSRF token."""
+    """Headers carrying the signed-in session's CSRF token."""
     import re
 
     response = client.get("/quiz?count=5")

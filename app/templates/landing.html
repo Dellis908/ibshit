@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}{{ site_name }}{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div>
+    <h1>IB Biology revision that keeps score</h1>
+    <p class="lede">
+      {{ stats.total_questions }} topic questions covering the whole syllabus, marked
+      automatically against the mark scheme — with partial credit on written answers
+      and per-topic progress you can actually act on.
+    </p>
+    <div class="hero-actions">
+      <a class="btn btn-primary btn-large" href="{{ url_for('auth.signup') }}">Create an account</a>
+      <a class="btn btn-ghost btn-large" href="{{ url_for('auth.login') }}">Sign in</a>
+    </div>
+  </div>
+  <div class="hero-panel">
+    <h2>What you get</h2>
+    <ul class="checklist checklist-plain">
+      <li><span class="check" aria-hidden="true">✓</span> Six study modes, including weak-topic and unseen-only practice</li>
+      <li><span class="check" aria-hidden="true">✓</span> Marking with partial credit and a list of the marking points you missed</li>
+      <li><span class="check" aria-hidden="true">✓</span> Progress and accuracy per syllabus topic</li>
+      <li><span class="check" aria-hidden="true">✓</span> Your own history — separate from anyone else using the server</li>
+    </ul>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-head">
+    <h2>How it works</h2>
+  </div>
+  <div class="mode-grid">
+    <div class="mode-card">
+      <strong>1. Pick a topic or mode</strong>
+      <span class="muted small">Practice, timed, exam, or focus on what you score lowest.</span>
+    </div>
+    <div class="mode-card">
+      <strong>2. Answer</strong>
+      <span class="muted small">Multiple choice is instant; written answers are marked point by point.</span>
+    </div>
+    <div class="mode-card">
+      <strong>3. See what to revise</strong>
+      <span class="muted small">Accuracy per topic, questions still unseen, and recent answers.</span>
+    </div>
+  </div>
+</section>
+{% endblock %}

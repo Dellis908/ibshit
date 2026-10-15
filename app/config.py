@@ -79,6 +79,20 @@ class Config:
     #: When set, /api/import and /api/export require an X-API-Key header.
     API_KEY = None
 
+    # --- accounts -----------------------------------------------------------
+    #: Whether new accounts can be created. Turn off once everyone who needs one
+    #: has registered, and the sign-up page closes.
+    ALLOW_REGISTRATION = True
+    #: When set, signing up also requires this code. Useful when the server is
+    #: publicly reachable and you do not want open registration.
+    REGISTRATION_CODE = None
+    #: "Remember me" lifetime.
+    REMEMBER_COOKIE_DURATION = 60 * 60 * 24 * 30
+    REMEMBER_COOKIE_HTTPONLY = True
+    REMEMBER_COOKIE_SAMESITE = "Lax"
+    #: Session lifetime for a signed-in user with "remember me" unticked.
+    PERMANENT_SESSION_LIFETIME = 60 * 60 * 24 * 14
+
 
 class DevelopmentConfig(Config):
     DEBUG = True
@@ -167,6 +181,10 @@ def apply_environment(app, *, testing: bool = False) -> None:
     )
 
     app.config["API_KEY"] = os.getenv("API_KEY") or None
+
+    app.config["ALLOW_REGISTRATION"] = _flag("ALLOW_REGISTRATION", True)
+    app.config["REGISTRATION_CODE"] = os.getenv("REGISTRATION_CODE") or None
+    app.config["REMEMBER_COOKIE_SECURE"] = app.config["SESSION_COOKIE_SECURE"]
 
     if os.getenv("QUIZ_DATA_DIR"):
         app.config["DATA_DIR"] = Path(os.environ["QUIZ_DATA_DIR"])

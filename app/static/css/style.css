@@ -674,3 +674,55 @@ textarea { resize: vertical; min-height: 84px; line-height: 1.5; }
   font-size: 0.85rem;
   font-style: italic;
 }
+
+/* --------------------------------------------------------------- accounts */
+
+.auth-shell { display: grid; place-items: start center; padding-block: var(--space-6); }
+.auth-card {
+  width: 100%; max-width: 30rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  box-shadow: var(--shadow);
+}
+.auth-card h1 { margin-bottom: var(--space-2); }
+.auth-form { display: grid; gap: var(--space-4); margin-top: var(--space-4); }
+.auth-form label { display: grid; gap: var(--space-1); font-weight: 600; font-size: 0.9rem; }
+.auth-form input[type="email"],
+.auth-form input[type="password"],
+.auth-form input[type="text"] {
+  font: inherit; color: var(--text); background: var(--bg);
+  border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
+  padding: var(--space-3); width: 100%;
+}
+.auth-form input:focus-visible { border-color: var(--accent); }
+.auth-form .muted, .auth-form .small { font-weight: 400; }
+.auth-alt { margin-top: var(--space-5); text-align: center; }
+
+.checkbox-row { display: flex !important; align-items: center; gap: var(--space-2); font-weight: 500; }
+.checkbox-row input { accent-color: var(--accent); }
+.checklist-plain .check { color: var(--good); }
+
+.two-column { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+@media (max-width: 800px) { .two-column { grid-template-columns: 1fr; } }
+.panel {
+  background: var(--bg-elevated); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: var(--space-5); box-shadow: var(--shadow-sm);
+}
+.panel h2 { font-size: 1.15rem; }
+
+/* Account menu in the header. */
+.user-menu { display: flex; align-items: center; gap: var(--space-2); margin-left: var(--space-2); }
+.user-menu > a {
+  font-weight: 600; color: var(--text); text-decoration: none;
+  padding: var(--space-2) var(--space-3); border-radius: var(--radius-sm);
+  background: var(--bg-sunken); border: 1px solid var(--border);
+}
+.user-menu > a:hover { border-color: var(--accent); color: var(--accent); }
+.link-button {
+  font: inherit; font-size: 0.9rem; font-weight: 500;
+  background: none; border: none; color: var(--text-muted);
+  cursor: pointer; padding: var(--space-2); border-radius: var(--radius-sm);
+}
+.link-button:hover { color: var(--accent); background: var(--bg-sunken); }

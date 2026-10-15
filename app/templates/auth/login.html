@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Sign in · {{ site_name }}{% endblock %}
+
+{% block content %}
+<section class="auth-shell">
+  <div class="auth-card">
+    <h1>Sign in</h1>
+    <p class="muted">Your progress is stored against your account.</p>
+
+    <form method="post" action="{{ url_for('auth.login') }}" class="auth-form" autocomplete="on">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+      <label>
+        <span>Email</span>
+        <input type="email" name="email" value="{{ email or '' }}" required autofocus
+               autocomplete="username" inputmode="email">
+      </label>
+
+      <label>
+        <span>Password</span>
+        <input type="password" name="password" required autocomplete="current-password">
+      </label>
+
+      <label class="checkbox-row">
+        <input type="checkbox" name="remember" value="1">
+        <span>Keep me signed in on this device</span>
+      </label>
+
+      <button class="btn btn-primary btn-large" type="submit">Sign in</button>
+    </form>
+
+    {% if registration_open %}
+      <p class="muted small auth-alt">
+        No account yet? <a href="{{ url_for('auth.signup') }}">Create one</a>.
+      </p>
+    {% else %}
+      <p class="muted small auth-alt">Registration is currently closed.</p>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

@@ -30,7 +30,134 @@ from app.quiz import topic_progress
 
 
 def register_cli(app: Flask) -> None:
-    """Attach the ``quiz`` command group to ``app``."""
+    """Attach the ``quiz`` and ``auth`` command groups to ``app``."""
+
+    @app.cli.group("auth")
+    def auth_group():
+        """Manage user accounts."""
+
+    @auth_group.command("list")
+    def auth_list():
+        """List accounts and how much each has answered."""
+        from app.models import User
+
+        users = db.session.query(User).order_by(User.id).all()
+        if not users:
+            click.echo("No accounts yet. Create one in the browser, or use:")
+            click.echo("  flask auth create-admin you@example.com")
+            return
+        for user in users:
+            answers = db.session.query(Attempt).filter(Attempt.user_id == user.id).count()
+            flag = "admin" if user.is_admin else "     "
+            last = user.last_login_at.strftime("%Y-%m-%d %H:%M") if user.last_login_at else "never"
+            click.echo(f"  {user.id:>4}  {flag}  {user.email:<38} {answers:>6} answers  last login {last}")
+
+    @auth_group.command("create")
+    @click.argument("email")
+    @click.option("--name", default=None, help="Display name.")
+    @click.option("--admin", is_flag=True, help="Grant administrator rights.")
+    @click.password_option(confirmation_prompt=True)
+    def auth_create(email: str, name: str | None, admin: bool, password: str):
+        """Create an account non-interactively."""
+        from app.auth import normalise_email, validate_signup
+        from app.models import User, user_count
+
+        email = normalise_email(email)
+        problems = validate_signup(email, password, password, name or "")
+        if problems:
+            for problem in problems:
+                click.secho(f"  - {problem}", fg="red")
+            raise SystemExit(1)
+        if db.session.query(User).filter_by(email=email).one_or_none():
+            click.secho(f"An account with {email} already exists.", fg="red")
+            raise SystemExit(1)
+
+        user = User(email=email, display_name=name, is_admin=admin or user_count() == 0)
+        user.set_password(password)
+        db.session.add(user)
+        db.session.commit()
+        click.secho(f"Created {'administrator' if user.is_admin else 'user'} {email}", fg="green")
+
+    @auth_group.command("create-admin")
+    @click.argument("email")
+    @click.option("--name", default=None, help="Display name.")
+    @click.password_option(confirmation_prompt=True)
+    def auth_create_admin(email: str, name: str | None, password: str):
+        """Create an administrator account (convenience wrapper)."""
+        from app.auth import normalise_email, validate_signup
+        from app.models import User
+
+        email = normalise_email(email)
+        problems = validate_signup(email, password, password, name or "")
+        if problems:
+            for problem in problems:
+                click.secho(f"  - {problem}", fg="red")
+            raise SystemExit(1)
+        if db.session.query(User).filter_by(email=email).one_or_none():
+            click.secho(f"An account with {email} already exists.", fg="red")
+            raise SystemExit(1)
+
+        user = User(email=email, display_name=name, is_admin=True)
+        user.set_password(password)
+        db.session.add(user)
+        db.session.commit()
+        click.secho(f"Created administrator {email}", fg="green")
+
+    @auth_group.command("passwd")
+    @click.argument("email")
+    @click.password_option(confirmation_prompt=True)
+    def auth_passwd(email: str, password: str):
+        """Reset an account password (for when someone is locked out)."""
+        from app.auth import normalise_email, validate_signup
+        from app.models import User
+
+        user = db.session.query(User).filter_by(email=normalise_email(email)).one_or_none()
+        if user is None:
+            click.secho(f"No account with email {email!r}", fg="red")
+            raise SystemExit(1)
+        problems = validate_signup(user.email, password, password, "")
+        if problems:
+            for problem in problems:
+                click.secho(f"  - {problem}", fg="red")
+            raise SystemExit(1)
+        user.set_password(password)
+        db.session.commit()
+        click.secho(f"Password updated for {user.email}", fg="green")
+
+    @auth_group.command("promote")
+    @click.argument("email")
+    def auth_promote(email: str):
+        """Grant administrator rights to an existing account."""
+        from app.auth import normalise_email
+        from app.models import User
+
+        user = db.session.query(User).filter_by(email=normalise_email(email)).one_or_none()
+        if user is None:
+            click.secho(f"No account with email {email!r}", fg="red")
+            raise SystemExit(1)
+        user.is_admin = True
+        db.session.commit()
+        click.secho(f"{user.email} is now an administrator", fg="green")
+
+    @auth_group.command("adopt-attempts")
+    @click.argument("email")
+    @click.option("--yes", is_flag=True, help="Skip the confirmation prompt.")
+    def auth_adopt(email: str, yes: bool):
+        """Give answer history recorded before accounts existed to one account."""
+        from app.auth import adopt_orphan_attempts
+
+        orphans = db.session.query(Attempt).filter(Attempt.user_id.is_(None)).count()
+        if not orphans:
+            click.echo("There are no ownerless answers to adopt.")
+            return
+        if not yes:
+            click.confirm(f"Assign {orphans} ownerless answer(s) to {email}?", abort=True)
+        try:
+            updated = adopt_orphan_attempts(email)
+        except ValueError as exc:
+            click.secho(str(exc), fg="red")
+            raise SystemExit(1)
+        click.secho(f"Assigned {updated} answer(s).", fg="green")
 
     @app.cli.group("quiz")
     def quiz_group():

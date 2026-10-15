@@ -26,6 +26,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 from flask import Blueprint, current_app, jsonify, request, session
+from flask_login import current_user
 
 from app import grading
 from app.content import export_questions, import_questions
@@ -33,6 +34,7 @@ from app.extensions import db
 from app.models import DIFFICULTIES, QUESTION_TYPES, Attempt, Question, Topic, overall_stats
 from app.quiz import MODE_LABELS, QUIZ_MODES, session_summary, topic_progress
 from app.routes import current_session_id
+from app.security import admin_required, login_required_api
 
 api = Blueprint("api", __name__, url_prefix="/api")
 
@@ -77,8 +79,9 @@ def _guard_write():
 # --------------------------------------------------------------------- topics
 
 @api.get("/topics")
+@login_required_api
 def list_topics():
-    progress = {row["slug"]: row for row in topic_progress()}
+    progress = {row["slug"]: row for row in topic_progress(current_user)}
     topics = db.session.query(Topic).order_by(Topic.position, Topic.title).all()
     payload = []
     for topic in topics:
@@ -97,6 +100,7 @@ def list_topics():
 
 
 @api.get("/questions")
+@login_required_api
 def list_questions():
     """Filter the bank. Answers are only included on explicit request."""
     query = db.session.query(Question).join(Topic)
@@ -135,22 +139,24 @@ def list_questions():
 # ---------------------------------------------------------------------- stats
 
 @api.get("/stats")
+@login_required_api
 def stats():
     return jsonify(
         {
-            "overall": overall_stats(),
-            "topics": topic_progress(),
+            "overall": overall_stats(current_user),
+            "topics": topic_progress(current_user),
             "modes": MODE_LABELS,
         }
     )
 
 
 @api.get("/result")
+@login_required_api
 def result():
     sid = request.args.get("session_id") or session.get("quiz_session")
     if not sid:
         return jsonify({"error": "no_active_quiz"}), 404
-    summary = session_summary(sid)
+    summary = session_summary(sid, current_user)
     if not summary["total"]:
         return jsonify({"error": "no_attempts_for_session"}), 404
     return jsonify(summary)
@@ -159,6 +165,7 @@ def result():
 # --------------------------------------------------------------------- answer
 
 @api.post("/answer")
+@login_required_api
 def submit_answer():
     """Mark one response and record it as an attempt."""
     guard = _guard_write()
@@ -197,6 +204,7 @@ def submit_answer():
         mode = "practice"
 
     attempt = Attempt(
+        user_id=current_user.id,
         question_id=question.id,
         topic_id=question.topic_id,
         session_id=payload.get("session_id") or current_session_id(),
@@ -242,6 +250,7 @@ def submit_answer():
 
 @api.post("/submit_answer")
 @api.post("/legacy/answer")
+@login_required_api
 def legacy_submit_answer():
     """The original ``POST /submit_answer`` contract, kept for compatibility.
 
@@ -276,6 +285,7 @@ def legacy_submit_answer():
 
     db.session.add(
         Attempt(
+            user_id=current_user.id,
             question_id=question.id,
             topic_id=question.topic_id,
             session_id=current_session_id(),
@@ -301,6 +311,7 @@ def legacy_submit_answer():
 
 
 @api.post("/attempts/<int:attempt_id>/override")
+@login_required_api
 def override_attempt(attempt_id: int):
     """Apply a user's self-marking decision to a written answer."""
     guard = _guard_write()
@@ -310,7 +321,9 @@ def override_attempt(attempt_id: int):
     payload = request.get_json(silent=True) or {}
     awarded = payload.get("marks_awarded")
     attempt = db.session.get(Attempt, attempt_id)
-    if attempt is None:
+    if attempt is None or attempt.user_id != current_user.id:
+        # Not found and not yours are deliberately the same answer, so the
+        # response cannot be used to probe which attempt ids exist.
         return jsonify({"error": "attempt_not_found"}), 404
     try:
         awarded = int(awarded)
@@ -328,6 +341,7 @@ def override_attempt(attempt_id: int):
 # ---------------------------------------------------------------------- reset
 
 @api.post("/reset")
+@login_required_api
 def reset_attempts():
     """Delete recorded attempts (all, or just one topic)."""
     guard = _guard_write()
@@ -338,7 +352,8 @@ def reset_attempts():
     if str(payload.get("confirm") or "").strip().upper() != "RESET":
         return jsonify({"error": "confirmation_required", "hint": "send confirm=RESET"}), 400
 
-    query = db.session.query(Attempt)
+    # Scoped to the caller: nobody can clear another account's history.
+    query = db.session.query(Attempt).filter(Attempt.user_id == current_user.id)
     slug = payload.get("topic")
     if slug:
         topic = db.session.query(Topic).filter_by(slug=slug).one_or_none()
@@ -354,6 +369,7 @@ def reset_attempts():
 # ------------------------------------------------------------------- data I/O
 
 @api.get("/export")
+@admin_required
 def export_bank():
     if not _api_key_ok():
         return jsonify({"error": "invalid_api_key"}), 401
@@ -366,6 +382,7 @@ def export_bank():
 
 
 @api.post("/import")
+@admin_required
 def import_bank():
     """Import questions from a JSON body: either a payload or a raw list."""
     if not _api_key_ok():

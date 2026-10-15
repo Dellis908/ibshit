@@ -68,6 +68,16 @@ def parse_quiz_request(args, defaults=None) -> QuizRequest:
     )
 
 
+def _uid(user) -> int | None:
+    """The user id to scope progress queries to.
+
+    Accepts a :class:`~app.models.User`, a raw id, or ``None``. Returning ``None``
+    means "no account", and every caller then matches nothing rather than
+    accidentally reading another account's history.
+    """
+    return getattr(user, "id", user)
+
+
 def _base_query(topics: tuple[str, ...] = (), difficulty: str | None = None):
     query = db.session.query(Question).join(Topic)
     if topics:
@@ -77,8 +87,16 @@ def _base_query(topics: tuple[str, ...] = (), difficulty: str | None = None):
     return query
 
 
-def weak_topic_slugs(limit: int = 3, min_attempts: int = 3) -> list[str]:
-    """Topics ordered by lowest accuracy (needs at least ``min_attempts``)."""
+def weak_topic_slugs(user, limit: int = 3, min_attempts: int = 3) -> list[str]:
+    """This user's weakest topics, lowest accuracy first.
+
+    Requires ``min_attempts`` answers in a topic so a single miss does not
+    dominate the choice.
+    """
+    user_id = _uid(user)
+    if user_id is None:
+        return []
+
     rows = (
         db.session.query(
             Topic.slug,
@@ -86,6 +104,7 @@ def weak_topic_slugs(limit: int = 3, min_attempts: int = 3) -> list[str]:
             func.sum(db.case((Attempt.is_correct.is_(True), 1), else_=0)).label("correct"),
         )
         .join(Attempt, Attempt.topic_id == Topic.id)
+        .filter(Attempt.user_id == user_id)
         .group_by(Topic.slug)
         .having(func.count(Attempt.id) >= min_attempts)
         .all()
@@ -98,14 +117,25 @@ def weak_topic_slugs(limit: int = 3, min_attempts: int = 3) -> list[str]:
     return [slug for _accuracy, _attempts, slug in scored[:limit]]
 
 
-def build_quiz(request: QuizRequest, *, max_count: int = 60, rng: random.Random | None = None) -> list[Question]:
-    """Select the questions for a quiz request."""
+def build_quiz(
+    request: QuizRequest,
+    *,
+    user=None,
+    max_count: int = 60,
+    rng: random.Random | None = None,
+) -> list[Question]:
+    """Select the questions for a quiz request.
+
+    ``user`` scopes the ``unseen`` and ``weak`` modes: without one, "unseen" would
+    mean "unseen by anybody" and would leak another account's activity.
+    """
     rng = rng or random.Random()
     count = max(1, min(request.count, max_count))
     topics = request.topics
+    user_id = _uid(user)
 
     if request.mode == "weak" and not topics:
-        weak = weak_topic_slugs()
+        weak = weak_topic_slugs(user)
         if weak:
             topics = tuple(weak)
 
@@ -113,14 +143,19 @@ def build_quiz(request: QuizRequest, *, max_count: int = 60, rng: random.Random 
 
     if request.mode == "unseen":
         attempted = db.session.query(Attempt.question_id).distinct()
+        if user_id is not None:
+            attempted = attempted.filter(Attempt.user_id == user_id)
+        else:
+            # No account: nothing has been seen, so the whole bank is available.
+            attempted = attempted.filter(db.false())
         query = query.filter(~Question.id.in_(attempted))
 
-    if request.mode == "weak" and topics:
-        # Weight towards questions the user has previously got wrong.
+    if request.mode == "weak" and topics and user_id is not None:
+        # Weight towards questions this user has previously got wrong.
         wrong_ids = [
             row[0]
             for row in db.session.query(Attempt.question_id)
-            .filter(Attempt.is_correct.is_(False))
+            .filter(Attempt.user_id == user_id, Attempt.is_correct.is_(False))
             .distinct()
             .all()
         ]
@@ -154,14 +189,20 @@ def build_quiz(request: QuizRequest, *, max_count: int = 60, rng: random.Random 
     return selected
 
 
-def session_summary(session_id: str) -> dict:
-    """Aggregate a quiz run's attempts into a results summary."""
-    attempts = (
-        db.session.query(Attempt)
-        .filter(Attempt.session_id == session_id)
-        .order_by(Attempt.answered_at, Attempt.id)
-        .all()
+def session_summary(session_id: str, user=None) -> dict:
+    """Aggregate one quiz run's attempts into a results summary.
+
+    The run is scoped to ``user``: knowing a session id is not enough to read
+    somebody else's results.
+    """
+    user_id = _uid(user)
+    query = db.session.query(Attempt).filter(Attempt.session_id == session_id)
+    query = (
+        query.filter(Attempt.user_id == user_id)
+        if user_id is not None
+        else query.filter(db.false())
     )
+    attempts = query.order_by(Attempt.answered_at, Attempt.id).all()
     total = len(attempts)
     correct = sum(1 for a in attempts if a.is_correct)
     marks_awarded = sum(a.marks_awarded or 0 for a in attempts)
@@ -201,8 +242,9 @@ def session_summary(session_id: str) -> dict:
     }
 
 
-def topic_progress() -> list[dict]:
-    """Per-topic progress: questions available, attempted, and accuracy."""
+def topic_progress(user=None) -> list[dict]:
+    """Per-topic progress for one user: available, attempted, and accuracy."""
+    user_id = _uid(user)
     totals = {
         slug: count
         for slug, count in db.session.query(Topic.slug, func.count(Question.id))
@@ -210,23 +252,27 @@ def topic_progress() -> list[dict]:
         .group_by(Topic.slug)
         .all()
     }
-    attempted = {
-        slug: count
-        for slug, count in db.session.query(Topic.slug, func.count(func.distinct(Attempt.question_id)))
+    attempted_query = (
+        db.session.query(Topic.slug, func.count(func.distinct(Attempt.question_id)))
         .join(Attempt, Attempt.topic_id == Topic.id)
-        .group_by(Topic.slug)
-        .all()
-    }
+    )
+    accuracy_query = db.session.query(
+        Topic.slug,
+        func.sum(db.case((Attempt.is_correct.is_(True), 1), else_=0)),
+        func.count(Attempt.id),
+    ).join(Attempt, Attempt.topic_id == Topic.id)
+
+    if user_id is None:
+        attempted_query = attempted_query.filter(db.false())
+        accuracy_query = accuracy_query.filter(db.false())
+    else:
+        attempted_query = attempted_query.filter(Attempt.user_id == user_id)
+        accuracy_query = accuracy_query.filter(Attempt.user_id == user_id)
+
+    attempted = {slug: count for slug, count in attempted_query.group_by(Topic.slug).all()}
     accuracy = {
         slug: (correct or 0, total)
-        for slug, correct, total in db.session.query(
-            Topic.slug,
-            func.sum(db.case((Attempt.is_correct.is_(True), 1), else_=0)),
-            func.count(Attempt.id),
-        )
-        .join(Attempt, Attempt.topic_id == Topic.id)
-        .group_by(Topic.slug)
-        .all()
+        for slug, correct, total in accuracy_query.group_by(Topic.slug).all()
     }
 
     topics = db.session.query(Topic).order_by(Topic.position, Topic.title).all()
@@ -254,9 +300,14 @@ def topic_progress() -> list[dict]:
     return progress
 
 
-def recent_attempts(limit: int = 20) -> list[Attempt]:
+def recent_attempts(user, limit: int = 20) -> list[Attempt]:
+    """The user's most recent answers."""
+    user_id = _uid(user)
+    if user_id is None:
+        return []
     return (
         db.session.query(Attempt)
+        .filter(Attempt.user_id == user_id)
         .order_by(Attempt.answered_at.desc(), Attempt.id.desc())
         .limit(limit)
         .all()

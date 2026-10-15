@@ -139,8 +139,8 @@ def test_stats_endpoint(client):
     assert isinstance(payload["topics"], list)
 
 
-def test_export_endpoint_round_trips(client):
-    payload = client.get("/api/export").get_json()
+def test_export_endpoint_round_trips(admin_client):
+    payload = admin_client.get("/api/export").get_json()
     assert payload["meta"]["count"] >= 5
     assert all("question_text" in q for q in payload["questions"])
 
@@ -289,18 +289,18 @@ def test_override_validates_input(client, csrf_headers):
 
 # ------------------------------------------------------------------- data I/O
 
-def test_import_rejects_invalid_questions(client):
-    response = client.post("/api/import", json={"questions": [{"question_text": "x"}]})
+def test_import_rejects_invalid_questions(admin_client):
+    response = admin_client.post("/api/import", json={"questions": [{"question_text": "x"}]})
     payload = response.get_json()
     assert payload["created"] == 0
     assert payload["rejected"] == 1
 
 
-def test_import_dry_run_writes_nothing(client, app):
+def test_import_dry_run_writes_nothing(admin_client, app):
     with app.app_context():
         before = db.session.query(Question).count()
 
-    response = client.post(
+    response = admin_client.post(
         "/api/import?dry_run=true",
         json={
             "questions": [
@@ -322,7 +322,7 @@ def test_import_dry_run_writes_nothing(client, app):
         assert db.session.query(Question).count() == before
 
 
-def test_import_then_export_round_trip(client, app):
+def test_import_then_export_round_trip(admin_client, app):
     payload = {
         "questions": [
             {
@@ -337,15 +337,15 @@ def test_import_then_export_round_trip(client, app):
             }
         ]
     }
-    created = client.post("/api/import", json=payload).get_json()
+    created = admin_client.post("/api/import", json=payload).get_json()
     assert created["created"] == 1
 
-    exported = client.get("/api/export?topic=evolution-biodiversity").get_json()
+    exported = admin_client.get("/api/export?topic=evolution-biodiversity").get_json()
     texts = [q["question_text"] for q in exported["questions"]]
     assert any("Antibiotic resistance" in text for text in texts)
 
 
-def test_import_is_idempotent(client, app):
+def test_import_is_idempotent(admin_client, app):
     """Importing the same payload twice must not duplicate questions."""
     payload = {
         "questions": [
@@ -360,25 +360,25 @@ def test_import_is_idempotent(client, app):
             }
         ]
     }
-    first = client.post("/api/import", json=payload).get_json()
-    second = client.post("/api/import", json=payload).get_json()
+    first = admin_client.post("/api/import", json=payload).get_json()
+    second = admin_client.post("/api/import", json=payload).get_json()
     assert first["created"] == 1
     assert second["created"] == 0
     assert second["skipped"] == 1
 
 
-def test_import_rejects_bad_json_shapes(client):
-    assert client.post("/api/import", data="not json").status_code == 400
-    assert client.post("/api/import", json={"questions": "nope"}).status_code == 400
+def test_import_rejects_bad_json_shapes(admin_client):
+    assert admin_client.post("/api/import", data="not json").status_code == 400
+    assert admin_client.post("/api/import", json={"questions": "nope"}).status_code == 400
 
 
-def test_api_key_gate_when_configured(client, app):
+def test_api_key_gate_when_configured(admin_client, app):
     app.config["API_KEY"] = "secret-key"
     try:
-        assert client.get("/api/export").status_code == 401
-        assert client.get("/api/export?api_key=secret-key").status_code == 200
+        assert admin_client.get("/api/export").status_code == 401
+        assert admin_client.get("/api/export?api_key=secret-key").status_code == 200
         assert (
-            client.get("/api/export", headers={"X-API-Key": "secret-key"}).status_code == 200
+            admin_client.get("/api/export", headers={"X-API-Key": "secret-key"}).status_code == 200
         )
     finally:
         app.config["API_KEY"] = None
@@ -434,7 +434,7 @@ def test_reset_for_one_topic_only(client, app, csrf_headers):
 
 # ------------------------------------------------------------------- security
 
-def test_question_content_is_sanitised_on_import(client, app):
+def test_question_content_is_sanitised_on_import(admin_client, app):
     payload = {
         "questions": [
             {
@@ -450,7 +450,7 @@ def test_question_content_is_sanitised_on_import(client, app):
             }
         ]
     }
-    assert client.post("/api/import", json=payload).get_json()["created"] == 1
+    assert admin_client.post("/api/import", json=payload).get_json()["created"] == 1
 
     with app.app_context():
         stored = db.session.query(Question).order_by(Question.id.desc()).first().question_text

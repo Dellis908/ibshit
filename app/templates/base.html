@@ -25,17 +25,32 @@
     </a>
 
     <nav class="site-nav" aria-label="Main">
-      {% set nav_items = [
-        ('main.index', 'Dashboard', '/'),
-        ('main.topics', 'Topics', '/topics'),
-        ('main.progress', 'Progress', '/progress'),
-        ('main.about', 'About', '/about')
-      ] %}
-      {% for endpoint, label, prefix in nav_items %}
-        <a href="{{ url_for(endpoint) }}"
-           {% if request.path == prefix or (prefix != '/' and request.path.startswith(prefix)) %}aria-current="page"{% endif %}>{{ label }}</a>
-      {% endfor %}
-      <a class="nav-cta" href="{{ url_for('main.quiz', mode='practice', count=10) }}">Start quiz</a>
+      {% if current_user.is_authenticated %}
+        {% set nav_items = [
+          ('main.index', 'Dashboard', '/'),
+          ('main.topics', 'Topics', '/topics'),
+          ('main.progress', 'Progress', '/progress'),
+          ('main.about', 'About', '/about')
+        ] %}
+        {% for endpoint, label, prefix in nav_items %}
+          <a href="{{ url_for(endpoint) }}"
+             {% if request.path == prefix or (prefix != '/' and request.path.startswith(prefix)) %}aria-current="page"{% endif %}>{{ label }}</a>
+        {% endfor %}
+        <a class="nav-cta" href="{{ url_for('main.quiz', mode='practice', count=10) }}">Start quiz</a>
+        <div class="user-menu">
+          <a href="{{ url_for('auth.account') }}" title="Your account">{{ current_user.name }}</a>
+          <form method="post" action="{{ url_for('auth.logout') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <button class="link-button" type="submit">Sign out</button>
+          </form>
+        </div>
+      {% else %}
+        <a href="{{ url_for('main.about') }}"
+           {% if request.path == '/about' %}aria-current="page"{% endif %}>About</a>
+        <a href="{{ url_for('auth.login') }}"
+           {% if request.path == '/auth/login' %}aria-current="page"{% endif %}>Sign in</a>
+        <a class="nav-cta" href="{{ url_for('auth.signup') }}">Create account</a>
+      {% endif %}
     </nav>
   </div>
 </header>
@@ -57,9 +72,9 @@
 <footer class="site-footer">
   <div class="wrap footer-inner">
     <p>
-      <strong>{{ site_stats.total_questions }}</strong> questions in the bank ·
-      <strong>{{ site_stats.total_attempts }}</strong> answers recorded{% if site_stats.accuracy is not none %} ·
-      <strong>{{ site_stats.accuracy }}%</strong> accuracy{% endif %}
+      <strong>{{ site_stats.total_questions }}</strong> questions in the bank{% if current_user.is_authenticated %} ·
+      <strong>{{ site_stats.total_attempts }}</strong> of your answers recorded{% if site_stats.accuracy is not none %} ·
+      <strong>{{ site_stats.accuracy }}%</strong> accuracy{% endif %}{% endif %}
     </p>
     <p class="footer-note">
       Built for personal revision. Questions are original study material, not official IB content.

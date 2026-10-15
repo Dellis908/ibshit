@@ -18,7 +18,7 @@ from pathlib import Path
 from flask import Flask, jsonify, render_template
 
 from app.config import apply_environment, get_config
-from app.extensions import db
+from app.extensions import db, login_manager
 
 __all__ = ["create_app", "db"]
 
@@ -37,6 +37,7 @@ def create_app(config_name: str | None = None) -> Flask:
 
     _check_configuration(app)
     _init_extensions(app)
+    _register_security(app)
     _init_proxy_support(app)
     _register_blueprints(app)
     _register_template_helpers(app)
@@ -44,6 +45,14 @@ def create_app(config_name: str | None = None) -> Flask:
 
     with app.app_context():
         db.create_all()
+        # create_all does not alter existing tables, so columns added after the
+        # first release are applied here. Failures are logged, not fatal.
+        from app.db_migrate import report_orphans, run_migrations
+
+        applied = run_migrations()
+        if applied:
+            app.logger.info("schema updated: %s", ", ".join(applied))
+        report_orphans()
 
     return app
 
@@ -77,6 +86,14 @@ def _check_configuration(app: Flask) -> None:
 
 def _init_extensions(app: Flask) -> None:
     db.init_app(app)
+    login_manager.init_app(app)
+
+
+def _register_security(app: Flask) -> None:
+    """Apply CSRF protection to every state-changing request by default."""
+    from app.security import csrf_protect
+
+    app.before_request(csrf_protect)
 
 
 def _init_proxy_support(app: Flask) -> None:
@@ -96,9 +113,11 @@ def _init_proxy_support(app: Flask) -> None:
 
 def _register_blueprints(app: Flask) -> None:
     from app.api import api
+    from app.auth import bp as auth_bp
     from app.routes import bp as main_bp
 
     app.register_blueprint(main_bp)
+    app.register_blueprint(auth_bp)
     app.register_blueprint(api)
 
     @app.route("/healthz")
@@ -109,19 +128,26 @@ def _register_blueprints(app: Flask) -> None:
 
 def _register_template_helpers(app: Flask) -> None:
     """Values every template needs (nav, CSRF token, active page)."""
+    from flask_login import current_user
+
     from app.api import csrf_token
     from app.models import overall_stats
 
     @app.context_processor
     def inject_globals():
+        # Progress figures are per account, so a visitor sees only the bank size.
         try:
-            stats = overall_stats()
+            stats = overall_stats(current_user if current_user.is_authenticated else None)
         except Exception:  # pragma: no cover - tables may not exist yet
             stats = {"total_questions": 0, "total_attempts": 0, "accuracy": None}
+        from app.auth import registration_allowed
+
         return {
             "csrf_token": csrf_token(),
             "site_stats": stats,
             "site_name": "IB Biology Revision",
+            "registration_open": registration_allowed(),
+            "invite_required": bool(app.config.get("REGISTRATION_CODE")),
         }
 
     @app.template_filter("nl2br")

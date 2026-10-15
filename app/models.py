@@ -5,9 +5,11 @@ from __future__ import annotations
 import json
 from datetime import datetime, timezone
 
+from flask_login import UserMixin
 from sqlalchemy import func
+from werkzeug.security import check_password_hash, generate_password_hash
 
-from app.extensions import db
+from app.extensions import db, login_manager
 
 QUESTION_TYPES = ("multiple_choice", "short_answer", "true_false", "calculation")
 DIFFICULTIES = ("easy", "medium", "hard")
@@ -16,6 +18,68 @@ DIFFICULTIES = ("easy", "medium", "hard")
 def utcnow() -> datetime:
     """Timezone-aware UTC now (``datetime.utcnow`` is deprecated)."""
     return datetime.now(timezone.utc)
+
+
+class User(UserMixin, db.Model):
+    """An account. Progress belongs to a user, never to the installation.
+
+    Passwords are stored only as Werkzeug hashes (scrypt by default), so a
+    database leak does not expose credentials.
+    """
+
+    __tablename__ = "user"
+
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(255), unique=True, nullable=False, index=True)
+    display_name = db.Column(db.String(80))
+    password_hash = db.Column(db.String(255), nullable=False)
+    #: The first account created becomes an administrator: it may import or
+    #: export the question bank. Everyone else can only study.
+    is_admin = db.Column(db.Boolean, default=False, nullable=False)
+    created_at = db.Column(db.DateTime(timezone=True), default=utcnow, nullable=False)
+    last_login_at = db.Column(db.DateTime(timezone=True))
+
+    attempts = db.relationship(
+        "Attempt", back_populates="user", cascade="all, delete-orphan"
+    )
+
+    # --------------------------------------------------------------- password
+    def set_password(self, password: str) -> None:
+        """Hash and store a password. Never stores the plaintext."""
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password: str) -> bool:
+        """Whether ``password`` matches this account's hash."""
+        if not self.password_hash or not password:
+            return False
+        return check_password_hash(self.password_hash, password)
+
+    # ------------------------------------------------------------------ misc
+    @property
+    def name(self) -> str:
+        """What to show in the interface."""
+        return self.display_name or self.email.split("@")[0]
+
+    def as_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "email": self.email,
+            "display_name": self.display_name,
+            "is_admin": self.is_admin,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+        }
+
+    def __repr__(self) -> str:  # pragma: no cover - debugging aid
+        return f"<User {self.email}>"
+
+
+@login_manager.user_loader
+def load_user(user_id: str):
+    """Flask-Login hook: resolve the session's user id to a User row."""
+    try:
+        return db.session.get(User, int(user_id))
+    except (TypeError, ValueError):
+        return None
 
 
 class Topic(db.Model):
@@ -165,6 +229,10 @@ class Attempt(db.Model):
     __tablename__ = "attempt"
 
     id = db.Column(db.Integer, primary_key=True)
+    #: Owner of this answer. Progress is per account.
+    user_id = db.Column(
+        db.Integer, db.ForeignKey("user.id"), index=True, nullable=True
+    )
     question_id = db.Column(
         db.Integer, db.ForeignKey("question.id"), index=True, nullable=False
     )
@@ -182,10 +250,12 @@ class Attempt(db.Model):
 
     question = db.relationship("Question", back_populates="attempts")
     topic = db.relationship("Topic")
+    user = db.relationship("User", back_populates="attempts")
 
     def as_dict(self) -> dict:
         return {
             "id": self.id,
+            "user_id": self.user_id,
             "question_id": self.question_id,
             "topic": self.topic.slug if self.topic else None,
             "session_id": self.session_id,
@@ -224,16 +294,37 @@ def _dump_list(value) -> str:
     return json.dumps(items, ensure_ascii=False)
 
 
-def overall_stats() -> dict:
-    """Site-wide statistics used by the dashboard."""
-    total_questions = db.session.query(func.count(Question.id)).scalar() or 0
-    total_attempts = db.session.query(func.count(Attempt.id)).scalar() or 0
-    correct_attempts = (
-        db.session.query(func.count(Attempt.id)).filter(Attempt.is_correct.is_(True)).scalar()
-        or 0
+def overall_stats(user=None) -> dict:
+    """Statistics for one user.
+
+    ``user`` may be a :class:`User`, a user id, or ``None`` for an
+    unauthenticated visitor. Progress figures are always scoped to that user, so
+    one account can never see another's history.
+    """
+    user_id = getattr(user, "id", user)
+
+    question_query = db.session.query(func.count(Question.id))
+    attempt_query = db.session.query(func.count(Attempt.id))
+    correct_query = db.session.query(func.count(Attempt.id)).filter(
+        Attempt.is_correct.is_(True)
     )
-    # Unique questions the user has ever attempted.
-    seen = db.session.query(func.count(func.distinct(Attempt.question_id))).scalar() or 0
+    seen_query = db.session.query(func.count(func.distinct(Attempt.question_id)))
+
+    if user_id is None:
+        # No account: report the bank size only, never another user's progress.
+        attempt_query = attempt_query.filter(db.false())
+        correct_query = correct_query.filter(db.false())
+        seen_query = seen_query.filter(db.false())
+    else:
+        attempt_query = attempt_query.filter(Attempt.user_id == user_id)
+        correct_query = correct_query.filter(Attempt.user_id == user_id)
+        seen_query = seen_query.filter(Attempt.user_id == user_id)
+
+    total_questions = question_query.scalar() or 0
+    total_attempts = attempt_query.scalar() or 0
+    correct_attempts = correct_query.scalar() or 0
+    seen = seen_query.scalar() or 0
+
     return {
         "total_questions": total_questions,
         "total_attempts": total_attempts,
@@ -246,9 +337,6 @@ def overall_stats() -> dict:
     }
 
 
-# ------------------------------------------------------- backwards compatibility
-# The first version of this app stored answers in a ``UserAnswer`` model and
-# exposed ``POST /submit_answer``. Both are now provided by ``Attempt`` and
-# ``/api/submit_answer``; this alias keeps older imports (and any scripts that
-# referenced the model) working without a second table.
-UserAnswer = Attempt
+def user_count() -> int:
+    """How many accounts exist. Used to decide whether the next is an admin."""
+    return db.session.query(func.count(User.id)).scalar() or 0

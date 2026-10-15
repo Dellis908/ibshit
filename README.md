@@ -47,6 +47,7 @@ docker compose up --build          # http://localhost:8000
 | **Question types** | Multiple choice, true/false, calculation, and written answers with multi-point mark schemes |
 | **Six study modes** | Practice, Timed, Exam simulation, Weak topics, Never attempted, Random mix |
 | **Marking** | Instant marking, partial credit, per-marking-point feedback, and a self-marking panel for longer prose |
+| **Accounts** | Email + password sign-in; progress, accuracy and history are stored per account and are invisible to other users |
 | **Progress** | Per-topic accuracy and coverage, recent answers, resettable history |
 | **API** | JSON endpoints for every page, plus import/export of the whole bank |
 | **Optional importers** | Turn the rdojo question bank (JSON + Git LFS) or your own PDFs into importable questions |
@@ -146,6 +147,48 @@ curl -X POST http://localhost:5000/api/import \
 ```
 
 ---
+
+## Accounts and access
+
+Everything is per account: two people using the same server cannot see each
+other's answers, accuracy or history. The first account created becomes an
+**administrator** and may import or export the question bank; other accounts can
+only study.
+
+| Property | How it is handled |
+| --- | --- |
+| Password storage | Werkzeug hashes (scrypt), salted per user. Plaintext is never stored or logged. |
+| Sign-in failures | One generic message for both a wrong password and an unknown email, so the form cannot be used to discover who has an account. |
+| Brute force | Rate limited per client address: 8 sign-ins / 5 min, 5 sign-ups / hour, 5 password changes / 15 min. |
+| Session fixation | The session identifier is rotated on sign-in and cleared on sign-out. |
+| CSRF | Applied globally to every state-changing request, so a cross-site form post cannot change a password or delete an account. |
+| Progress isolation | Every progress query is scoped to the signed-in account; "unseen" means unseen *by you*. |
+| Bank changes | `/api/import` and `/api/export` require an administrator. |
+
+Controlling who can register:
+
+```bash
+# in /etc/ibshit.env
+ALLOW_REGISTRATION=0          # closes the sign-up page, existing accounts still work
+REGISTRATION_CODE=some-secret # keeps registration open but requires this code
+```
+
+Managing accounts from the command line:
+
+```bash
+flask auth list                              # accounts and how much each has answered
+flask auth create you@example.com --admin    # create one non-interactively
+flask auth passwd you@example.com            # reset a password
+flask auth promote you@example.com           # grant administrator rights
+flask auth adopt-attempts you@example.com    # take ownership of pre-accounts history
+```
+
+Upgrading an existing installation: a database created before accounts existed is
+migrated in place on startup — the `user_id` column is added to `attempt` and old
+rows are kept but left unowned, since attributing them to an account that did not
+exist would be a guess. `flask auth adopt-attempts <email>` hands them to an
+account if that is what you want. `app/db_migrate.py` only ever adds columns; it
+never drops or rewrites data.
 
 ## Adding your own questions
 

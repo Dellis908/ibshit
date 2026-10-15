@@ -36,6 +36,131 @@ def main() -> int:
     app.config.update(TESTING=True)
 
     with app.test_client() as client:
+        print("\n--- accounts ---")
+        response = client.get("/")
+        check("landing page for visitors", response.status_code == 200)
+        check(
+            "landing page shows no progress figures",
+            b"of your answers recorded" not in response.data,
+        )
+
+        response = client.get("/progress")
+        check("protected page redirects visitors", response.status_code == 302, str(response.status_code))
+
+        response = client.get("/api/stats")
+        check("protected api returns 401 for visitors", response.status_code == 401, str(response.status_code))
+
+        # Sign up through the real form, which exercises CSRF and validation.
+        # The account may already exist from a previous run, in which case
+        # signing in is the correct behaviour to exercise instead.
+        with app.app_context():
+            from app.models import User
+
+            existing = db.session.query(User).filter_by(email="smoke@example.com").one_or_none()
+
+        if existing is None:
+            page = client.get("/auth/signup").get_data(as_text=True)
+            token = re.search(r'name="csrf-token" content="([^"]+)"', page).group(1)
+
+            response = client.post(
+                "/auth/signup",
+                data={
+                    "email": "smoke@example.com",
+                    "password": "smoke-test-password",
+                    "password_confirm": "smoke-test-password",
+                    "csrf_token": token,
+                },
+                follow_redirects=True,
+            )
+            check("sign-up succeeds", response.status_code == 200, str(response.status_code))
+            check("sign-up lands on the dashboard", b"questions in the bank" in response.data)
+
+            # A second sign-up with the same address must be refused.
+            page = client.get("/auth/signup", follow_redirects=True).get_data(as_text=True)
+            token = re.search(r'name="csrf-token" content="([^"]+)"', page).group(1)
+            response = client.post(
+                "/auth/signup",
+                data={
+                    "email": "smoke@example.com",
+                    "password": "smoke-test-password",
+                    "password_confirm": "smoke-test-password",
+                    "csrf_token": token,
+                },
+            )
+            check("duplicate email is refused", response.status_code == 400, str(response.status_code))
+            # The refused sign-up left us signed out of that page load; sign in.
+            page = client.get("/auth/login").get_data(as_text=True)
+            token = re.search(r'name="csrf-token" content="([^"]+)"', page).group(1)
+            client.post(
+                "/auth/login",
+                data={"email": "smoke@example.com", "password": "smoke-test-password",
+                      "csrf_token": token},
+                follow_redirects=True,
+            )
+        else:
+            check("account already exists from a previous run", True)
+
+        page = client.get("/").get_data(as_text=True)
+        token = re.search(r'name="csrf-token" content="([^"]+)"', page).group(1)
+        response = client.post("/auth/logout", data={"csrf_token": token}, follow_redirects=True)
+        check("sign-out succeeds", response.status_code == 200)
+        check(
+            "signed-out visitor no longer sees progress",
+            b"of your answers recorded" not in response.data,
+        )
+
+        page = client.get("/auth/login").get_data(as_text=True)
+        token = re.search(r'name="csrf-token" content="([^"]+)"', page).group(1)
+        response = client.post(
+            "/auth/login",
+            data={"email": "smoke@example.com", "password": "wrong-password", "csrf_token": token},
+        )
+        check("wrong password is rejected", response.status_code == 401, str(response.status_code))
+
+        page = client.get("/auth/login").get_data(as_text=True)
+        token = re.search(r'name="csrf-token" content="([^"]+)"', page).group(1)
+        response = client.post(
+            "/auth/login",
+            data={"email": "smoke@example.com", "password": "smoke-test-password", "csrf_token": token},
+            follow_redirects=True,
+        )
+        check("sign-in succeeds", b"questions in the bank" in response.data)
+
+        print("\n--- permissions ---")
+        # Make the starting state explicit: previous runs may have promoted this
+        # account, and these checks are about a normal user.
+        with app.app_context():
+            from app.models import User
+
+            db.session.query(User).filter_by(email="smoke@example.com").one().is_admin = False
+            db.session.commit()
+
+        response = client.get("/api/export")
+        check(
+            "export is refused for a normal account",
+            response.status_code == 403,
+            str(response.status_code),
+        )
+        check(
+            "refusal names the reason",
+            response.get_json().get("error") == "administrator_required",
+            str(response.get_json()),
+        )
+        response = client.post("/api/import", json={"questions": []})
+        check(
+            "import is refused for a normal account",
+            response.status_code == 403,
+            str(response.status_code),
+        )
+
+        # Promote the account; administrator rights now apply to the session.
+        with app.app_context():
+            from app.models import User
+
+            db.session.query(User).filter_by(email="smoke@example.com").one().is_admin = True
+            db.session.commit()
+        check("promotion succeeded", True)
+
         print("\n--- pages ---")
         for path in ["/", "/topics", "/progress", "/about", "/healthz"]:
             response = client.get(path)
@@ -196,7 +321,8 @@ def main() -> int:
         response = client.get("/results")
         check("GET /results -> 200", response.status_code == 200)
 
-        print("\n--- data I/O ---")
+        print("\n--- data I/O (administrator only) ---")
+
         response = client.post(
             "/api/import?dry_run=true",
             json={

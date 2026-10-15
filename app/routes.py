@@ -15,6 +15,8 @@ from flask import (
     url_for,
 )
 
+from flask_login import current_user, login_required
+
 from app.extensions import db
 from app.models import Question, Topic, overall_stats
 from app.quiz import (
@@ -63,8 +65,14 @@ def available_topics() -> list[Topic]:
 
 @bp.route("/")
 def index():
-    stats = overall_stats()
-    progress = {row["slug"]: row for row in topic_progress()}
+    """The dashboard, or a short landing page for visitors."""
+    if not current_user.is_authenticated:
+        # Nothing here is user-specific, so this needs no login: the bank size is
+        # public information and no progress is shown.
+        return render_template("landing.html", stats=overall_stats(None))
+
+    stats = overall_stats(current_user)
+    progress = {row["slug"]: row for row in topic_progress(current_user)}
     return render_template(
         "index.html",
         stats=stats,
@@ -75,8 +83,9 @@ def index():
 
 
 @bp.route("/topics")
+@login_required
 def topics():
-    progress = {row["slug"]: row for row in topic_progress()}
+    progress = {row["slug"]: row for row in topic_progress(current_user)}
     return render_template(
         "topics.html",
         topics=available_topics(),
@@ -86,12 +95,13 @@ def topics():
 
 
 @bp.route("/topics/<slug>")
+@login_required
 def topic_detail(slug: str):
     topic = db.session.query(Topic).filter_by(slug=slug).one_or_none()
     if topic is None or not topic.questions:
         flash(f"No questions available for '{slug}' yet.", "warning")
         return redirect(url_for("main.topics"))
-    progress = {row["slug"]: row for row in topic_progress()}
+    progress = {row["slug"]: row for row in topic_progress(current_user)}
     return render_template(
         "topic_detail.html",
         topic=topic,
@@ -101,6 +111,7 @@ def topic_detail(slug: str):
 
 
 @bp.route("/quiz")
+@login_required
 def quiz():
     """Build and present a quiz from query parameters."""
     start_new_session()
@@ -110,7 +121,7 @@ def quiz():
     req = parse_quiz_request(request.args, defaults={"count": default_count})
     req.count = max(1, min(req.count, max_count))
 
-    questions = build_quiz(req, max_count=max_count)
+    questions = build_quiz(req, user=current_user, max_count=max_count)
     if not questions:
         flash(
             "No questions matched that selection. Try a different topic, mode or difficulty.",
@@ -146,6 +157,7 @@ def quiz():
 
 
 @bp.route("/quiz/<topic>")
+@login_required
 def quiz_by_topic(topic: str):
     """Backwards-compatible shortcut for ``/quiz?topic=<topic>``."""
     args = request.args.to_dict(flat=False)
@@ -156,12 +168,13 @@ def quiz_by_topic(topic: str):
 
 
 @bp.route("/results")
+@login_required
 def results():
     sid = session.get("quiz_session")
     if not sid:
         flash("Finish a quiz to see your results.", "warning")
         return redirect(url_for("main.index"))
-    summary = session_summary(sid)
+    summary = session_summary(sid, current_user)
     if not summary["total"]:
         flash("No answers recorded for the last quiz.", "warning")
         return redirect(url_for("main.index"))
@@ -169,8 +182,9 @@ def results():
 
 
 @bp.route("/results/<session_id>")
+@login_required
 def results_by_id(session_id: str):
-    summary = session_summary(session_id)
+    summary = session_summary(session_id, current_user)
     if not summary["total"]:
         flash("That quiz run has no recorded answers.", "warning")
         return redirect(url_for("main.index"))
@@ -178,12 +192,13 @@ def results_by_id(session_id: str):
 
 
 @bp.route("/progress")
+@login_required
 def progress():
     return render_template(
         "progress.html",
-        stats=overall_stats(),
-        progress=topic_progress(),
-        attempts=recent_attempts(limit=30),
+        stats=overall_stats(current_user),
+        progress=topic_progress(current_user),
+        attempts=recent_attempts(current_user, limit=30),
     )
 
 

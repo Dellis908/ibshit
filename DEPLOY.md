@@ -278,12 +278,19 @@ You do **not** need to open any port for gunicorn — it talks over the socket.
 
 ### If it is only on your LAN
 
-Nothing more is strictly needed. Bind nginx to the LAN interface if you want it
+The app's own accounts are enough. Bind nginx to the LAN interface if you want it
 unreachable from elsewhere, or just do not forward ports on your router.
 
 ### If you expose it to the internet
 
-The app has no authentication. Pick one of:
+Accounts are required to reach any progress, so a stranger cannot read another
+user's history. Two things still deserve attention:
+
+* **Registration.** Anyone who can reach the site can create an account. Set
+  `ALLOW_REGISTRATION=0` once your accounts exist, or `REGISTRATION_CODE` to gate
+  it.
+* **Defence in depth.** If you want the whole app behind one gate as well, pick
+  one of:
 
 1. **Basic auth at nginx** (quickest):
    ```bash
@@ -301,6 +308,39 @@ The app has no authentication. Pick one of:
 
 3. **Put it behind an SSO proxy** such as Authelia, OAuth2 Proxy or
    Cloudflare Access if you want per-user accounts.
+
+### Accounts
+
+Sign-in is built in. The first account created becomes the administrator; it is
+the only one that may import or export the question bank. Everyone else can study
+and sees only their own progress.
+
+Create the first account in the browser, or from the shell:
+
+```bash
+sudo -u ibshit /usr/local/sbin/ibshit-flask auth create you@example.com --admin
+sudo -u ibshit /usr/local/sbin/ibshit-flask auth list
+```
+
+Once your accounts exist, close registration so strangers cannot create their own:
+
+```bash
+# /etc/ibshit.env
+ALLOW_REGISTRATION=0
+sudo systemctl restart ibshit
+```
+
+Or leave it open but require a code you share privately:
+
+```bash
+# /etc/ibshit.env
+REGISTRATION_CODE=some-shared-secret
+```
+
+Sign-in is rate limited per client address (8 attempts per 5 minutes). That limit
+is tracked in each worker's memory, so if you run more than a couple of gunicorn
+workers the effective limit multiplies — put the app behind a proxy that can do
+the rate limiting itself if that matters to you.
 
 Also set `API_KEY` in `/etc/ibshit.env` if the server is reachable by anyone you
 do not trust — that closes the import/export endpoints:
@@ -564,6 +604,19 @@ An earlier run as root created a root-owned `instance/quiz.db`. Fix with
 **`status=200/CHDIR` in the journal**
 The systemd unit's `WorkingDirectory` does not exist or is not readable by the
 service account.
+
+**Locked out of an account**
+Reset the password from the shell:
+`sudo -u ibshit /usr/local/sbin/ibshit-flask auth passwd you@example.com`
+
+**Nobody can administer the bank (import/export returns 403)**
+Administrator rights belong to an account, not to the server. Grant them with
+`sudo -u ibshit /usr/local/sbin/ibshit-flask auth promote you@example.com`.
+
+**Progress recorded before accounts existed is missing**
+That history has no owner, so it is shown to nobody. Report it with
+`... auth list` (it is logged on startup too), then assign it:
+`sudo -u ibshit /usr/local/sbin/ibshit-flask auth adopt-attempts you@example.com`
 
 **Timezone shows UTC**
 Set it: `sudo timedatectl set-timezone Europe/London` (or your zone). Times in
