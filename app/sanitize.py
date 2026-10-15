@@ -44,10 +44,11 @@ ALLOWED_TAG_ATTRS: dict[str, frozenset[str]] = {
 }
 
 #: Hosts an <img> in question content may point at. Anything else (including
-#: protocol-relative and data: URLs) is dropped.
-ALLOWED_IMAGE_HOSTS: frozenset[str] = frozenset(
-    {"pub-images.revisiondojo.com", "localhost", "127.0.0.1"}
-)
+#: protocol-relative and data: URLs) is dropped. The question-image hosts live in
+#: app.images so the sanitiser and the mirror fallback cannot drift apart.
+from app.images import ALLOWED_IMAGE_HOSTS as _QUESTION_IMAGE_HOSTS
+
+ALLOWED_IMAGE_HOSTS: frozenset[str] = _QUESTION_IMAGE_HOSTS | {"localhost", "127.0.0.1"}
 
 _DANGEROUS_URL_RE = re.compile(r"^\s*(javascript|vbscript|data|file)\s*:", re.IGNORECASE)
 _WS_RE = re.compile(r"[ \t\r\f\v]+")

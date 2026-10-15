@@ -421,24 +421,32 @@ def _image_cache_dir() -> Path:
 
 
 def _is_allowed_image_url(url: str) -> bool:
-    """Only mirror https images from hosts we recognise."""
+    """Whether an image URL may be fetched.
+
+    Live hosts must be on the allow-list. URLs pointing at a retired host are
+    also accepted so they can be rewritten onto a live one, which recovers
+    images the bank recorded before the last migration.
+    """
     from urllib.parse import urlparse
 
-    from app.sanitize import _image_src_allowed
+    from app.images import is_dead_host, is_supported_host
 
-    if not _image_src_allowed(url):
+    if urlparse(url).scheme != "https":
         return False
-    return urlparse(url).scheme == "https"
+    return is_supported_host(url) or is_dead_host(url)
 
 
 @api.get("/image")
 def proxy_image():
     """Serve a question image, mirroring it locally on first use.
 
-    Question banks host their diagrams on a third-party CDN. Proxying them keeps
-    quizzes working when that CDN is slow or unreachable, avoids leaking the
-    reader's IP to a third party, and lets the browser cache them. Only hosts on
-    the allow-list are fetched, so this cannot be used as an open proxy.
+    Question banks host their diagrams on object storage that has been migrated
+    more than once, so an image recorded under one host may still exist under a
+    legacy one. Every candidate URL is tried before giving up (see app.images).
+    Proxying also keeps quizzes working when storage is slow or unreachable,
+    avoids leaking the reader's IP to a third party, and lets the browser cache
+    images. Only hosts on the allow-list are fetched, so this cannot be used as
+    an open proxy.
     """
     import hashlib
     import mimetypes
@@ -447,11 +455,13 @@ def proxy_image():
 
     from flask import Response, abort
 
+    from app.images import candidates, explain
+
     url = (request.args.get("url") or "").strip()
     if not url:
-        abort(400, "url is required")
+        return jsonify({"error": "url_required"}), 400
     if not _is_allowed_image_url(url):
-        abort(403, "image host is not allowed")
+        return jsonify({"error": "image_host_not_allowed", "host": urlparse(url).hostname}), 403
 
     digest = hashlib.sha256(url.encode("utf-8")).hexdigest()[:32]
     suffix = Path(urlparse(url).path).suffix.lower()
@@ -464,26 +474,49 @@ def proxy_image():
         payload = cached.read_bytes()
         content_type = mimetypes.guess_type(str(cached))[0]
     else:
-        upstream = urllib.request.Request(
-            url,
-            headers={
-                "User-Agent": "Mozilla/5.0 (compatible; ib-biology-revision/1.0)",
-                "Accept": "image/*,*/*;q=0.8",
-            },
-        )
-        try:
-            with urllib.request.urlopen(upstream, timeout=15) as response:
-                content_type = (response.headers.get("Content-Type") or "").split(";")[0].strip()
-                if content_type and content_type not in IMAGE_CONTENT_TYPES:
-                    abort(415, "upstream did not return an image")
-                payload = response.read(MAX_IMAGE_BYTES + 1)
-        except urllib.error.HTTPError:
-            abort(502, "image is unavailable upstream")
-        except Exception:
-            abort(502, "image could not be fetched")
+        payload = None
+        for candidate in candidates(url):
+            upstream = urllib.request.Request(
+                candidate,
+                headers={
+                    "User-Agent": "Mozilla/5.0 (compatible; ib-biology-revision/1.0)",
+                    "Accept": "image/*,*/*;q=0.8",
+                },
+            )
+            try:
+                with urllib.request.urlopen(upstream, timeout=15) as response:
+                    detected = (
+                        (response.headers.get("Content-Type") or "").split(";")[0].strip()
+                    )
+                    if detected and detected not in IMAGE_CONTENT_TYPES:
+                        continue
+                    body = response.read(MAX_IMAGE_BYTES + 1)
+            except Exception:
+                # A dead mirror is expected; move on to the next candidate.
+                continue
 
-        if len(payload) > MAX_IMAGE_BYTES:
-            abort(413, "image is too large to mirror")
+            if len(body) > MAX_IMAGE_BYTES:
+                abort(413, "image is too large to mirror")
+            payload = body
+            content_type = detected or None
+            break
+
+        if payload is None:
+            # 404 is the honest answer when the figure has been deleted upstream,
+            # and it tells the client to show its "unavailable" placeholder.
+            # The reason is returned in the body so the state is diagnosable
+            # rather than a bare error page.
+            return (
+                jsonify(
+                    {
+                        "error": "image_unavailable",
+                        "reason": explain(url),
+                        "url": url,
+                    }
+                ),
+                404,
+            )
+
         try:
             cached.write_bytes(payload)
         except OSError:  # pragma: no cover - read-only filesystem

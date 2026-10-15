@@ -253,7 +253,7 @@ What the converter does:
 | `difficulty` 1–8 | easy / medium / hard |
 | `labeledSubSubTopics` (`A1.1.4`) | tags plus a real syllabus topic |
 
-Three data-quality problems are handled automatically, because the upstream data
+Four data-quality problems are handled automatically, because the upstream data
 has them:
 
 - **Cross-topic duplicates.** The same question is listed under several related
@@ -265,6 +265,17 @@ has them:
 - **Same stem, different question.** Two entries can share a stem with different
   options or marks. The deduplication key includes the answer, the options and
   the mark allocation, so a legitimate question is never dropped.
+- **Images on retired hosts.** The bank's figures live on object storage that has
+  been migrated (the current host, a legacy `s.revisiondojo.com` mirror, and a
+  Supabase project that no longer resolves). `app/images.py` derives every
+  candidate URL for an image and both the importer and the `/api/image` proxy try
+  them in turn, so an image that 404s on its recorded URL is still served from a
+  mirror when one exists. An image that is gone everywhere returns 404 with a
+  reason, and the client shows a placeholder.
+
+  This is a data problem, not a download problem: the LFS payloads verify against
+  their content hashes, and only 19 of 475 image URLs are still served by any
+  mirror — the objects were deleted at the source, not mis-fetched.
 
 Two things to know about this source:
 

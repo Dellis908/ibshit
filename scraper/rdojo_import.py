@@ -346,29 +346,35 @@ def check_image_urls(urls: list[str], *, workers: int = 16) -> dict[str, bool]:
     import urllib.request
     import concurrent.futures as futures
 
+    from app.images import candidates
+
     def probe(url: str) -> tuple[str, bool]:
-        request = urllib.request.Request(
-            url, method="HEAD", headers={"User-Agent": USER_AGENT}
-        )
-        try:
-            with urllib.request.urlopen(request, timeout=25) as response:
-                return url, response.status == 200
-        except urllib.error.HTTPError as exc:
-            return url, exc.code == 200
-        except Exception:
-            return url, False
+        """True if any known mirror still serves this image."""
+        for candidate in candidates(url):
+            request = urllib.request.Request(
+                candidate, method="HEAD", headers={"User-Agent": USER_AGENT}
+            )
+            try:
+                with urllib.request.urlopen(request, timeout=25) as response:
+                    if response.status == 200:
+                        return url, True
+            except urllib.error.HTTPError:
+                continue  # try the next mirror
+            except Exception:
+                break  # a network problem will not improve on another host
+        return url, False
 
     unique = sorted(set(urls))
     if not unique:
         return {}
 
-    print(f"checking {len(unique)} image url(s) ...")
+    print(f"checking {len(unique)} image url(s) across all known mirrors ...")
     health: dict[str, bool] = {}
     with futures.ThreadPoolExecutor(max_workers=workers) as pool:
         for url, ok in pool.map(probe, unique):
             health[url] = ok
     alive = sum(1 for ok in health.values() if ok)
-    print(f"  reachable: {alive}/{len(unique)}")
+    print(f"  reachable: {alive}/{len(unique)} (tried legacy mirrors too)")
     return health
 
 
