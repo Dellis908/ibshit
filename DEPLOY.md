@@ -14,6 +14,13 @@ Everything below assumes you have `sudo` and can SSH into the box.
 
 > **Shortcut:** `deploy/bootstrap-debian.sh` automates every step below. Read the
 > manual steps anyway — you will want to understand what it did.
+>
+> **Do not install this under `/tmp`.** On Debian, systemd can give a service its
+> own private `/tmp` (`PrivateTmp`), so the app and nginx would see different
+> filesystems, and `/tmp` is cleared on boot. Use `/srv/ibshit` (the default) or
+> any directory under `/srv`, `/opt` or `/home`. If the app already lives in
+> `/tmp`, move it with `deploy/move-app.sh` — see
+> [Moving an existing install](#moving-an-existing-install).
 
 ---
 
@@ -566,7 +573,46 @@ sudo -u ibshit git clone https://<token>@github.com/Dellis908/ibshit.git /srv/ib
 This repository contains no secrets (configuration comes from `/etc/ibshit.env`,
 which is not tracked), so keeping it public is also safe if that is simpler.
 
-## 16. Troubleshooting
+## 16. Moving an existing install
+
+The scripts, the systemd unit and the nginx site all assume `/srv/ibshit`. If the
+app is somewhere else — notably `/tmp`, which systemd sandboxes and which is
+cleared on boot — move it rather than editing paths by hand:
+
+```bash
+# See what would happen first
+sudo bash /srv/ibshit/deploy/move-app.sh /tmp/ibshit
+
+# Then do it
+sudo bash /srv/ibshit/deploy/move-app.sh /tmp/ibshit --apply
+```
+
+It stops the service, moves the checkout to `/srv/ibshit`, keeps `instance/` (so
+your database and progress survive), recreates `.venv`, repoints
+`WorkingDirectory`, `ExecStart`, `ReadWritePaths`, the nginx static alias and the
+`ibshit-flask` wrapper, then restarts and checks `/healthz`.
+
+To install somewhere other than `/srv/ibshit`, set `APP_DIR` for the helper
+scripts and change the same paths in the unit by hand:
+
+```bash
+sudo APP_DIR=/opt/ibshit bash /opt/ibshit/deploy/fix-duckdns.sh your.domain
+```
+
+### Why `.venv` keeps disappearing
+
+`.venv/` is in `.gitignore`, so `git clone` and `git pull` never create it. After
+a fresh clone it must be built once:
+
+```bash
+sudo -u ibshit python3 -m venv /srv/ibshit/.venv
+sudo -u ibshit /srv/ibshit/.venv/bin/pip install -r /srv/ibshit/requirements.txt
+```
+
+`bootstrap-debian.sh` and `fix-duckdns.sh` now do this automatically when the
+environment is missing or incomplete, and `diagnose.sh` reports it.
+
+## 17. Troubleshooting
 
 **`flask` says "Could not locate a Flask application"**
 `FLASK_APP` is not set. Pass it explicitly, as every command above does, or
@@ -600,6 +646,21 @@ If an earlier run left root-owned files behind, fix them with
 **The service starts but cannot read the database**
 An earlier run as root created a root-owned `instance/quiz.db`. Fix with
 `sudo chown -R ibshit:ibshit /srv/ibshit/instance && sudo systemctl restart ibshit`.
+
+**`/srv/ibshit/.venv/bin/flask: not found` or similar**
+`.venv` is not tracked by git, so a clone or a move leaves it missing. Recreate it:
+```bash
+sudo -u ibshit python3 -m venv /srv/ibshit/.venv
+sudo -u ibshit /srv/ibshit/.venv/bin/pip install -r /srv/ibshit/requirements.txt
+```
+Or just re-run `deploy/bootstrap-debian.sh`, which does it for you.
+
+**The app is installed in `/tmp`**
+Move it: `sudo bash /srv/ibshit/deploy/move-app.sh /tmp/ibshit --apply`. Then
+confirm nothing still points at the old location:
+```bash
+grep -rn "/tmp/ibshit" /etc/systemd/system /etc/nginx /usr/local/sbin 2>/dev/null
+```
 
 **`status=200/CHDIR` in the journal**
 The systemd unit's `WorkingDirectory` does not exist or is not readable by the
@@ -651,7 +712,9 @@ it, then stop and disable that service.
 | Update | `sudo bash /srv/ibshit/deploy/bootstrap-debian.sh` |
 | Run CLI as the app | `sudo -u ibshit /usr/local/sbin/ibshit-flask quiz stats` |
 | nginx config test | `sudo nginx -t` |
-| Code location | `/srv/ibshit` |
+| Code location | `/srv/ibshit` (override with `APP_DIR=`) |
+| Move the install | `sudo bash /srv/ibshit/deploy/move-app.sh /tmp/ibshit --apply` |
+| Rebuild `.venv` | `sudo bash /srv/ibshit/deploy/bootstrap-debian.sh` |
 | Database | `/srv/ibshit/instance/quiz.db` |
 | Secrets | `/etc/ibshit.env` |
 | Image cache | `/srv/ibshit/instance/images/` |

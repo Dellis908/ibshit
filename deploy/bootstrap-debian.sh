@@ -9,7 +9,9 @@
 set -euo pipefail
 
 APP_USER="ibshit"
-APP_DIR="/srv/ibshit"
+# Where the application lives. Override by exporting APP_DIR before running:
+#   sudo APP_DIR=/tmp/ibshit bash deploy/fix-duckdns.sh your.domain
+APP_DIR="${APP_DIR:-/srv/ibshit}"
 ENV_FILE="/etc/ibshit.env"
 REPO="${REPO:-https://github.com/Dellis908/ibshit.git}"
 SERVER_NAME="${1:-}"
@@ -93,11 +95,37 @@ else
     git clone --quiet "$REPO" "$APP_DIR"
 fi
 
+# ---------------------------------------------------------------- virtualenv
+# .venv is in .gitignore, so `git pull` never restores it: it has to exist on
+# disk. Any script that runs the app's CLI must be able to recreate it, or the
+# first `git pull` after a fresh clone breaks every command with "not found".
+ensure_venv() {
+    if [[ -x "$APP_DIR/.venv/bin/python" ]] \
+       && "$APP_DIR/.venv/bin/python" -c 'import flask, flask_login' 2>/dev/null; then
+        log "Python environment present"
+        return 0
+    fi
+
+    if [[ -x "$APP_DIR/.venv/bin/python" ]]; then
+        warn "The Python environment exists but is missing dependencies; repairing"
+    else
+        warn "$APP_DIR/.venv is missing (it is not tracked by git, so it must be recreated)"
+    fi
+
+    apt-get install -y --no-install-recommends python3-venv >/dev/null 2>&1 || true
+
+    # Build it as the service account so the files are not root-owned.
+    log "Creating the virtual environment"
+    rm -rf "$APP_DIR/.venv"
+    sudo -u "$APP_USER" python3 -m venv "$APP_DIR/.venv"
+    sudo -u "$APP_USER" "$APP_DIR/.venv/bin/pip" install --quiet --upgrade pip
+    log "Installing Python dependencies"
+    sudo -u "$APP_USER" "$APP_DIR/.venv/bin/pip" install --quiet -r "$APP_DIR/requirements.txt"
+    log "Python environment ready"
+}
+
 # --- virtualenv ------------------------------------------------------------
-log "Installing Python dependencies"
-python3 -m venv "$APP_DIR/.venv"
-"$APP_DIR/.venv/bin/pip" install --quiet --upgrade pip
-"$APP_DIR/.venv/bin/pip" install --quiet -r "$APP_DIR/requirements.txt"
+ensure_venv
 
 # --- ownership -------------------------------------------------------------
 # The application must run as APP_USER, not root: otherwise it cannot create

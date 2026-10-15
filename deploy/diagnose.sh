@@ -9,7 +9,9 @@
 set -uo pipefail
 
 APP_USER="ibshit"
-APP_DIR="/srv/ibshit"
+# Where the application lives. Override by exporting APP_DIR before running:
+#   sudo APP_DIR=/tmp/ibshit bash deploy/fix-duckdns.sh your.domain
+APP_DIR="${APP_DIR:-/srv/ibshit}"
 ENV_FILE="/etc/ibshit.env"
 SOCKET="/run/ibshit/gunicorn.sock"
 SERVICE="ibshit"
@@ -91,6 +93,34 @@ if [[ -r "$APP_DIR/wsgi.py" ]]; then
     ok "$APP_DIR/wsgi.py is readable"
 else
     bad "$APP_DIR/wsgi.py is missing or unreadable"
+    echo "        the app may be somewhere else; re-run with APP_DIR= set, e.g."
+    echo "            sudo APP_DIR=/tmp/ibshit bash $0"
+fi
+
+# .venv is gitignored, so a fresh clone never has one.
+if [[ -x "$APP_DIR/.venv/bin/python" ]]; then
+    ok "virtualenv present"
+else
+    bad "$APP_DIR/.venv is missing (it is not tracked by git)"
+    echo "        fix: sudo bash $APP_DIR/deploy/bootstrap-debian.sh"
+    echo "        or, to keep everything else as it is:"
+    echo "             sudo -u ibshit python3 -m venv $APP_DIR/.venv"
+    echo "             sudo -u ibshit $APP_DIR/.venv/bin/pip install -r $APP_DIR/requirements.txt"
+fi
+
+if [[ "$APP_DIR" == /tmp/* ]]; then
+    warn "the app is installed under /tmp, which is cleared on boot and"
+    echo "        sandboxed by systemd (PrivateTmp). Move it to /srv, /opt or /home."
+fi
+
+# The unit's WorkingDirectory must match where the app actually is.
+unit_dir=$(systemctl show -p WorkingDirectory --value "$SERVICE" 2>/dev/null || true)
+if [[ -n "$unit_dir" && "$unit_dir" != "$APP_DIR" ]]; then
+    bad "the systemd unit points at $unit_dir but the app is in $APP_DIR"
+    echo "        fix: edit WorkingDirectory, ExecStart and ReadWritePaths in"
+    echo "             /etc/systemd/system/$SERVICE.service, then"
+    echo "             sudo systemctl daemon-reload && sudo systemctl restart $SERVICE"
+    echo "        and update the static alias in /etc/nginx/sites-available/ibshit"
 fi
 
 if id -u "$APP_USER" >/dev/null 2>&1; then

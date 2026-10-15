@@ -10,7 +10,9 @@ set -euo pipefail
 
 DOMAIN="${1:-}"
 APP_USER="ibshit"
-APP_DIR="/srv/ibshit"
+# Where the application lives. Override by exporting APP_DIR before running:
+#   sudo APP_DIR=/tmp/ibshit bash deploy/fix-duckdns.sh your.domain
+APP_DIR="${APP_DIR:-/srv/ibshit}"
 ENV_FILE="/etc/ibshit.env"
 SOCKET="/run/ibshit/gunicorn.sock"
 FLASK_WRAPPER="/usr/local/sbin/ibshit-flask"
@@ -22,6 +24,36 @@ die()  { printf '\033[1;31m[x]\033[0m %s\n' "$*" >&2; exit 1; }
 
 [[ $EUID -eq 0 ]] || die "run with sudo"
 [[ -n "$DOMAIN" ]] || die "usage: sudo bash $0 yourname.duckdns.org"
+
+# ---------------------------------------------------------------- virtualenv
+# .venv is in .gitignore, so `git pull` never restores it: it has to exist on
+# disk. Any script that runs the app's CLI must be able to recreate it, or the
+# first `git pull` after a fresh clone breaks every command with "not found".
+ensure_venv() {
+    if [[ -x "$APP_DIR/.venv/bin/python" ]] \
+       && "$APP_DIR/.venv/bin/python" -c 'import flask, flask_login' 2>/dev/null; then
+        log "Python environment present"
+        return 0
+    fi
+
+    if [[ -x "$APP_DIR/.venv/bin/python" ]]; then
+        warn "The Python environment exists but is missing dependencies; repairing"
+    else
+        warn "$APP_DIR/.venv is missing (it is not tracked by git, so it must be recreated)"
+    fi
+
+    apt-get install -y --no-install-recommends python3-venv >/dev/null 2>&1 || true
+
+    # Build it as the service account so the files are not root-owned.
+    log "Creating the virtual environment"
+    rm -rf "$APP_DIR/.venv"
+    sudo -u "$APP_USER" python3 -m venv "$APP_DIR/.venv"
+    sudo -u "$APP_USER" "$APP_DIR/.venv/bin/pip" install --quiet --upgrade pip
+    log "Installing Python dependencies"
+    sudo -u "$APP_USER" "$APP_DIR/.venv/bin/pip" install --quiet -r "$APP_DIR/requirements.txt"
+    log "Python environment ready"
+}
+
 
 # ---------------------------------------------------------------- preconditions
 [[ -f "$APP_DIR/wsgi.py" ]] || die "$APP_DIR/wsgi.py not found. Run deploy/bootstrap-debian.sh first."
@@ -52,6 +84,9 @@ fi
 log "Ensuring $APP_USER owns $APP_DIR"
 chown -R "$APP_USER:$APP_USER" "$APP_DIR"
 install -d -o "$APP_USER" -g "$APP_USER" -m 0755 "$APP_DIR/instance"
+
+# .venv is not tracked by git, so it may be absent after a fresh clone.
+ensure_venv
 
 # The CLI must run as the app user, otherwise Flask cannot create instance/.
 if [[ ! -x "$FLASK_WRAPPER" ]]; then
