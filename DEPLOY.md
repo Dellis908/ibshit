@@ -106,6 +106,10 @@ sudo sed -i "s|^SECRET_KEY=.*|SECRET_KEY=$(openssl rand -hex 32)|" /etc/ibshit.e
 sudo nano /etc/ibshit.env      # review, set FLASK_ENV=production
 ```
 
+Write values as plain `KEY=value` — **no quotes and no spaces**. systemd strips
+quotes when it reads the file but a shell does not, so a quoted value would work
+for the service and break the command-line tools.
+
 `SECRET_KEY` signs session cookies. The default in the repository is a
 development placeholder — replacing it here is required, not optional. Changing
 it later invalidates existing sessions (people just re-answer; no data is lost).
@@ -120,23 +124,51 @@ sudo grep -v '^#' /etc/ibshit.env | grep -v '^$'
 
 ## 5. Create the database and load the questions
 
-Load the environment and run the CLI. `flask` needs to know the app:
+**Run these as the `ibshit` user, not as root.** `/srv/ibshit` is owned by
+`ibshit`, so root cannot create `instance/` inside it — and if you force it, the
+database ends up root-owned and the service cannot read it.
+
+The supplied bootstrap script installs a small wrapper at
+`/usr/local/sbin/ibshit-flask` that loads `/etc/ibshit.env` and runs the CLI as
+the service user. Create the same thing manually:
+
+```bash
+sudo tee /usr/local/sbin/ibshit-flask >/dev/null <<'WRAPPER'
+#!/bin/sh
+set -a
+. /etc/ibshit.env
+set +a
+cd /srv/ibshit
+exec /srv/ibshit/.venv/bin/flask --app /srv/ibshit/wsgi.py "$@"
+WRAPPER
+
+sudo chmod 0750 /usr/local/sbin/ibshit-flask
+sudo chown root:ibshit /usr/local/sbin/ibshit-flask
+```
+
+Then load the questions:
+
+```bash
+sudo -u ibshit /usr/local/sbin/ibshit-flask quiz seed
+sudo -u ibshit /usr/local/sbin/ibshit-flask quiz import /srv/ibshit/seed/rdojo.json
+```
+
+Or, if you prefer one-off commands, the equivalent without a wrapper is:
 
 ```bash
 cd /srv/ibshit
-sudo -u ibshit env $(sudo grep -v '^#' /etc/ibshit.env | xargs) \
-    .venv/bin/flask --app /srv/ibshit/wsgi.py quiz seed
-
-sudo -u ibshit env $(sudo grep -v '^#' /etc/ibshit.env | xargs) \
-    .venv/bin/flask --app /srv/ibshit/wsgi.py quiz import /srv/ibshit/seed/rdojo.json
+sudo -u ibshit sh -c 'set -a; . /etc/ibshit.env; set +a; \
+    exec /srv/ibshit/.venv/bin/flask --app /srv/ibshit/wsgi.py quiz seed'
 ```
+
+The wrapper exists because `env $(grep -v "^#" /etc/ibshit.env | xargs)` breaks on
+values containing spaces and exposes secrets in the process list.
 
 The first command creates `instance/quiz.db` and loads the 154 built-in
 questions; the second adds the 2,244 imported ones. Check:
 
 ```bash
-sudo -u ibshit env $(sudo grep -v '^#' /etc/ibshit.env | xargs) \
-    .venv/bin/flask --app /srv/ibshit/wsgi.py quiz stats
+sudo -u ibshit /usr/local/sbin/ibshit-flask quiz stats
 ```
 
 Make sure the service account owns what it needs to write:
@@ -346,11 +378,8 @@ Then restart and reload the questions:
 
 ```bash
 sudo systemctl restart ibshit
-cd /srv/ibshit
-sudo -u ibshit env $(sudo grep -v '^#' /etc/ibshit.env | xargs) \
-    .venv/bin/flask --app /srv/ibshit/wsgi.py quiz seed
-sudo -u ibshit env $(sudo grep -v '^#' /etc/ibshit.env | xargs) \
-    .venv/bin/flask --app /srv/ibshit/wsgi.py quiz import /srv/ibshit/seed/rdojo.json
+sudo -u ibshit /usr/local/sbin/ibshit-flask quiz seed
+sudo -u ibshit /usr/local/sbin/ibshit-flask quiz import /srv/ibshit/seed/rdojo.json
 ```
 
 Back up with `pg_dump ibshit > backup.sql` instead of copying a file.
@@ -397,8 +426,7 @@ an existing table, the simplest fix on a single-user install is to export and
 re-import:
 
 ```bash
-sudo -u ibshit env $(sudo grep -v '^#' /etc/ibshit.env | xargs) \
-    .venv/bin/flask --app /srv/ibshit/wsgi.py quiz export /tmp/bank.json
+sudo -u ibshit /usr/local/sbin/ibshit-flask quiz export /tmp/bank.json
 # then stop the service, move instance/quiz.db aside, restart, and import
 ```
 
@@ -437,6 +465,17 @@ export it: `export FLASK_APP=/srv/ibshit/wsgi.py`.
 **502 Bad Gateway from nginx**
 gunicorn is not running or the socket path is wrong. Check
 `sudo systemctl status ibshit`, then `sudo ls -l /run/ibshit/`.
+
+**`PermissionError: [Errno 13] Permission denied: '/srv/ibshit/instance'`**
+`flask` was run as root, and `/srv/ibshit` belongs to `ibshit`, so root cannot
+create `instance/` inside it. Run the CLI as the service account instead — see
+step 5, or use the wrapper: `sudo -u ibshit /usr/local/sbin/ibshit-flask quiz seed`.
+If an earlier run left root-owned files behind, fix them with
+`sudo chown -R ibshit:ibshit /srv/ibshit`.
+
+**The service starts but cannot read the database**
+An earlier run as root created a root-owned `instance/quiz.db`. Fix with
+`sudo chown -R ibshit:ibshit /srv/ibshit/instance && sudo systemctl restart ibshit`.
 
 **`status=200/CHDIR` in the journal**
 The systemd unit's `WorkingDirectory` does not exist or is not readable by the
