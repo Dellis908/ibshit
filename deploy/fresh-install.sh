@@ -13,6 +13,14 @@
 
 set -euo pipefail
 
+# Every stage is numbered and printed, so a log always shows how far the install
+# got — the previous attempt failed silently between two stages.
+trap 'echo "[x] błąd w linii $LINENO — instalacja przerwana"; exit 1' ERR
+
+# Every command in this script is guarded by `set -e`; the trap above reports where
+# it stopped. Note: never pipe an app command into `head` — SIGPIPE plus
+# `pipefail` looks like a failure and aborts an otherwise successful install.
+
 DOMAIN="${1:-}"
 PREFIX="${2:-/srv/ibshit}"
 APP_USER="ibshit"
@@ -88,28 +96,56 @@ rm -rf "$PREFIX"
 # A leftover directory from the old /tmp attempt.
 [[ -d /tmp/ibshit ]] && { warn "usuwam też /tmp/ibshit"; rm -rf /tmp/ibshit; }
 
-log "Usuwam użytkownika $APP_USER"
+log "Usuwam użytkownika i grupę $APP_USER"
 if id -u "$APP_USER" >/dev/null 2>&1; then
     pkill -u "$APP_USER" 2>/dev/null || true
     userdel "$APP_USER" 2>/dev/null || warn "nie udało się usunąć użytkownika (może być w użyciu)"
 fi
+# `userdel` leaves the group behind, and `useradd --system` then refuses with
+# "group <name> exists", which under `set -e` aborts the whole install. Removing
+# the group as well is what makes re-running this script actually work.
+if getent group "$APP_USER" >/dev/null 2>&1; then
+    groupdel "$APP_USER" 2>/dev/null && log "Usunięto grupę $APP_USER" \
+        || warn "nie udało się usunąć grupy $APP_USER (może mieć członków)"
+fi
 
 # ───────────────────────────────────────────────────────────── 4. zależności
 log "Instaluję pakiety systemowe"
-apt-get update -qq
-apt-get install -y --no-install-recommends \
+DEBIAN_FRONTEND=noninteractive apt-get update -qq
+DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     git python3 python3-venv python3-pip nginx ca-certificates curl sqlite3
 
 log "Tworzę użytkownika $APP_USER"
-useradd --system --home "$PREFIX" --shell /usr/sbin/nologin "$APP_USER"
+if id -u "$APP_USER" >/dev/null 2>&1; then
+    log "Użytkownik $APP_USER już istnieje, zostawiam"
+elif getent group "$APP_USER" >/dev/null 2>&1; then
+    # A previous run left the group (or www-data was added to it).
+    useradd --system --home "$PREFIX" --shell /usr/sbin/nologin -g "$APP_USER" "$APP_USER" \
+        || die "nie udało się utworzyć użytkownika $APP_USER"
+else
+    useradd --system --home "$PREFIX" --shell /usr/sbin/nologin "$APP_USER" \
+        || die "nie udało się utworzyć użytkownika $APP_USER"
+fi
 
 # ──────────────────────────────────────────────────────────────── 5. klonuj
 log "Klonuję $REPO"
 git clone --quiet "$REPO" "$PREFIX"
 
+# Ownership must be set BEFORE the environment is built: git clones as root, so
+# the tree starts root-owned and `python3 -m venv` (run as the service account)
+# would fail with "Permission denied". This ordering was the bug.
+log "Ustawiam właściciela $PREFIX na $APP_USER"
+chown -R "$APP_USER:$APP_USER" "$PREFIX"
+install -d -o "$APP_USER" -g "$APP_USER" -m 0755 "$PREFIX/instance"
+if ! as_app_user test -w "$PREFIX"; then
+    die "$APP_USER nie może pisać do $PREFIX
+  napraw: chown -R $APP_USER:$APP_USER $PREFIX"
+fi
+
 # ──────────────────────────────────────────────────────────── 6. środowisko
 log "Tworzę środowisko Python"
-as_app_user python3 -m venv "$PREFIX/.venv"
+rm -rf "$PREFIX/.venv"   # a partial venv from a failed run would confuse the next
+as_app_user python3 -m venv "$PREFIX/.venv" || die "nie udało się utworzyć $PREFIX/.venv"
 # Zawsze przez `python -m pip`: skrypt .venv/bin/pip ma zaszyty shebang, który
 # przestaje działać po przeniesieniu katalogu.
 as_app_user "$PREFIX/.venv/bin/python" -m pip install --quiet --upgrade pip
@@ -136,8 +172,6 @@ fi
 
 chown root:"$APP_USER" "$ENV_FILE"
 chmod 0640 "$ENV_FILE"
-chown -R "$APP_USER:$APP_USER" "$PREFIX"
-install -d -o "$APP_USER" -g "$APP_USER" -m 0755 "$PREFIX/instance"
 
 if ! as_app_user test -w "$PREFIX/instance"; then
     die "$APP_USER nie może pisać do $PREFIX/instance
@@ -166,7 +200,10 @@ chown root:"$APP_USER" "$WRAPPER"
 log "Ładuję pytania"
 as_app_user "$WRAPPER" quiz seed
 as_app_user "$WRAPPER" quiz import "$PREFIX/seed/rdojo.json"
-as_app_user "$WRAPPER" quiz stats | head -4
+# Nie używaj `| head` na poleceniach aplikacji: `head` zamyka potok, aplikacja
+# ginie od SIGPIPE, a `set -o pipefail` zgłasza to jako błąd i przerywa instalację.
+as_app_user "$WRAPPER" quiz stats >/tmp/quiz-stats.txt 2>&1 || true
+sed -n '1,4p' /tmp/quiz-stats.txt
 
 # ──────────────────────────────────────────────────────────────────── 10. systemd
 log "Instaluję usługę systemd"
@@ -303,11 +340,13 @@ fi
 # ───────────────────────────────────────────────────────────────────────── 14. HTTPS
 if ! command -v certbot >/dev/null 2>&1; then
     log "Instaluję certbot"
-    apt-get install -y --no-install-recommends certbot python3-certbot-nginx
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends certbot python3-certbot-nginx
 fi
 
-log "Wystawiam certyfikat TLS dla $DOMAIN"
-if certbot --nginx -d "$DOMAIN" --non-interactive --agree-tos \
+log "Wystawiam certyfikat TLS dla $DOMAIN (limit 3 minuty)"
+# --non-interactive alone can still block on DNS or the ACME handshake, and this
+# script must never hang: a stuck install is what broke the previous attempt.
+if timeout 180 certbot --nginx -d "$DOMAIN" --non-interactive --agree-tos \
         --register-unsafely-without-email --redirect; then
     log "HTTPS włączone"
     sed -i '/^SESSION_COOKIE_SECURE=/d; /^PREFERRED_URL_SCHEME=/d; /^TRUST_PROXY_HEADERS=/d' "$ENV_FILE"
