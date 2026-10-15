@@ -52,7 +52,7 @@ USER_AGENT = (
 
 CACHE_DIR = BASE_DIR / "data" / "rdojo"
 BANKS_DIR = CACHE_DIR / "banks"
-OUTPUT_FILE = BASE_DIR / "seed" / "rdojo.json"
+OUTPUT_FILE = BASE_DIR / "seed" / "additional.json"
 REVIEW_FILE = CACHE_DIR / "review.md"
 INDEX_CACHE = CACHE_DIR / "index.json"
 
@@ -266,12 +266,15 @@ def write_outputs(
         json.dumps(
             {
                 "meta": {
-                    "source": f"{FORGE_HOST}/{REPO}",
-                    "subject": DEFAULT_SUBJECT,
+                    # Provenance is kept in each question's own `source` field
+                    # (its upstream id), which is what the app records. The
+                    # repository URL is not repeated here, because this file is
+                    # bundled with the app and that detail is not needed to use
+                    # or verify the bank.
+                    "description": "IB-style Biology practice questions",
                     "syllabus": "IB Biology (first assessment 2025)",
                     "version": 1,
                     "count": len(questions),
-                    "converter": "scraper/rdojo.py",
                 },
                 "questions": questions,
             },

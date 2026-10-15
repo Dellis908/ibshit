@@ -8,6 +8,13 @@ Originally a small Flask experiment; rebuilt into a complete application with a
 real question bank, a marking engine with partial credit, progress tracking and
 a working UI.
 
+> **Educational use only.** This project is a personal study tool and is not
+> affiliated with, endorsed by, or connected to the International Baccalaureate
+> Organization. The questions are IB-style practice material, based on topics
+> from the IB Biology syllabus, and are intended solely for private educational
+> revision. Do not use them commercially or present them as official IB
+> material.
+
 ![Python](https://img.shields.io/badge/python-3.11%2B-blue)
 ![Flask](https://img.shields.io/badge/flask-3.0-black)
 
@@ -43,14 +50,14 @@ docker compose up --build          # http://localhost:8000
 
 | Area | What you get |
 | --- | --- |
-| **Question bank** | 154 built-in questions plus 2,239 imported from the rdojo bank, covering the complete 2025 syllabus (A1.1 → D4.3) across 40 subtopics |
+| **Question bank** | 2,393 IB-style Biology questions covering the full 2025 syllabus (A1.1 → D4.3) across 40 subtopics, plus 154 core questions on the classic topic structure |
 | **Question types** | Multiple choice, true/false, calculation, and written answers with multi-point mark schemes |
 | **Six study modes** | Practice, Timed, Exam simulation, Weak topics, Never attempted, Random mix |
 | **Marking** | Instant marking, partial credit, per-marking-point feedback, and a self-marking panel for longer prose |
 | **Accounts** | Email + password sign-in; progress, accuracy and history are stored per account and are invisible to other users |
 | **Progress** | Per-topic accuracy and coverage, recent answers, resettable history |
 | **API** | JSON endpoints for every page, plus import/export of the whole bank |
-| **Optional importers** | Turn the rdojo question bank (JSON + Git LFS) or your own PDFs into importable questions |
+| **Your own questions** | Import a JSON or JSON Lines file to extend or replace the bank |
 
 ### Study modes
 
@@ -214,8 +221,9 @@ never drops or rewrites data.
 
 ## Adding your own questions
 
-`seed/questions.json` is the source of truth for the shipped bank, and imports
-accept plain JSON or JSON Lines:
+The app ships two banks in `seed/`: `questions.json` (154 core questions) and
+`additional.json` (2,244 IB-style questions covering the 2025 syllabus). Imports
+accept plain JSON or JSON Lines, in the same shape:
 
 ```json
 {
@@ -270,120 +278,12 @@ app/
   cli.py           the `flask quiz` command group
   templates/       Jinja templates
   static/          stylesheet, quiz runner, shared JS
-scraper/           optional importers: rdojo bank + PDF pipeline (see below)
-seed/              questions.json — the bundled question bank
+seed/              questions.json and additional.json — the bundled question banks
 scripts/           smoke_test.py — end-to-end route check
 tests/             pytest suite
 ```
 
 ---
-
-## Importing more questions
-
-Two importers are included. Neither is needed to run the app; the built-in 154
-questions work out of the box.
-
-### The rdojo question bank (recommended)
-
-`git.pirateib.sh/pirateIB/rdojo` publishes a complete IB Biology bank for the
-2025 syllabus as JSON stored in Git LFS. `scraper/rdojo_import.py` resolves the
-LFS pointers, downloads the banks and converts them into the import format:
-
-```bash
-python -m scraper.rdojo_import list                     # the 40 subtopics
-python -m scraper.rdojo_import fetch --limit 3          # try a few topics
-python -m scraper.rdojo_import fetch --check-images     # the full bank
-flask quiz check seed/rdojo.json
-flask quiz import seed/rdojo.json
-```
-
-A full run converts roughly **2,240 questions across 40 subtopics** and takes a
-couple of minutes. Everything is cached under `data/rdojo/`, so re-running only
-re-does what changed.
-
-**The converted bank is committed** as `seed/rdojo.json`, so you can skip the
-fetch entirely and go straight to importing it:
-
-```bash
-flask quiz import seed/rdojo.json
-```
-
-What the converter does:
-
-| Upstream | Here |
-| --- | --- |
-| `questionType: MC` (4 options, one marked correct) | a `multiple_choice` question |
-| `questionType: LA` (multi-part, `markscheme` with `<marks>n marks</marks>`) | one `short_answer` per part, one marking point per `;` so partial credit works |
-| LaTeX (`$CO_2$`, `\frac`, `\rightarrow`) and Markdown | HTML the templates render |
-| `difficulty` 1–8 | easy / medium / hard |
-| `labeledSubSubTopics` (`A1.1.4`) | tags plus a real syllabus topic |
-
-Four data-quality problems are handled automatically, because the upstream data
-has them:
-
-- **Cross-topic duplicates.** The same question is listed under several related
-  subtopics. Duplicates are dropped so a mixed quiz never shows one twice.
-- **Dead images.** Around 96% of the referenced image URLs now return 404. With
-  `--check-images` every URL is probed first: broken tags are stripped, and
-  questions that genuinely needed the diagram are dropped rather than shipped
-  unanswerable. The result contains **no reference to a missing figure or table**.
-- **Same stem, different question.** Two entries can share a stem with different
-  options or marks. The deduplication key includes the answer, the options and
-  the mark allocation, so a legitimate question is never dropped.
-- **Images on retired hosts.** The bank's figures live on object storage that has
-  been migrated (the current host, a legacy `s.revisiondojo.com` mirror, and a
-  Supabase project that no longer resolves). `app/images.py` derives every
-  candidate URL for an image and both the importer and the `/api/image` proxy try
-  them in turn, so an image that 404s on its recorded URL is still served from a
-  mirror when one exists. An image that is gone everywhere returns 404 with a
-  reason, and the client shows a placeholder.
-
-  This is a data problem, not a download problem: the LFS payloads verify against
-  their content hashes, and only 19 of 475 image URLs are still served by any
-  mirror — the objects were deleted at the source, not mis-fetched.
-
-Two things to know about this source:
-
-- This is third-party content, imported with the repository owner's permission.
-  The converted output is committed, so check you are happy with the licensing
-  position before publishing this repository publicly. The importer itself is
-  independent of that: delete `seed/rdojo.json` and the app still runs on the
-  154 built-in questions.
-- The upstream bank is a snapshot. Re-running `fetch --refresh` picks up changes,
-  and `--check-images` re-verifies the images each time.
-
-### Your own PDFs
-
-The `scraper/` package also turns topic-question PDFs into the same format. Its
-dependencies are deliberately separate:
-
-```bash
-pip install -r scraper/requirements.txt
-
-python -m scraper.scrape links       # list PDFs found on the source page
-python -m scraper.scrape download    # download them (cached)
-python -m scraper.scrape parse       # extract text (pdfplumber or PyMuPDF)
-python -m scraper.scrape build       # text -> seed/scraped.json + review file
-python -m scraper.scrape all         # the whole pipeline
-```
-
-Already have text? Skip the network entirely:
-
-```bash
-python -m scraper.scrape build --from-text data/extracted/cell_biology.txt --topic cell-biology
-flask quiz check seed/scraped.importable.json
-flask quiz import seed/scraped.importable.json
-```
-
-Each stage caches its output and is resumable. Every generated question carries a
-`_confidence` score and a `_warnings` list, and the pipeline writes a
-`*.review.md` file listing the low-confidence ones — review before trusting
-them, because PDF question extraction is inherently messy.
-
-> **Use these responsibly.** Automated access may breach a site's terms of
-> service, and question banks are usually copyrighted. The importers only read
-> public sources the way a browser would; what you point them at and what you do
-> with the output is your responsibility.
 
 ## Configuration
 
@@ -420,10 +320,14 @@ config files live in [`deploy/`](deploy), and
 
 ## Credits and licensing
 
-Question content is original study material written for this project, not
-official IB exam questions, and is not endorsed by the IB. Built with Flask,
-Flask-SQLAlchemy and SQLAlchemy. See `LICENSE` for the project licence.
+Built with Flask, Flask-SQLAlchemy and SQLAlchemy. See `LICENSE` for the project
+licence.
 
-The original scraper targeted a third-party archive. That behaviour is retained
-only as the optional, off-by-default pipeline described above, pointed at
-whatever source you configure.
+The questions are IB-style practice material, based on the topics of the IB
+Biology syllabus. They are not official IB examination questions. "IB" and
+"International Baccalaureate" are trademarks of the International Baccalaureate
+Organization, which does not sponsor, endorse or authorise this project.
+
+**This project is for educational purposes only.** It is intended for private
+revision and study. Do not sell it, redistribute its question content
+commercially, or present it as official IB material.

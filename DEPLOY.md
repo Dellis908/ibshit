@@ -157,7 +157,7 @@ Then load the questions:
 
 ```bash
 sudo -u ibshit /usr/local/sbin/ibshit-flask quiz seed
-sudo -u ibshit /usr/local/sbin/ibshit-flask quiz import /srv/ibshit/seed/rdojo.json
+sudo -u ibshit /usr/local/sbin/ibshit-flask quiz import /srv/ibshit/seed/additional.json
 ```
 
 Or, if you prefer one-off commands, the equivalent without a wrapper is:
@@ -426,7 +426,7 @@ Then restart and reload the questions:
 ```bash
 sudo systemctl restart ibshit
 sudo -u ibshit /usr/local/sbin/ibshit-flask quiz seed
-sudo -u ibshit /usr/local/sbin/ibshit-flask quiz import /srv/ibshit/seed/rdojo.json
+sudo -u ibshit /usr/local/sbin/ibshit-flask quiz import /srv/ibshit/seed/additional.json
 ```
 
 Back up with `pg_dump ibshit > backup.sql` instead of copying a file.

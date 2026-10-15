@@ -1,11 +1,9 @@
 {
   "meta": {
-    "source": "https://git.pirateib.sh/pirateIB/rdojo",
-    "subject": "ib-biology-new",
+    "description": "IB-style Biology practice questions",
     "syllabus": "IB Biology (first assessment 2025)",
     "version": 1,
-    "count": 2244,
-    "converter": "scraper/rdojo.py"
+    "count": 2244
   },
   "questions": [
     {
