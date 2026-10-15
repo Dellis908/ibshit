@@ -23,6 +23,20 @@ APP_USER="ibshit"
 SERVICE="ibshit"
 ENV_FILE="/etc/ibshit.env"
 
+# Run a command as the service account.
+#
+# `sudo -u <user>` fails when the target is the user already running the script
+# ("sudo: unknown user", or a password prompt), which is what happens on a small
+# host where the operator works as the app user. Only switch user when we are
+# root and the account actually differs.
+as_app_user() {
+    if [[ $EUID -eq 0 && "$(id -un)" != "$APP_USER" ]]; then
+        sudo -u "$APP_USER" "$@"
+    else
+        "$@"
+    fi
+}
+
 log()  { printf '\033[1;32m==>\033[0m %s\n' "$*"; }
 warn() { printf '\033[1;33m[!]\033[0m %s\n' "$*"; }
 die()  { printf '\033[1;31m[x]\033[0m %s\n' "$*" >&2; exit 1; }
@@ -97,9 +111,9 @@ install -d -o "$APP_USER" -g "$APP_USER" -m 0755 "$TARGET/instance"
 log "Creating the virtual environment"
 apt-get install -y --no-install-recommends python3-venv >/dev/null 2>&1 || true
 rm -rf "$TARGET/.venv"
-sudo -u "$APP_USER" python3 -m venv "$TARGET/.venv"
-sudo -u "$APP_USER" "$TARGET/.venv/bin/pip" install --quiet --upgrade pip
-sudo -u "$APP_USER" "$TARGET/.venv/bin/pip" install --quiet -r "$TARGET/requirements.txt"
+as_app_user python3 -m venv "$TARGET/.venv"
+as_app_user "$TARGET/.venv/bin/python" -m pip install --quiet --upgrade pip
+as_app_user "$TARGET/.venv/bin/python" -m pip install --quiet -r "$TARGET/requirements.txt"
 
 # ------------------------------------------------------------------- systemd
 UNIT=/etc/systemd/system/$SERVICE.service

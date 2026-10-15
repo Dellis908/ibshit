@@ -29,6 +29,21 @@ die()  { printf '\033[1;31m[x]\033[0m %s\n' "$*" >&2; exit 1; }
 # .venv is in .gitignore, so `git pull` never restores it: it has to exist on
 # disk. Any script that runs the app's CLI must be able to recreate it, or the
 # first `git pull` after a fresh clone breaks every command with "not found".
+# Run a command as the service account.
+#
+# `sudo -u <user>` fails when the target is the user already running the script
+# ("sudo: unknown user", or a password prompt), which is what happens on a small
+# host where the operator works as the app user. Only switch user when we are
+# root and the account actually differs.
+as_app_user() {
+    if [[ $EUID -eq 0 && "$(id -un)" != "$APP_USER" ]]; then
+        sudo -u "$APP_USER" "$@"
+    else
+        "$@"
+    fi
+}
+
+
 ensure_venv() {
     if [[ -x "$APP_DIR/.venv/bin/python" ]] \
        && "$APP_DIR/.venv/bin/python" -c 'import flask, flask_login' 2>/dev/null; then
@@ -47,10 +62,10 @@ ensure_venv() {
     # Build it as the service account so the files are not root-owned.
     log "Creating the virtual environment"
     rm -rf "$APP_DIR/.venv"
-    sudo -u "$APP_USER" python3 -m venv "$APP_DIR/.venv"
-    sudo -u "$APP_USER" "$APP_DIR/.venv/bin/pip" install --quiet --upgrade pip
+    as_app_user python3 -m venv "$APP_DIR/.venv"
+    as_app_user "$APP_DIR/.venv/bin/python" -m pip install --quiet --upgrade pip
     log "Installing Python dependencies"
-    sudo -u "$APP_USER" "$APP_DIR/.venv/bin/pip" install --quiet -r "$APP_DIR/requirements.txt"
+    as_app_user "$APP_DIR/.venv/bin/python" -m pip install --quiet -r "$APP_DIR/requirements.txt"
     log "Python environment ready"
 }
 
@@ -122,7 +137,7 @@ log "Service is active"
 # ---------------------------------------------------- 4. socket reachable by nginx
 # nginx workers run as www-data and must be able to open the app's socket.
 if [[ -S "$SOCKET" ]]; then
-    if ! sudo -u www-data test -w "$SOCKET" 2>/dev/null; then
+    if ! as_app_user test -w "$SOCKET" 2>/dev/null && ! sudo -u www-data test -w "$SOCKET" 2>/dev/null; then
         log "Granting nginx access to the socket"
         # RuntimeDirectoryMode=0750 in the unit only admits the app group, so add
         # nginx's user to that group. The permission on /run/<user> is the cause.

@@ -99,6 +99,21 @@ fi
 # .venv is in .gitignore, so `git pull` never restores it: it has to exist on
 # disk. Any script that runs the app's CLI must be able to recreate it, or the
 # first `git pull` after a fresh clone breaks every command with "not found".
+# Run a command as the service account.
+#
+# `sudo -u <user>` fails when the target is the user already running the script
+# ("sudo: unknown user", or a password prompt), which is what happens on a small
+# host where the operator works as the app user. Only switch user when we are
+# root and the account actually differs.
+as_app_user() {
+    if [[ $EUID -eq 0 && "$(id -un)" != "$APP_USER" ]]; then
+        sudo -u "$APP_USER" "$@"
+    else
+        "$@"
+    fi
+}
+
+
 ensure_venv() {
     if [[ -x "$APP_DIR/.venv/bin/python" ]] \
        && "$APP_DIR/.venv/bin/python" -c 'import flask, flask_login' 2>/dev/null; then
@@ -117,7 +132,7 @@ ensure_venv() {
     # Build it as the service account so the files are not root-owned.
     log "Creating the virtual environment"
     rm -rf "$APP_DIR/.venv"
-    sudo -u "$APP_USER" python3 -m venv "$APP_DIR/.venv"
+    as_app_user python3 -m venv "$APP_DIR/.venv"
     sudo -u "$APP_USER" "$APP_DIR/.venv/bin/pip" install --quiet --upgrade pip
     log "Installing Python dependencies"
     sudo -u "$APP_USER" "$APP_DIR/.venv/bin/pip" install --quiet -r "$APP_DIR/requirements.txt"
@@ -167,12 +182,12 @@ chmod 0750 "$FLASK_WRAPPER"
 chown root:"$APP_USER" "$FLASK_WRAPPER"
 
 run_flask() {
-    sudo -u "$APP_USER" "$FLASK_WRAPPER" "$@"
+    as_app_user "$FLASK_WRAPPER" "$@"
 }
 
 # The wrapper sources the env file, so a syntax error there would surface as a
 # confusing failure later. Check it now, as the service account would see it.
-if ! sudo -u "$APP_USER" sh -n "$ENV_FILE" 2>/dev/null; then
+if ! as_app_user sh -n "$ENV_FILE" 2>/dev/null; then
     die "$ENV_FILE is not valid shell syntax, so the app cannot read it.
   Values must be plain KEY=value with no quotes and no spaces, e.g.
     SECRET_KEY=abc123
@@ -189,7 +204,7 @@ chown -R "$APP_USER:$APP_USER" "$APP_DIR/instance"
 # --- sanity check ----------------------------------------------------------
 # Confirm the service account can actually write, with a message that says what
 # to do rather than a traceback from inside Flask.
-if ! sudo -u "$APP_USER" test -w "$APP_DIR/instance"; then
+if ! as_app_user test -w "$APP_DIR/instance"; then
     die "$APP_USER cannot write to $APP_DIR/instance. Check ownership with:
     ls -ld $APP_DIR $APP_DIR/instance
   and fix it with:
