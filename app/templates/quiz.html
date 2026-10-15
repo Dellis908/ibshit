@@ -1,40 +1,149 @@
 {% extends "base.html" %}
-{% block content %}
-<h2>{{ topic }}</h2>
-{% for q in questions %}
-<div class="question-card" data-question-id="{{ q.id }}">
-    <h3>Pytanie {{ loop.index }}</h3>
-    <p>{{ q.question_text | safe }}</p>
-    {% if q.image_path %}
-        <img src="{{ url_for('static', filename=q.image_path) }}" alt="diagram">
-    {% endif %}
-    <textarea class="answer-input" placeholder="Twoja odpowiedź..."></textarea>
-    <button class="submit-btn">Sprawdź</button>
-    <div class="feedback"></div>
-</div>
-{% endfor %}
+{% from "_macros.html" import accuracy_bar %}
 
-<script>
-document.querySelectorAll('.submit-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-        const card = this.closest('.question-card');
-        const qid = card.dataset.questionId;
-        const answer = card.querySelector('.answer-input').value;
-        fetch('/submit_answer', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({question_id: qid, answer: answer})
-        })
-        .then(r => r.json())
-        .then(data => {
-            const fb = card.querySelector('.feedback');
-            if (data.is_correct) {
-                fb.innerHTML = '✅ Poprawnie!';
-            } else {
-                fb.innerHTML = `❌ Błędnie. Poprawna odpowiedź: ${data.correct_answer}`;
-            }
-        });
-    });
-});
+{% block title %}{{ mode_label }} quiz · {{ site_name }}{% endblock %}
+
+{% block content %}
+<section class="quiz-header">
+  <div>
+    <h1>{{ mode_label }} quiz</h1>
+    <p class="muted">
+      {% if topic_titles %}
+        {{ topic_titles.values()|join(', ') }} ·
+      {% else %}
+        All topics ·
+      {% endif %}
+      {{ questions|length }} question{{ '' if questions|length == 1 else 's' }} ·
+      {{ questions|sum(attribute='marks') }} marks
+      {% if request_spec.difficulty %} · {{ request_spec.difficulty }} difficulty{% endif %}
+    </p>
+  </div>
+
+  <div class="quiz-status">
+    {% if time_limit %}
+      <div class="timer" id="quiz-timer" data-seconds="{{ time_limit }}" role="timer" aria-live="off">
+        <span class="timer-label">Time left</span>
+        <span class="timer-value" id="timer-value">--:--</span>
+      </div>
+    {% endif %}
+    <label class="self-mark-toggle" title="After checking, compare your wording with the mark scheme and award yourself marks.">
+      <input type="checkbox" id="self-mark-toggle">
+      <span class="small">Self-mark</span>
+    </label>
+    <div class="score-pill" id="score-pill">
+      <span class="muted small">Score</span>
+      <strong><span id="score-correct">0</span>/<span id="score-total">{{ questions|length }}</span></strong>
+    </div>
+  </div>
+</section>
+
+<div class="progress-track" aria-hidden="true">
+  <div class="progress-fill" id="quiz-progress" style="width: 0%"></div>
+</div>
+<p class="muted small" id="quiz-progress-label">0 of {{ questions|length }} answered</p>
+
+{% if request_spec.mode in ('timed', 'exam') %}
+  <div class="notice">
+    <strong>{{ 'Timed' if request_spec.mode == 'timed' else 'Exam' }} mode:</strong>
+    answers are not revealed until you finish. You can still change an answer before submitting it.
+  </div>
+{% endif %}
+
+<ol class="question-list" id="question-list">
+  {% for q in questions %}
+    <li class="question-card" data-question-id="{{ q.id }}" data-type="{{ q.question_type }}" data-marks="{{ q.marks }}">
+      <header class="question-head">
+        <span class="question-number">Question {{ loop.index }}</span>
+        <span class="question-meta">
+          <span class="badge badge-soft">{{ q.question_type.replace('_', ' ') }}</span>
+          <span class="badge badge-soft">{{ q.marks }} mark{{ '' if q.marks == 1 else 's' }}</span>
+          <span class="badge badge-soft badge-{{ q.difficulty }}">{{ q.difficulty }}</span>
+        </span>
+      </header>
+
+      <div class="question-text">{{ q.question_text | safe }}</div>
+
+      {% if q.image_path %}
+        <figure class="question-figure">
+          <img src="{{ url_for('static', filename=q.image_path) }}" alt="Diagram for question {{ loop.index }}" loading="lazy">
+        </figure>
+      {% endif %}
+
+      <div class="answer-area">
+        {% if q.question_type == 'multiple_choice' %}
+          <fieldset class="choice-grid">
+            <legend class="sr-only">Choose one option</legend>
+            {% for choice in q.choices %}
+              <label class="choice">
+                <input type="radio" name="q{{ q.id }}" value="{{ choice }}" data-answer>
+                <span class="choice-marker" aria-hidden="true">{{ 'ABCDEFGH'[loop.index0] }}</span>
+                <span class="choice-text">{{ choice }}</span>
+              </label>
+            {% endfor %}
+          </fieldset>
+
+        {% elif q.question_type == 'true_false' %}
+          <fieldset class="choice-grid choice-grid-tf">
+            <legend class="sr-only">True or false?</legend>
+            <label class="choice">
+              <input type="radio" name="q{{ q.id }}" value="True" data-answer>
+              <span class="choice-marker" aria-hidden="true">T</span>
+              <span class="choice-text">True</span>
+            </label>
+            <label class="choice">
+              <input type="radio" name="q{{ q.id }}" value="False" data-answer>
+              <span class="choice-marker" aria-hidden="true">F</span>
+              <span class="choice-text">False</span>
+            </label>
+          </fieldset>
+
+        {% else %}
+          <label class="sr-only" for="answer-{{ q.id }}">Your answer</label>
+          <textarea id="answer-{{ q.id }}" rows="{{ 2 if q.question_type == 'calculation' else 4 }}"
+                    data-answer
+                    placeholder="{{ 'Give your value with units…' if q.question_type == 'calculation' else 'Write your answer…' }}"></textarea>
+        {% endif %}
+      </div>
+
+      <div class="question-actions">
+        <button type="button" class="btn btn-primary" data-submit>Check answer</button>
+        <button type="button" class="btn btn-ghost btn-small" data-skip>Skip</button>
+        <span class="muted small" data-hint></span>
+      </div>
+
+      <div class="feedback" data-feedback hidden aria-live="polite"></div>
+
+      {% if q.question_type == 'short_answer' and q.marks > 1 %}
+        <details class="self-mark" data-self-mark hidden>
+          <summary>Mark yourself against the mark scheme</summary>
+          <div data-self-mark-body></div>
+        </details>
+      {% endif %}
+    </li>
+  {% endfor %}
+</ol>
+
+<section class="quiz-footer">
+  <div>
+    <p class="muted small">Answers are saved as you go — you can leave and come back to your progress page.</p>
+  </div>
+  <div class="quiz-footer-actions">
+    <a class="btn btn-ghost" href="{{ url_for('main.index') }}">Abandon</a>
+    <a class="btn btn-primary" id="finish-btn" href="{{ url_for('main.results') }}">Finish &amp; see results</a>
+  </div>
+</section>
+
+<script id="quiz-config" type="application/json">
+  {{ {
+      'mode': request_spec.mode,
+      'timed': request_spec.timed,
+      'timeLimit': time_limit,
+      'count': questions|length,
+      'modeLabel': mode_label
+     } | tojson }}
 </script>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/quiz.js') }}" defer></script>
 {% endblock %}

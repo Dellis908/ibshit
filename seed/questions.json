@@ -1,0 +1,2475 @@
+{
+  "meta": {
+    "syllabus": "IB Biology HL (first assessment 2025)",
+    "version": 1,
+    "count": 154
+  },
+  "questions": [
+    {
+      "topic": "cell-biology",
+      "type": "multiple_choice",
+      "question_text": "Which structure is found in all prokaryotic cells?",
+      "correct_answer": "70S ribosomes",
+      "choices": [
+        "70S ribosomes",
+        "A membrane-bound nucleus",
+        "Mitochondria",
+        "A Golgi apparatus"
+      ],
+      "marks": 1,
+      "explanation": "Prokaryotes have 70S ribosomes in their cytoplasm but no membrane-bound organelles, so they lack a nucleus, mitochondria and Golgi apparatus.",
+      "tags": [
+        "prokaryote",
+        "organelles"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "topic": "cell-biology",
+      "type": "multiple_choice",
+      "question_text": "A human cell is placed in a solution and its volume decreases. Which description of the solution is correct?",
+      "correct_answer": "Hypertonic, because water moves out of the cell by osmosis",
+      "choices": [
+        "Hypertonic, because water moves out of the cell by osmosis",
+        "Hypotonic, because water moves out of the cell by osmosis",
+        "Isotonic, because there is no net movement of water",
+        "Hypertonic, because solutes move into the cell"
+      ],
+      "marks": 1,
+      "explanation": "A hypertonic solution has a lower water potential than the cytoplasm, so water leaves the cell by osmosis and the cell shrinks.",
+      "tags": [
+        "osmosis",
+        "water potential"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "cell-biology",
+      "type": "multiple_choice",
+      "question_text": "Which process requires ATP to be hydrolysed directly?",
+      "correct_answer": "Active transport of ions against a concentration gradient",
+      "choices": [
+        "Active transport of ions against a concentration gradient",
+        "Simple diffusion of oxygen into a cell",
+        "Osmosis of water across a partially permeable membrane",
+        "Facilitated diffusion of glucose down its concentration gradient"
+      ],
+      "marks": 1,
+      "explanation": "Only active transport moves substances against a concentration gradient, and this needs energy released by ATP hydrolysis; diffusion, osmosis and facilitated diffusion are all passive.",
+      "tags": [
+        "active transport",
+        "atp"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "cell-biology",
+      "type": "multiple_choice",
+      "question_text": "Which statement best describes the fluid mosaic model of the plasma membrane?",
+      "correct_answer": "A phospholipid bilayer with proteins embedded in it that can move laterally within the membrane",
+      "choices": [
+        "A phospholipid bilayer with proteins embedded in it that can move laterally within the membrane",
+        "A rigid protein layer with phospholipids attached only to its outer surface",
+        "A single layer of phospholipids with proteins attached only at the edges",
+        "A double layer of protein with phospholipid channels running through it"
+      ],
+      "marks": 1,
+      "explanation": "The membrane is a bilayer of phospholipids in which proteins are embedded and can drift sideways, giving it a fluid and mosaic-like appearance.",
+      "tags": [
+        "membrane",
+        "fluid mosaic"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "cell-biology",
+      "type": "multiple_choice",
+      "question_text": "Which structure is the site of polypeptide synthesis?",
+      "correct_answer": "Ribosome",
+      "choices": [
+        "Ribosome",
+        "Lysosome",
+        "Golgi apparatus",
+        "Smooth endoplasmic reticulum"
+      ],
+      "marks": 1,
+      "explanation": "Ribosomes hold mRNA and tRNA together so that amino acids are joined into a polypeptide; the other organelles have different roles in modification, packaging and digestion.",
+      "tags": [
+        "ribosome",
+        "protein synthesis"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "topic": "cell-biology",
+      "type": "multiple_choice",
+      "question_text": "During which stage of mitosis do the sister chromatids of each chromosome separate and move to opposite poles?",
+      "correct_answer": "Anaphase",
+      "choices": [
+        "Anaphase",
+        "Prophase",
+        "Metaphase",
+        "Telophase"
+      ],
+      "marks": 1,
+      "explanation": "In anaphase the centromeres divide and the spindle microtubules pull the sister chromatids apart, so each pole receives one copy of every chromosome.",
+      "tags": [
+        "mitosis",
+        "anaphase"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "topic": "cell-biology",
+      "type": "multiple_choice",
+      "question_text": "What is the main function of cholesterol in the plasma membrane of animal cells?",
+      "correct_answer": "It regulates membrane fluidity at different temperatures",
+      "choices": [
+        "It regulates membrane fluidity at different temperatures",
+        "It forms channels through which ions pass",
+        "It acts as an enzyme that modifies membrane proteins",
+        "It provides the ATP needed for active transport"
+      ],
+      "marks": 1,
+      "explanation": "Cholesterol sits between the phospholipid tails and makes the membrane less fluid at high temperatures while preventing it from becoming too rigid at low temperatures.",
+      "tags": [
+        "membrane",
+        "cholesterol"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "cell-biology",
+      "type": "short_answer",
+      "question_text": "State the function of the Golgi apparatus in a eukaryotic cell.",
+      "correct_answer": "It modifies proteins, then sorts and packages them into vesicles for secretion or delivery to other organelles",
+      "choices": [],
+      "marks": 2,
+      "explanation": "Proteins made on the rough endoplasmic reticulum are transported to the Golgi, where they are processed and packaged into vesicles, so the Golgi is the cell's modification and distribution centre.",
+      "tags": [
+        "golgi",
+        "secretion"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "topic": "cell-biology",
+      "type": "short_answer",
+      "question_text": "State two structural differences between prokaryotic and eukaryotic cells.",
+      "correct_answer": "Eukaryotic cells have a membrane-bound nucleus and membrane-bound organelles; prokaryotic cells have neither, only 70S ribosomes",
+      "choices": [],
+      "marks": 2,
+      "explanation": "The defining difference is compartmentalisation: eukaryotic DNA is enclosed in a nucleus and their organelles are membrane-bound, whereas prokaryotic DNA lies free in the cytoplasm.",
+      "tags": [
+        "prokaryote",
+        "eukaryote"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "cell-biology",
+      "type": "short_answer",
+      "question_text": "Explain why a cell with a larger surface area to volume ratio can exchange materials with its surroundings more efficiently.",
+      "correct_answer": "A larger surface area to volume ratio gives more membrane per unit of cytoplasm, so diffusion distances are shorter and exchange is fast enough",
+      "choices": [],
+      "marks": 3,
+      "explanation": "Exchange happens across the surface, while the demand for materials depends on the volume, so cells that stay small keep diffusion paths short and supply adequate.",
+      "tags": [
+        "surface area",
+        "diffusion"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "topic": "cell-biology",
+      "type": "short_answer",
+      "question_text": "State the function of lysosomes.",
+      "correct_answer": "They contain hydrolytic enzymes that digest worn-out organelles and material taken into the cell",
+      "choices": [],
+      "marks": 1,
+      "explanation": "Lysosomes keep digestive enzymes separated from the rest of the cytoplasm so that macromolecules and damaged organelles can be broken down safely.",
+      "tags": [
+        "lysosome",
+        "digestion"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "topic": "cell-biology",
+      "type": "short_answer",
+      "question_text": "Outline the process of endocytosis.",
+      "correct_answer": "The membrane invaginates around material, pinches off to form a vesicle that carries the material into the cell; ATP is required",
+      "choices": [],
+      "marks": 2,
+      "explanation": "Endocytosis is an active process in which the plasma membrane folds inwards and fuses to trap extracellular material inside a vesicle.",
+      "tags": [
+        "endocytosis",
+        "transport"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "cell-biology",
+      "type": "short_answer",
+      "question_text": "In which stage of the cell cycle is DNA replicated?",
+      "correct_answer": "The S phase of interphase",
+      "choices": [],
+      "marks": 1,
+      "explanation": "DNA is copied during the S (synthesis) phase so that each chromosome consists of two identical sister chromatids before mitosis begins.",
+      "tags": [
+        "cell cycle",
+        "s phase"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "topic": "cell-biology",
+      "type": "short_answer",
+      "question_text": "Explain why cells that carry out a lot of active transport contain many mitochondria.",
+      "correct_answer": "Active transport needs ATP, and mitochondria produce most of the cell's ATP by aerobic respiration",
+      "choices": [],
+      "marks": 2,
+      "explanation": "Because active transport moves substances against a concentration gradient, a large and continuous supply of ATP is required, which mitochondria release.",
+      "tags": [
+        "mitochondria",
+        "active transport"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "cell-biology",
+      "type": "true_false",
+      "question_text": "The smooth endoplasmic reticulum is the main site of lipid synthesis in a eukaryotic cell.",
+      "correct_answer": "True",
+      "choices": [],
+      "marks": 1,
+      "explanation": "The smooth endoplasmic reticulum lacks ribosomes and synthesises lipids such as phospholipids and steroids, as well as detoxifying some substances.",
+      "tags": [
+        "er",
+        "lipids"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "cell-biology",
+      "type": "true_false",
+      "question_text": "In facilitated diffusion, particles are moved against their concentration gradient by carrier proteins.",
+      "correct_answer": "False",
+      "choices": [],
+      "marks": 1,
+      "explanation": "Facilitated diffusion is passive: channel and carrier proteins only allow particles to move down their concentration gradient, and no ATP is used.",
+      "tags": [
+        "facilitated diffusion",
+        "transport"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "cell-biology",
+      "type": "calculation",
+      "question_text": "A specimen is viewed at a total magnification of 400 times. A structure in the specimen appears to be 8 mm long in the image. Calculate the actual length of the structure in micrometres.",
+      "correct_answer": "20 micrometres",
+      "choices": [],
+      "marks": 2,
+      "explanation": "Actual size equals image size divided by magnification: 8 mm / 400 = 0.02 mm, and 0.02 mm is 20 micrometres.",
+      "tags": [
+        "magnification",
+        "microscopy"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "topic": "cell-biology",
+      "type": "calculation",
+      "question_text": "A cell is placed in a solution and its mass increases from 2.50 g to 2.75 g. Calculate the percentage increase in mass.",
+      "correct_answer": "10%",
+      "choices": [],
+      "marks": 2,
+      "explanation": "The increase is 0.25 g, and 0.25 / 2.50 multiplied by 100 gives 10%, showing that water entered the cell by osmosis.",
+      "tags": [
+        "osmosis",
+        "percentage change"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "molecular-biology",
+      "type": "multiple_choice",
+      "question_text": "Which bond is formed between two amino acids during a condensation reaction?",
+      "correct_answer": "A peptide bond",
+      "choices": [
+        "A peptide bond",
+        "A glycosidic bond",
+        "An ester bond",
+        "A hydrogen bond"
+      ],
+      "marks": 1,
+      "explanation": "The amine group of one amino acid reacts with the carboxyl group of another, releasing water and forming a covalent peptide bond.",
+      "tags": [
+        "proteins",
+        "peptide bond"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "topic": "molecular-biology",
+      "type": "multiple_choice",
+      "question_text": "Which of the following is a monosaccharide?",
+      "correct_answer": "Glucose",
+      "choices": [
+        "Glucose",
+        "Sucrose",
+        "Maltose",
+        "Glycogen"
+      ],
+      "marks": 1,
+      "explanation": "Glucose is a single sugar unit; sucrose and maltose are disaccharides and glycogen is a polysaccharide.",
+      "tags": [
+        "carbohydrates",
+        "monosaccharide"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "topic": "molecular-biology",
+      "type": "multiple_choice",
+      "question_text": "Which property of water makes it effective at absorbing heat with only a small change in its own temperature?",
+      "correct_answer": "Its high specific heat capacity",
+      "choices": [
+        "Its high specific heat capacity",
+        "Its low viscosity",
+        "Its high surface tension",
+        "Its low density when frozen"
+      ],
+      "marks": 1,
+      "explanation": "Many hydrogen bonds between water molecules must be broken to raise the temperature, so water absorbs a large amount of heat for a small temperature rise, making it a good coolant.",
+      "tags": [
+        "water",
+        "properties"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "molecular-biology",
+      "type": "multiple_choice",
+      "question_text": "Which statement about enzymes is correct?",
+      "correct_answer": "They lower the activation energy of the reaction they catalyse",
+      "choices": [
+        "They lower the activation energy of the reaction they catalyse",
+        "They increase the activation energy so that only useful reactions occur",
+        "They are used up during the reaction they catalyse",
+        "They change the equilibrium position of a reversible reaction"
+      ],
+      "marks": 1,
+      "explanation": "Enzymes provide an alternative reaction pathway with a lower activation energy, which speeds up the rate without being consumed or altering the position of equilibrium.",
+      "tags": [
+        "enzymes",
+        "activation energy"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "topic": "molecular-biology",
+      "type": "multiple_choice",
+      "question_text": "An enzyme that normally works at 37 degrees Celsius is heated to 75 degrees Celsius and loses its activity. Which explanation is correct?",
+      "correct_answer": "Hydrogen and ionic bonds break, so the active site changes shape and the substrate no longer fits",
+      "choices": [
+        "Hydrogen and ionic bonds break, so the active site changes shape and the substrate no longer fits",
+        "The substrate molecules are denatured by the heat",
+        "The enzyme is hydrolysed into amino acids by the heat",
+        "The peptide bonds in the enzyme break, releasing fatty acids"
+      ],
+      "marks": 1,
+      "explanation": "Heat disrupts the weak hydrogen and ionic bonds that maintain tertiary structure, so the enzyme denatures and the active site is no longer complementary to the substrate.",
+      "tags": [
+        "enzymes",
+        "denaturation"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "molecular-biology",
+      "type": "multiple_choice",
+      "question_text": "In a DNA molecule, which base pair is held together by hydrogen bonds?",
+      "correct_answer": "Adenine and thymine",
+      "choices": [
+        "Adenine and thymine",
+        "Adenine and guanine",
+        "Cytosine and thymine",
+        "Guanine and thymine"
+      ],
+      "marks": 1,
+      "explanation": "Adenine pairs with thymine through two hydrogen bonds and guanine pairs with cytosine through three, which keeps the two antiparallel strands together.",
+      "tags": [
+        "dna",
+        "base pairing"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "topic": "molecular-biology",
+      "type": "multiple_choice",
+      "question_text": "Which products are formed when a triglyceride is completely hydrolysed?",
+      "correct_answer": "One glycerol molecule and three fatty acid molecules",
+      "choices": [
+        "One glycerol molecule and three fatty acid molecules",
+        "Three glycerol molecules and one fatty acid molecule",
+        "One glycerol molecule and three amino acid molecules",
+        "One glucose molecule and three phosphate groups"
+      ],
+      "marks": 1,
+      "explanation": "A triglyceride is glycerol joined to three fatty acids by ester bonds, so hydrolysis breaks those bonds and releases the four original molecules.",
+      "tags": [
+        "lipids",
+        "hydrolysis"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "molecular-biology",
+      "type": "short_answer",
+      "question_text": "State two functions of water in living organisms.",
+      "correct_answer": "It acts as a solvent for metabolic reactions and as a transport medium; it is also a reactant in hydrolysis and a coolant",
+      "choices": [],
+      "marks": 2,
+      "explanation": "Water's polarity allows it to dissolve ions and polar molecules, so reactions can occur and substances can be carried in blood or sap; its high specific heat capacity also helps control temperature.",
+      "tags": [
+        "water",
+        "functions"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "topic": "molecular-biology",
+      "type": "short_answer",
+      "question_text": "Outline how the structure of a phospholipid makes it suitable for forming a bilayer.",
+      "correct_answer": "The phosphate head is hydrophilic and the two fatty acid tails are hydrophobic, so in water the molecules arrange with heads outwards and tails inwards",
+      "choices": [],
+      "marks": 2,
+      "explanation": "The amphipathic nature of phospholipids causes them to self-assemble into a bilayer in aqueous conditions, with the hydrophobic core shielding the tails from water.",
+      "tags": [
+        "phospholipid",
+        "membrane"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "molecular-biology",
+      "type": "short_answer",
+      "question_text": "State one difference between a saturated and an unsaturated fatty acid.",
+      "correct_answer": "A saturated fatty acid has no carbon to carbon double bonds, whereas an unsaturated fatty acid has at least one",
+      "choices": [],
+      "marks": 1,
+      "explanation": "Saturated fatty acids have all carbon atoms bonded to the maximum number of hydrogen atoms, while unsaturated ones contain double bonds that produce kinks in the chain.",
+      "tags": [
+        "lipids",
+        "fatty acids"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "molecular-biology",
+      "type": "short_answer",
+      "question_text": "Explain how a competitive inhibitor reduces the rate of an enzyme-controlled reaction.",
+      "correct_answer": "It resembles the substrate and binds to the active site, so fewer substrate molecules bind; its effect is reduced when substrate concentration is increased",
+      "choices": [],
+      "marks": 3,
+      "explanation": "Because the inhibitor competes with the substrate for the active site, raising the substrate concentration increases the chance that substrate rather than inhibitor binds.",
+      "tags": [
+        "enzymes",
+        "inhibition"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "molecular-biology",
+      "type": "short_answer",
+      "question_text": "Describe the test used to detect the presence of starch in a sample and state the positive result.",
+      "correct_answer": "Add iodine solution in potassium iodide; a blue-black colour indicates that starch is present",
+      "choices": [],
+      "marks": 2,
+      "explanation": "Iodine molecules become trapped in the coiled amylose helix of starch, producing a distinctive blue-black colour; a yellow-brown colour is a negative result.",
+      "tags": [
+        "food tests",
+        "starch"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "molecular-biology",
+      "type": "short_answer",
+      "question_text": "State the four levels of protein structure.",
+      "correct_answer": "Primary, secondary, tertiary and quaternary structure",
+      "choices": [],
+      "marks": 1,
+      "explanation": "Primary structure is the amino acid sequence, secondary structure is local folding such as alpha helices and beta pleated sheets, tertiary structure is the overall 3D shape, and quaternary structure involves more than one polypeptide.",
+      "tags": [
+        "proteins",
+        "structure"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "topic": "molecular-biology",
+      "type": "short_answer",
+      "question_text": "Explain what is meant by the induced fit model of enzyme action.",
+      "correct_answer": "The active site is not exactly complementary to the substrate; substrate binding makes the active site change shape to fit closely and lower activation energy",
+      "choices": [],
+      "marks": 3,
+      "explanation": "In the induced fit model the enzyme is flexible, and the conformational change that follows substrate binding places strain on the substrate bonds and stabilises the transition state.",
+      "tags": [
+        "enzymes",
+        "induced fit"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "topic": "molecular-biology",
+      "type": "true_false",
+      "question_text": "Cellulose is a polymer of beta-glucose joined by 1,4 glycosidic bonds, whereas starch is a polymer of alpha-glucose.",
+      "correct_answer": "True",
+      "choices": [],
+      "marks": 1,
+      "explanation": "The different orientation of the hydroxyl group on carbon 1 in alpha and beta glucose leads to very different polymers: alpha-glucose forms helical starch, while beta-glucose forms straight cellulose chains.",
+      "tags": [
+        "carbohydrates",
+        "polysaccharides"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "topic": "molecular-biology",
+      "type": "true_false",
+      "question_text": "Enzymes are permanently altered by the reactions that they catalyse.",
+      "correct_answer": "False",
+      "choices": [],
+      "marks": 1,
+      "explanation": "Enzymes are catalysts, so they are released unchanged after the reaction and can be reused many times; only the substrate is converted into product.",
+      "tags": [
+        "enzymes",
+        "catalysis"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "topic": "molecular-biology",
+      "type": "calculation",
+      "question_text": "A sample of double-stranded DNA contains 28% adenine. Calculate the percentage of guanine in the sample.",
+      "correct_answer": "22%",
+      "choices": [],
+      "marks": 2,
+      "explanation": "Adenine pairs with thymine, so thymine is also 28% and together they make 56%; the remaining 44% is shared equally between guanine and cytosine, giving 22% guanine.",
+      "tags": [
+        "dna",
+        "base composition"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "topic": "molecular-biology",
+      "type": "calculation",
+      "question_text": "An enzyme-controlled reaction produces 0.80 mol of product in 40 seconds. Calculate the mean rate of reaction in mol per second.",
+      "correct_answer": "0.02 mol s^-1",
+      "choices": [],
+      "marks": 2,
+      "explanation": "The rate equals the amount of product divided by the time taken: 0.80 / 40 = 0.02 mol s^-1.",
+      "tags": [
+        "enzymes",
+        "rate"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "genetics",
+      "type": "multiple_choice",
+      "question_text": "Two individuals heterozygous for two unlinked genes are crossed. What is the expected phenotypic ratio of the offspring?",
+      "correct_answer": "9:3:3:1",
+      "choices": [
+        "9:3:3:1",
+        "3:1",
+        "1:2:1",
+        "1:1:1:1"
+      ],
+      "marks": 1,
+      "explanation": "Independent assortment of two unlinked gene pairs gives four gamete types in equal numbers, and the Punnett square produces the classic 9:3:3:1 phenotypic ratio.",
+      "tags": [
+        "dihybrid",
+        "inheritance"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "topic": "genetics",
+      "type": "multiple_choice",
+      "question_text": "A woman with blood group AB and a man with blood group O have children. Which blood groups can their children have?",
+      "correct_answer": "A or B",
+      "choices": [
+        "A or B",
+        "AB only",
+        "A, B or AB",
+        "A, B, AB or O"
+      ],
+      "marks": 1,
+      "explanation": "The mother can pass on either an A allele or a B allele, while the father can only pass on an O allele, so the children are heterozygous A or heterozygous B.",
+      "tags": [
+        "multiple alleles",
+        "blood groups"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "topic": "genetics",
+      "type": "multiple_choice",
+      "question_text": "Which statement defines a gene?",
+      "correct_answer": "A heritable factor made of a length of DNA that influences a specific characteristic",
+      "choices": [
+        "A heritable factor made of a length of DNA that influences a specific characteristic",
+        "A length of DNA that always codes for a complete enzyme",
+        "An alternative form of a chromosome found in a gamete",
+        "A section of RNA that determines the sequence of a protein"
+      ],
+      "marks": 1,
+      "explanation": "A gene is a DNA sequence at a specific locus that influences a characteristic, and it may code for a polypeptide, a tRNA or an rRNA rather than always an enzyme.",
+      "tags": [
+        "gene",
+        "dna"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "topic": "genetics",
+      "type": "multiple_choice",
+      "question_text": "Red-green colour blindness is caused by a recessive allele carried on the X chromosome. A carrier woman and an unaffected man have children. What proportion of their sons is expected to be colour blind?",
+      "correct_answer": "50%",
+      "choices": [
+        "50%",
+        "0%",
+        "25%",
+        "100%"
+      ],
+      "marks": 1,
+      "explanation": "Sons receive their only X chromosome from their mother, and half of her X chromosomes carry the recessive allele, so half of the sons are expected to be affected.",
+      "tags": [
+        "sex linkage",
+        "pedigree"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "topic": "genetics",
+      "type": "multiple_choice",
+      "question_text": "At which stage of meiosis does the random orientation of homologous chromosome pairs occur?",
+      "correct_answer": "Metaphase I",
+      "choices": [
+        "Metaphase I",
+        "Metaphase II",
+        "Anaphase II",
+        "Telophase I"
+      ],
+      "marks": 1,
+      "explanation": "During metaphase I the bivalents line up on the equator and either chromosome of each pair may face either pole, which is the basis of independent assortment.",
+      "tags": [
+        "meiosis",
+        "independent assortment"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "genetics",
+      "type": "multiple_choice",
+      "question_text": "Which change to a DNA sequence would cause a frameshift mutation?",
+      "correct_answer": "The insertion of a single nucleotide",
+      "choices": [
+        "The insertion of a single nucleotide",
+        "A substitution of a single nucleotide",
+        "The deletion of three nucleotides",
+        "A change in the methylation pattern of the DNA"
+      ],
+      "marks": 1,
+      "explanation": "Inserting one nucleotide shifts every following triplet, so all downstream codons are read incorrectly; substituting a base or removing a whole triplet does not shift the reading frame.",
+      "tags": [
+        "mutation",
+        "frameshift"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "genetics",
+      "type": "multiple_choice",
+      "question_text": "An organism showing the dominant phenotype is crossed with a homozygous recessive organism. What is the purpose of this test cross?",
+      "correct_answer": "To determine whether the unknown organism is homozygous dominant or heterozygous",
+      "choices": [
+        "To determine whether the unknown organism is homozygous dominant or heterozygous",
+        "To determine which allele is dominant",
+        "To show that the two genes are linked",
+        "To increase the number of offspring showing the recessive phenotype"
+      ],
+      "marks": 1,
+      "explanation": "If the unknown parent is heterozygous, the recessive parent contributes only recessive alleles and about half of the offspring show the recessive phenotype, which reveals the unknown genotype.",
+      "tags": [
+        "test cross",
+        "genotype"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "genetics",
+      "type": "short_answer",
+      "question_text": "Two heterozygous tall pea plants are crossed. State the expected genotype ratio and the expected phenotype ratio of the offspring.",
+      "correct_answer": "Genotypes 1 TT : 2 Tt : 1 tt, giving phenotypes 3 tall : 1 short",
+      "choices": [],
+      "marks": 2,
+      "explanation": "A cross of Tt with Tt gives one homozygous dominant, two heterozygous and one homozygous recessive offspring, and because T is dominant only the tt plant is short.",
+      "tags": [
+        "monohybrid",
+        "punnett"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "genetics",
+      "type": "short_answer",
+      "question_text": "Define the term allele.",
+      "correct_answer": "One of the different forms of a gene, occupying the same locus on homologous chromosomes",
+      "choices": [],
+      "marks": 1,
+      "explanation": "Alleles are alternative versions of the same gene that differ slightly in base sequence and therefore may produce different versions of a characteristic.",
+      "tags": [
+        "allele",
+        "definition"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "topic": "genetics",
+      "type": "short_answer",
+      "question_text": "Explain how a mutation in a gamete differs in its effect from a mutation in a body cell.",
+      "correct_answer": "A gamete mutation can be inherited by offspring and passed on, whereas a body cell mutation affects only that individual and is not inherited",
+      "choices": [],
+      "marks": 2,
+      "explanation": "Only mutations in cells that form gametes enter the germ line, so they can change the gene pool; somatic mutations may cause problems such as cancer but die with the individual.",
+      "tags": [
+        "mutation",
+        "inheritance"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "genetics",
+      "type": "short_answer",
+      "question_text": "State the number of chromosomes in a normal human gamete and explain why this number is described as haploid.",
+      "correct_answer": "23 chromosomes, because a gamete contains one chromosome of each homologous pair so that fertilisation restores the diploid number 46",
+      "choices": [],
+      "marks": 2,
+      "explanation": "Meiosis halves the chromosome number, producing haploid gametes; fusion of two haploid gametes at fertilisation restores the diploid number in the zygote.",
+      "tags": [
+        "meiosis",
+        "haploid"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "genetics",
+      "type": "short_answer",
+      "question_text": "Outline how a pedigree chart can be used to decide whether a characteristic is controlled by a dominant or a recessive allele.",
+      "correct_answer": "If two unaffected parents have an affected child the allele is recessive; if every affected person has an affected parent a dominant allele is likely",
+      "choices": [],
+      "marks": 2,
+      "explanation": "A recessive allele can be hidden in unaffected carriers, so it can appear in a child of two unaffected parents, which is impossible for a fully penetrant dominant allele.",
+      "tags": [
+        "pedigree",
+        "inheritance"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "topic": "genetics",
+      "type": "short_answer",
+      "question_text": "Explain why a person with the genotype IAIB has blood group AB.",
+      "correct_answer": "Both alleles are expressed because they are codominant, so both A and B antigens are present on the red blood cells",
+      "choices": [],
+      "marks": 2,
+      "explanation": "Codominance means that neither allele masks the other, so a heterozygous individual shows the effect of both alleles at the same time.",
+      "tags": [
+        "codominance",
+        "blood groups"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "genetics",
+      "type": "short_answer",
+      "question_text": "State two processes that produce genetic variation during meiosis.",
+      "correct_answer": "Crossing over between non-sister chromatids in prophase I and independent assortment of homologous chromosomes in metaphase I",
+      "choices": [],
+      "marks": 2,
+      "explanation": "Crossing over creates new combinations of alleles on a chromosome, and the random orientation of bivalents shuffles whole chromosomes independently into the gametes.",
+      "tags": [
+        "meiosis",
+        "variation"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "genetics",
+      "type": "true_false",
+      "question_text": "Two parents who both have blood group A cannot have a child with blood group O.",
+      "correct_answer": "False",
+      "choices": [],
+      "marks": 1,
+      "explanation": "Both parents could be heterozygous IAi, in which case there is a one in four chance that a child inherits the i allele from each parent and has blood group O.",
+      "tags": [
+        "blood groups",
+        "recessive"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "topic": "genetics",
+      "type": "true_false",
+      "question_text": "In humans, the sex of a child is determined by the sex chromosome carried by the sperm that fertilises the egg.",
+      "correct_answer": "True",
+      "choices": [],
+      "marks": 1,
+      "explanation": "The egg always carries an X chromosome, so a sperm carrying an X produces a female (XX) and a sperm carrying a Y produces a male (XY).",
+      "tags": [
+        "sex determination",
+        "chromosomes"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "topic": "genetics",
+      "type": "calculation",
+      "question_text": "In a population of 500 plants, 45 show the recessive phenotype for a characteristic controlled by a single gene with two alleles. Assuming Hardy-Weinberg equilibrium, calculate the frequency of the recessive allele.",
+      "correct_answer": "0.3",
+      "choices": [],
+      "marks": 2,
+      "explanation": "The recessive phenotype frequency is q squared, so q squared is 45/500 = 0.09 and q is the square root of 0.09, which is 0.3.",
+      "tags": [
+        "hardy-weinberg",
+        "allele frequency"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "topic": "genetics",
+      "type": "calculation",
+      "question_text": "A monohybrid cross between two heterozygous parents produces 120 offspring. Calculate the expected number of offspring showing the recessive phenotype.",
+      "correct_answer": "30 offspring",
+      "choices": [],
+      "marks": 2,
+      "explanation": "A cross of two heterozygotes gives a 3:1 phenotypic ratio, so one quarter of 120, which is 30, are expected to show the recessive phenotype.",
+      "tags": [
+        "monohybrid",
+        "expected ratio"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "topic": "ecology",
+      "type": "multiple_choice",
+      "question_text": "In a food chain, which organism is a primary consumer?",
+      "correct_answer": "An organism that feeds directly on producers",
+      "choices": [
+        "An organism that feeds directly on producers",
+        "An organism that feeds on other consumers",
+        "An organism that breaks down dead organic matter",
+        "An organism that makes its own food by photosynthesis"
+      ],
+      "marks": 1,
+      "explanation": "Primary consumers are herbivores at the second trophic level because they obtain their energy by eating producers.",
+      "tags": [
+        "food chain",
+        "trophic level"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "topic": "ecology",
+      "type": "multiple_choice",
+      "question_text": "Why is only about 10% of the energy in one trophic level transferred to the next?",
+      "correct_answer": "Most energy is lost as heat during respiration and in uneaten or undigested material",
+      "choices": [
+        "Most energy is lost as heat during respiration and in uneaten or undigested material",
+        "Energy is destroyed when organisms are eaten by predators",
+        "Energy is converted into carbon dioxide, which cannot be used",
+        "Energy is stored permanently in the biomass of each organism"
+      ],
+      "marks": 1,
+      "explanation": "Consumers use most of the energy they ingest for respiration, movement and excretion, so only a small fraction becomes new biomass available to the next level.",
+      "tags": [
+        "energy transfer",
+        "trophic levels"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "ecology",
+      "type": "multiple_choice",
+      "question_text": "Which process removes carbon dioxide from the atmosphere?",
+      "correct_answer": "Photosynthesis by autotrophs",
+      "choices": [
+        "Photosynthesis by autotrophs",
+        "Aerobic respiration by consumers",
+        "Combustion of fossil fuels",
+        "Decomposition of leaf litter"
+      ],
+      "marks": 1,
+      "explanation": "Photosynthesis fixes atmospheric carbon dioxide into organic molecules, while respiration, combustion and decomposition all release carbon dioxide.",
+      "tags": [
+        "carbon cycle",
+        "photosynthesis"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "topic": "ecology",
+      "type": "multiple_choice",
+      "question_text": "Which statement defines a population in ecology?",
+      "correct_answer": "All the individuals of one species living in the same area at the same time",
+      "choices": [
+        "All the individuals of one species living in the same area at the same time",
+        "All the different species living in the same area at the same time",
+        "All the organisms and the physical environment in a given area",
+        "All the individuals of one species living anywhere in the world"
+      ],
+      "marks": 1,
+      "explanation": "A population is a group of individuals of a single species that can interbreed and occupy a defined area at a defined time; all the populations together form a community.",
+      "tags": [
+        "population",
+        "definition"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "ecology",
+      "type": "multiple_choice",
+      "question_text": "Which factor is density independent in its effect on population size?",
+      "correct_answer": "A severe drought",
+      "choices": [
+        "A severe drought",
+        "Competition for nesting sites",
+        "The spread of an infectious disease",
+        "Predation by a specialist predator"
+      ],
+      "marks": 1,
+      "explanation": "Density-independent factors such as drought, fire or storms affect the same proportion of a population regardless of how crowded it is, unlike competition, disease and predation.",
+      "tags": [
+        "population growth",
+        "limiting factors"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "ecology",
+      "type": "multiple_choice",
+      "question_text": "What is the role of nitrogen-fixing bacteria in the nitrogen cycle?",
+      "correct_answer": "Converting atmospheric nitrogen into ammonia and ammonium compounds",
+      "choices": [
+        "Converting atmospheric nitrogen into ammonia and ammonium compounds",
+        "Converting nitrate into atmospheric nitrogen",
+        "Converting ammonia into nitrite and then nitrate",
+        "Breaking down proteins in dead organisms into amino acids"
+      ],
+      "marks": 1,
+      "explanation": "Nitrogen-fixing bacteria such as Rhizobium in root nodules reduce inert atmospheric nitrogen to ammonia, which plants can then absorb and use to make amino acids.",
+      "tags": [
+        "nitrogen cycle",
+        "bacteria"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "ecology",
+      "type": "short_answer",
+      "question_text": "Explain the main reason why food chains rarely contain more than four or five trophic levels.",
+      "correct_answer": "Energy is lost at each transfer, mainly as heat from respiration, so too little energy remains to support another trophic level",
+      "choices": [],
+      "marks": 2,
+      "explanation": "Because only around 10% of the energy at one level becomes biomass at the next, the energy available declines sharply and eventually cannot support a viable breeding population.",
+      "tags": [
+        "energy loss",
+        "food chain"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "ecology",
+      "type": "short_answer",
+      "question_text": "State two human activities that increase the concentration of carbon dioxide in the atmosphere.",
+      "correct_answer": "Burning fossil fuels and deforestation, which reduce the uptake of carbon dioxide by photosynthesis",
+      "choices": [],
+      "marks": 1,
+      "explanation": "Combustion releases carbon stored in fossil fuels, and removing forests reduces the amount of carbon dioxide removed from the atmosphere each year by photosynthesis.",
+      "tags": [
+        "carbon cycle",
+        "human impact"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "topic": "ecology",
+      "type": "short_answer",
+      "question_text": "Outline how quadrats can be used to estimate the population size of a plant species in a field.",
+      "correct_answer": "Place many quadrats at random, count the individuals in each, calculate the mean per quadrat, then multiply by the field area divided by quadrat area",
+      "choices": [],
+      "marks": 2,
+      "explanation": "Random placement avoids bias, and scaling the mean density up to the total area gives an estimate of the whole population.",
+      "tags": [
+        "quadrat",
+        "sampling"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "ecology",
+      "type": "short_answer",
+      "question_text": "Distinguish between the habitat and the niche of an organism.",
+      "correct_answer": "The habitat is the place where an organism lives, while the niche is its role, including its interactions with other organisms and the environment",
+      "choices": [],
+      "marks": 1,
+      "explanation": "A habitat is a physical location, whereas the niche describes how an organism obtains energy and how it interacts with other species in its community.",
+      "tags": [
+        "habitat",
+        "niche"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "ecology",
+      "type": "short_answer",
+      "question_text": "Explain why the concentration of a persistent pesticide such as DDT increases along a food chain.",
+      "correct_answer": "The pesticide is not excreted or broken down, so it accumulates in tissues, and each consumer accumulates the pesticide from all the biomass it eats",
+      "choices": [],
+      "marks": 3,
+      "explanation": "Because the pollutant is fat soluble and persistent, it becomes more concentrated in biomass at each trophic level, which is called biomagnification.",
+      "tags": [
+        "biomagnification",
+        "pollution"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "topic": "ecology",
+      "type": "short_answer",
+      "question_text": "State what is meant by gross primary productivity and by net primary productivity.",
+      "correct_answer": "Gross primary productivity is the total energy fixed by producers; net primary productivity is gross primary productivity minus the energy lost in respiration",
+      "choices": [],
+      "marks": 2,
+      "explanation": "Only the net primary productivity remains as biomass and is therefore the energy available to consumers in the ecosystem.",
+      "tags": [
+        "productivity",
+        "energy"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "ecology",
+      "type": "true_false",
+      "question_text": "In an ecosystem, energy is recycled between trophic levels while nutrients flow through and are eventually lost as heat.",
+      "correct_answer": "False",
+      "choices": [],
+      "marks": 1,
+      "explanation": "It is the opposite: nutrients such as carbon and nitrogen are recycled by decomposers, while energy flows one way through the ecosystem and is lost as heat.",
+      "tags": [
+        "energy flow",
+        "nutrient cycling"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "topic": "ecology",
+      "type": "true_false",
+      "question_text": "Increasing the concentration of greenhouse gases in the atmosphere tends to raise the mean global temperature by trapping outgoing long-wave radiation.",
+      "correct_answer": "True",
+      "choices": [],
+      "marks": 1,
+      "explanation": "Greenhouse gases absorb infrared radiation emitted by the Earth's surface and re-emit part of it back, so less heat escapes to space and the lower atmosphere warms.",
+      "tags": [
+        "greenhouse effect",
+        "climate"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "topic": "ecology",
+      "type": "calculation",
+      "question_text": "A grassland receives 40000 kJ of solar energy per square metre each year. The producers convert 400 kJ per square metre per year into gross primary production. Calculate the percentage of the incoming solar energy that is converted.",
+      "correct_answer": "1%",
+      "choices": [],
+      "marks": 2,
+      "explanation": "The efficiency is (400 / 40000) multiplied by 100, which equals 1%, showing that photosynthesis captures only a very small share of incoming solar energy.",
+      "tags": [
+        "productivity",
+        "efficiency"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "ecology",
+      "type": "calculation",
+      "question_text": "Producers in a food chain contain 20000 kJ of energy per square metre. Assuming that 10% of the energy is transferred at each step, calculate the energy available to the secondary consumer.",
+      "correct_answer": "200 kJ m^-2",
+      "choices": [],
+      "marks": 2,
+      "explanation": "The primary consumer receives 10% of 20000 kJ, which is 2000 kJ, and the secondary consumer receives 10% of that, which is 200 kJ.",
+      "tags": [
+        "energy transfer",
+        "trophic levels"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "evolution-biodiversity",
+      "type": "multiple_choice",
+      "question_text": "According to the biological species concept, what is a species?",
+      "correct_answer": "A group of organisms that can interbreed to produce fertile offspring",
+      "choices": [
+        "A group of organisms that can interbreed to produce fertile offspring",
+        "A group of organisms that look identical to one another",
+        "A group of organisms that live in the same habitat",
+        "A group of organisms with the same number of chromosomes"
+      ],
+      "marks": 1,
+      "explanation": "The biological species concept defines a species by reproductive compatibility, so members of a species share a gene pool that is isolated from other such groups.",
+      "tags": [
+        "species",
+        "definition"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "topic": "evolution-biodiversity",
+      "type": "multiple_choice",
+      "question_text": "Which pair of structures is an example of homologous structures?",
+      "correct_answer": "The forelimb of a human and the wing of a bat",
+      "choices": [
+        "The forelimb of a human and the wing of a bat",
+        "The wing of a bird and the wing of an insect",
+        "The eye of an octopus and the eye of a mammal",
+        "The streamlined body of a dolphin and the streamlined body of a shark"
+      ],
+      "marks": 1,
+      "explanation": "The human arm and the bat wing contain the same basic arrangement of bones inherited from a common ancestor, even though they are used differently; the other pairs are analogous.",
+      "tags": [
+        "homologous",
+        "comparative anatomy"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "evolution-biodiversity",
+      "type": "multiple_choice",
+      "question_text": "What is meant by analogous structures?",
+      "correct_answer": "Structures with a similar function but a different evolutionary origin",
+      "choices": [
+        "Structures with a similar function but a different evolutionary origin",
+        "Structures with a different function but the same evolutionary origin",
+        "Structures that have been lost during evolution and remain as remnants",
+        "Structures that are found only in the embryos of related species"
+      ],
+      "marks": 1,
+      "explanation": "Analogous structures such as bird and insect wings are the result of convergent evolution and do not indicate recent common ancestry.",
+      "tags": [
+        "analogous",
+        "convergent evolution"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "evolution-biodiversity",
+      "type": "multiple_choice",
+      "question_text": "Which statement defines a clade?",
+      "correct_answer": "A group containing a common ancestor and all of its descendants",
+      "choices": [
+        "A group containing a common ancestor and all of its descendants",
+        "A group of organisms that share a similar appearance but not a common ancestor",
+        "A group containing a common ancestor and only some of its descendants",
+        "A group of organisms that can interbreed in the wild"
+      ],
+      "marks": 1,
+      "explanation": "Cladistics groups organisms by shared ancestry, so a genuine clade must include every descendant of the ancestral species, not a selected subset.",
+      "tags": [
+        "clade",
+        "classification"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "evolution-biodiversity",
+      "type": "multiple_choice",
+      "question_text": "Two closely related frog species live in the same pond but breed in different months of the year. Which type of reproductive isolating mechanism is this?",
+      "correct_answer": "Temporal isolation",
+      "choices": [
+        "Temporal isolation",
+        "Behavioural isolation",
+        "Mechanical isolation",
+        "Hybrid sterility"
+      ],
+      "marks": 1,
+      "explanation": "Because the two species are ready to breed at different times, their gametes never meet, so gene flow between them is prevented before fertilisation.",
+      "tags": [
+        "isolation",
+        "speciation"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "topic": "evolution-biodiversity",
+      "type": "multiple_choice",
+      "question_text": "Which statement best describes allopatric speciation?",
+      "correct_answer": "A population becomes geographically separated, and the separated groups diverge until they can no longer interbreed",
+      "choices": [
+        "A population becomes geographically separated, and the separated groups diverge until they can no longer interbreed",
+        "New species form within the same area without any geographic separation",
+        "Two species interbreed to produce a new hybrid species",
+        "A species changes gradually over time without any splitting of the population"
+      ],
+      "marks": 1,
+      "explanation": "A physical barrier stops gene flow, so the two populations experience different selection pressures and accumulate different genetic changes until reproductive isolation evolves.",
+      "tags": [
+        "speciation",
+        "allopatric"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "evolution-biodiversity",
+      "type": "short_answer",
+      "question_text": "State the conditions that must be present for natural selection to occur in a population.",
+      "correct_answer": "There must be genetic variation within the population, the variation must be heritable, and some variants must survive and reproduce more successfully than others",
+      "choices": [],
+      "marks": 3,
+      "explanation": "Selection can only act when individuals differ, when those differences are passed to offspring, and when the differences affect survival or reproductive success under a particular selection pressure.",
+      "tags": [
+        "natural selection",
+        "variation"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "evolution-biodiversity",
+      "type": "short_answer",
+      "question_text": "Explain how the development of antibiotic resistance in a population of bacteria is an example of natural selection.",
+      "correct_answer": "Random mutations give some bacteria resistance; the antibiotic kills sensitive cells, so resistant cells survive, reproduce and pass on the resistance allele",
+      "choices": [],
+      "marks": 2,
+      "explanation": "The antibiotic is the selection pressure, and because resistant mutants survive and multiply, the frequency of resistance alleles in the population increases over generations.",
+      "tags": [
+        "antibiotic resistance",
+        "selection"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "topic": "evolution-biodiversity",
+      "type": "short_answer",
+      "question_text": "Outline how the fossil record provides evidence for evolution.",
+      "correct_answer": "Fossils show the structure of past organisms and their relative ages, revealing gradual change over time and transitional forms between ancestral and modern groups",
+      "choices": [],
+      "marks": 2,
+      "explanation": "Because fossils are found in sequences of rock layers, they allow the order in which characteristics appeared to be reconstructed and show how lineages changed.",
+      "tags": [
+        "fossils",
+        "evidence"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "evolution-biodiversity",
+      "type": "short_answer",
+      "question_text": "State the three domains into which all living organisms are classified.",
+      "correct_answer": "Bacteria, Archaea and Eukaryota",
+      "choices": [],
+      "marks": 1,
+      "explanation": "Molecular evidence, especially ribosomal RNA sequences, showed that the prokaryotes fall into two very distinct groups, so life is divided into three domains.",
+      "tags": [
+        "domains",
+        "classification"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "topic": "evolution-biodiversity",
+      "type": "short_answer",
+      "question_text": "Explain why the pentadactyl limb of a mammal and the wing of a bird are described as homologous structures.",
+      "correct_answer": "Both contain the same basic arrangement of bones inherited from a common ancestor, although they have different functions",
+      "choices": [],
+      "marks": 2,
+      "explanation": "Homology is based on shared ancestry rather than function, and the matching bone pattern in such different limbs is evidence that the species descended from a common ancestor.",
+      "tags": [
+        "homologous",
+        "pentadactyl limb"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "evolution-biodiversity",
+      "type": "short_answer",
+      "question_text": "Define the term biodiversity.",
+      "correct_answer": "The variety of life, including the number of species, the genetic variation within species and the variety of ecosystems",
+      "choices": [],
+      "marks": 1,
+      "explanation": "Biodiversity has several levels: species richness, genetic diversity within populations and habitat or ecosystem diversity.",
+      "tags": [
+        "biodiversity",
+        "definition"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "topic": "evolution-biodiversity",
+      "type": "short_answer",
+      "question_text": "Explain how a mass extinction can lead to an increase in biodiversity over geological time.",
+      "correct_answer": "Many species disappear and their niches become vacant, so surviving groups undergo adaptive radiation and diversify to fill those niches",
+      "choices": [],
+      "marks": 2,
+      "explanation": "With competitors removed, surviving lineages can exploit new resources, and the resulting adaptive radiation produces many new species and higher biodiversity than before.",
+      "tags": [
+        "mass extinction",
+        "adaptive radiation"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "topic": "evolution-biodiversity",
+      "type": "true_false",
+      "question_text": "Analogous structures provide strong evidence that two species share a recent common ancestor.",
+      "correct_answer": "False",
+      "choices": [],
+      "marks": 1,
+      "explanation": "Analogous structures arise by convergent evolution in unrelated lineages, so they indicate similar selection pressures rather than common ancestry; homologous structures provide that evidence.",
+      "tags": [
+        "analogous",
+        "evidence"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "evolution-biodiversity",
+      "type": "true_false",
+      "question_text": "The binomial system gives every species a two-part name consisting of its genus followed by its species name.",
+      "correct_answer": "True",
+      "choices": [],
+      "marks": 1,
+      "explanation": "In binomial nomenclature the first word is the genus and the second is the species, for example Homo sapiens, which allows scientists worldwide to refer to the same organism.",
+      "tags": [
+        "nomenclature",
+        "classification"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "topic": "evolution-biodiversity",
+      "type": "calculation",
+      "question_text": "A survey of a one hectare rainforest plot recorded 240 species in 2005 and 180 species in the same plot in 2020. Calculate the percentage decrease in species richness.",
+      "correct_answer": "25%",
+      "choices": [],
+      "marks": 2,
+      "explanation": "The decrease is 60 species, and 60 divided by 240 multiplied by 100 gives a 25% fall in species richness.",
+      "tags": [
+        "species richness",
+        "percentage change"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "human-physiology",
+      "type": "multiple_choice",
+      "question_text": "Which blood vessel carries oxygenated blood away from the heart to the body?",
+      "correct_answer": "The aorta",
+      "choices": [
+        "The aorta",
+        "The pulmonary artery",
+        "The vena cava",
+        "The pulmonary vein"
+      ],
+      "marks": 1,
+      "explanation": "The left ventricle pumps oxygenated blood into the aorta, which distributes it to the systemic circulation; the pulmonary artery is the exception as it carries deoxygenated blood.",
+      "tags": [
+        "circulation",
+        "blood vessels"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "topic": "human-physiology",
+      "type": "multiple_choice",
+      "question_text": "Which structure initiates each heartbeat by acting as the pacemaker of the heart?",
+      "correct_answer": "The sinoatrial node",
+      "choices": [
+        "The sinoatrial node",
+        "The atrioventricular node",
+        "The bundle of His",
+        "The Purkinje fibres"
+      ],
+      "marks": 1,
+      "explanation": "The sinoatrial node in the wall of the right atrium spontaneously depolarises and sends a wave of excitation over the atria, setting the rhythm of the heart.",
+      "tags": [
+        "heart",
+        "pacemaker"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "human-physiology",
+      "type": "multiple_choice",
+      "question_text": "Which feature of the small intestine increases the surface area available for absorption?",
+      "correct_answer": "Villi covered in microvilli",
+      "choices": [
+        "Villi covered in microvilli",
+        "A thick muscular wall",
+        "A layer of cartilage in the wall",
+        "A large number of goblet cells producing acid"
+      ],
+      "marks": 1,
+      "explanation": "Finger-like villi and the microvilli on their epithelial cells greatly increase the surface area, and each villus contains a dense capillary network to carry absorbed nutrients away.",
+      "tags": [
+        "absorption",
+        "small intestine"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "topic": "human-physiology",
+      "type": "multiple_choice",
+      "question_text": "Which is the correct order of structures through which air passes on its way to the gas exchange surfaces?",
+      "correct_answer": "Trachea, bronchus, bronchiole, alveolus",
+      "choices": [
+        "Trachea, bronchus, bronchiole, alveolus",
+        "Bronchus, trachea, alveolus, bronchiole",
+        "Trachea, bronchiole, bronchus, alveolus",
+        "Bronchiole, bronchus, trachea, alveolus"
+      ],
+      "marks": 1,
+      "explanation": "Air flows down the trachea, which divides into bronchi, then into narrower bronchioles, and finally reaches the alveoli where gas exchange takes place.",
+      "tags": [
+        "ventilation",
+        "lungs"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "topic": "human-physiology",
+      "type": "multiple_choice",
+      "question_text": "Which set of events occurs during inhalation in a healthy human?",
+      "correct_answer": "The diaphragm contracts and flattens while the external intercostal muscles raise the ribs",
+      "choices": [
+        "The diaphragm contracts and flattens while the external intercostal muscles raise the ribs",
+        "The diaphragm relaxes and becomes domed while the internal intercostal muscles raise the ribs",
+        "The diaphragm contracts and becomes domed while the rib cage moves down and in",
+        "The diaphragm relaxes and flattens while the volume of the thorax decreases"
+      ],
+      "marks": 1,
+      "explanation": "Contraction of the diaphragm and external intercostal muscles increases the volume of the thorax, which lowers the pressure so air enters the lungs.",
+      "tags": [
+        "ventilation",
+        "diaphragm"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "human-physiology",
+      "type": "multiple_choice",
+      "question_text": "What is the main function of the loop of Henle in the kidney?",
+      "correct_answer": "To build up a high solute concentration in the medulla so that water can be reabsorbed from the collecting duct",
+      "choices": [
+        "To build up a high solute concentration in the medulla so that water can be reabsorbed from the collecting duct",
+        "To filter blood plasma into the Bowman's capsule",
+        "To reabsorb all of the glucose from the filtrate",
+        "To secrete urea from the blood into the filtrate"
+      ],
+      "marks": 1,
+      "explanation": "The countercurrent multiplier of the loop of Henle creates an osmotic gradient in the medulla, and this gradient allows osmotic reabsorption of water as filtrate passes down the collecting duct.",
+      "tags": [
+        "kidney",
+        "loop of henle"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "topic": "human-physiology",
+      "type": "multiple_choice",
+      "question_text": "Which hormone lowers the concentration of glucose in the blood?",
+      "correct_answer": "Insulin",
+      "choices": [
+        "Insulin",
+        "Glucagon",
+        "Adrenaline",
+        "Thyroxine"
+      ],
+      "marks": 1,
+      "explanation": "Insulin, secreted by the beta cells of the pancreas, stimulates cells to take up glucose and the liver to convert it to glycogen, which lowers blood glucose concentration.",
+      "tags": [
+        "hormones",
+        "blood glucose"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "topic": "human-physiology",
+      "type": "short_answer",
+      "question_text": "Outline the role of the atrioventricular valves during the cardiac cycle.",
+      "correct_answer": "They prevent backflow of blood from the ventricles into the atria when the ventricles contract",
+      "choices": [],
+      "marks": 2,
+      "explanation": "As ventricular pressure rises above atrial pressure, the valves are pushed shut, so blood can only leave the ventricle through the aorta or pulmonary artery.",
+      "tags": [
+        "heart",
+        "valves"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "human-physiology",
+      "type": "short_answer",
+      "question_text": "State two features of alveoli that make gas exchange efficient.",
+      "correct_answer": "A very large surface area, walls one cell thick giving a short diffusion distance, and a dense capillary network that maintains the concentration gradient",
+      "choices": [],
+      "marks": 2,
+      "explanation": "Efficient gas exchange requires a large surface area, a thin barrier and a steep concentration gradient, and alveoli are adapted in all three ways.",
+      "tags": [
+        "alveoli",
+        "gas exchange"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "human-physiology",
+      "type": "short_answer",
+      "question_text": "Explain how the kidney helps to maintain the water balance of the blood when the blood becomes too concentrated.",
+      "correct_answer": "The pituitary secretes more ADH, which makes the collecting duct more permeable to water, so more water is reabsorbed and concentrated urine is produced",
+      "choices": [],
+      "marks": 3,
+      "explanation": "Osmoreceptors detect the increased solute concentration of the blood and trigger ADH release, so water is conserved and the blood water content returns towards normal.",
+      "tags": [
+        "osmoregulation",
+        "adh"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "topic": "human-physiology",
+      "type": "short_answer",
+      "question_text": "State the function of the epiglottis during swallowing.",
+      "correct_answer": "It closes off the opening to the trachea so that food and drink pass into the oesophagus",
+      "choices": [],
+      "marks": 1,
+      "explanation": "By covering the glottis during swallowing, the epiglottis prevents food from entering the airways and causing choking.",
+      "tags": [
+        "digestion",
+        "epiglottis"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "topic": "human-physiology",
+      "type": "short_answer",
+      "question_text": "Explain how the depth and rate of ventilation change during strenuous exercise.",
+      "correct_answer": "Both increase because more carbon dioxide is produced by respiring muscles, which lowers blood pH and stimulates the ventilation centre in the medulla",
+      "choices": [],
+      "marks": 2,
+      "explanation": "The increased tidal volume and breathing rate remove carbon dioxide faster and supply more oxygen to the working muscles, so the blood pH and oxygen levels are kept within limits.",
+      "tags": [
+        "ventilation",
+        "exercise"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "human-physiology",
+      "type": "short_answer",
+      "question_text": "Distinguish between type 1 and type 2 diabetes mellitus.",
+      "correct_answer": "Type 1 results from too little insulin being secreted, while type 2 involves body cells becoming less responsive to insulin",
+      "choices": [],
+      "marks": 2,
+      "explanation": "In type 1 the beta cells are destroyed, so insulin must be injected; in type 2 insulin is still produced but target cells respond poorly, and it is often linked to obesity.",
+      "tags": [
+        "diabetes",
+        "insulin"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "human-physiology",
+      "type": "short_answer",
+      "question_text": "Outline how an action potential is propagated along an unmyelinated axon.",
+      "correct_answer": "Sodium ions enter at one point and depolarise the membrane; local currents then depolarise the adjacent region, so the action potential moves along the axon",
+      "choices": [],
+      "marks": 2,
+      "explanation": "Depolarisation at one region sets up local circuits of current that open voltage-gated sodium channels in the next region, allowing the impulse to travel in one direction.",
+      "tags": [
+        "neurons",
+        "action potential"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "topic": "human-physiology",
+      "type": "true_false",
+      "question_text": "In the human heart, the pulmonary artery carries deoxygenated blood from the right ventricle to the lungs.",
+      "correct_answer": "True",
+      "choices": [],
+      "marks": 1,
+      "explanation": "The pulmonary artery is an exception to the usual rule that arteries carry oxygenated blood, because it takes deoxygenated blood from the right ventricle to the lungs for gas exchange.",
+      "tags": [
+        "circulation",
+        "pulmonary"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "human-physiology",
+      "type": "true_false",
+      "question_text": "During ventricular systole, the atrioventricular valves are open and the semilunar valves are closed.",
+      "correct_answer": "False",
+      "choices": [],
+      "marks": 1,
+      "explanation": "During ventricular systole the rising pressure closes the atrioventricular valves to prevent backflow into the atria and opens the semilunar valves so blood can leave the heart.",
+      "tags": [
+        "cardiac cycle",
+        "valves"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "topic": "human-physiology",
+      "type": "calculation",
+      "question_text": "A person has a stroke volume of 70 cm^3 and a heart rate of 75 beats per minute. Calculate their cardiac output in cm^3 per minute.",
+      "correct_answer": "5250 cm^3 min^-1",
+      "choices": [],
+      "marks": 2,
+      "explanation": "Cardiac output is the product of stroke volume and heart rate: 70 times 75 equals 5250 cm^3 per minute.",
+      "tags": [
+        "cardiac output",
+        "heart"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "human-physiology",
+      "type": "calculation",
+      "question_text": "A person breathes 15 times per minute with a tidal volume of 500 cm^3. Calculate their pulmonary ventilation rate in dm^3 per minute.",
+      "correct_answer": "7.5 dm^3 min^-1",
+      "choices": [],
+      "marks": 2,
+      "explanation": "Pulmonary ventilation is 15 times 500, which is 7500 cm^3 per minute, and since 1 dm^3 equals 1000 cm^3 this is 7.5 dm^3 per minute.",
+      "tags": [
+        "ventilation",
+        "tidal volume"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "topic": "nucleic-acids",
+      "type": "multiple_choice",
+      "question_text": "Which enzyme unwinds the double helix and separates the two strands of DNA during replication?",
+      "correct_answer": "Helicase",
+      "choices": [
+        "Helicase",
+        "DNA polymerase",
+        "DNA ligase",
+        "Primase"
+      ],
+      "marks": 1,
+      "explanation": "Helicase breaks the hydrogen bonds between the complementary bases so that each strand can act as a template for the synthesis of a new strand.",
+      "tags": [
+        "replication",
+        "enzymes"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "topic": "nucleic-acids",
+      "type": "multiple_choice",
+      "question_text": "In which direction does DNA polymerase build a new strand of DNA?",
+      "correct_answer": "From the 5-prime end towards the 3-prime end",
+      "choices": [
+        "From the 5-prime end towards the 3-prime end",
+        "From the 3-prime end towards the 5-prime end",
+        "From the middle of the strand towards both ends at once",
+        "In either direction, depending on which strand is the template"
+      ],
+      "marks": 1,
+      "explanation": "DNA polymerase can only add nucleotides to a free 3-prime end, so new strands are always synthesised in the 5-prime to 3-prime direction.",
+      "tags": [
+        "replication",
+        "dna polymerase"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "topic": "nucleic-acids",
+      "type": "multiple_choice",
+      "question_text": "Which feature of the genetic code means that several different codons can code for the same amino acid?",
+      "correct_answer": "The code is degenerate",
+      "choices": [
+        "The code is degenerate",
+        "The code is universal",
+        "The code is non-overlapping",
+        "The code is read in triplets"
+      ],
+      "marks": 1,
+      "explanation": "Degeneracy means most amino acids are encoded by more than one codon, which reduces the effect of some point mutations on the protein produced.",
+      "tags": [
+        "genetic code",
+        "degenerate"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "topic": "nucleic-acids",
+      "type": "multiple_choice",
+      "question_text": "Which molecule delivers amino acids to the ribosome during translation?",
+      "correct_answer": "Transfer RNA",
+      "choices": [
+        "Transfer RNA",
+        "Messenger RNA",
+        "Ribosomal RNA",
+        "DNA polymerase"
+      ],
+      "marks": 1,
+      "explanation": "Each tRNA carries a specific amino acid and has an anticodon that base-pairs with the complementary codon on the mRNA, so amino acids are added in the correct order.",
+      "tags": [
+        "translation",
+        "trna"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "topic": "nucleic-acids",
+      "type": "multiple_choice",
+      "question_text": "During the polymerase chain reaction, which step separates the two strands of the DNA template?",
+      "correct_answer": "Heating the sample to about 95 degrees Celsius",
+      "choices": [
+        "Heating the sample to about 95 degrees Celsius",
+        "Cooling the sample to about 55 degrees Celsius",
+        "Incubating the sample at about 72 degrees Celsius",
+        "Adding restriction enzymes to the sample"
+      ],
+      "marks": 1,
+      "explanation": "The high temperature breaks the hydrogen bonds between the strands during the denaturation step, after which primers anneal on cooling and Taq polymerase extends them at about 72 degrees Celsius.",
+      "tags": [
+        "pcr",
+        "dna"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "nucleic-acids",
+      "type": "multiple_choice",
+      "question_text": "In gel electrophoresis, why do DNA fragments move towards the positive electrode?",
+      "correct_answer": "Because the phosphate groups give DNA an overall negative charge",
+      "choices": [
+        "Because the phosphate groups give DNA an overall negative charge",
+        "Because the sugar groups make DNA positively charged",
+        "Because DNA is attracted to the negative electrode",
+        "Because the DNA dissolves in the buffer and is carried by the current"
+      ],
+      "marks": 1,
+      "explanation": "The phosphate backbone makes DNA negatively charged, so in an electric field fragments migrate towards the anode, with smaller fragments moving faster through the gel.",
+      "tags": [
+        "electrophoresis",
+        "dna charge"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "nucleic-acids",
+      "type": "short_answer",
+      "question_text": "State the role of DNA ligase in DNA replication.",
+      "correct_answer": "It seals the sugar-phosphate backbone by joining Okazaki fragments together on the lagging strand",
+      "choices": [],
+      "marks": 1,
+      "explanation": "Because the lagging strand is made in short fragments, ligase is needed to form the final continuous strand by catalysing the formation of the missing phosphodiester bonds.",
+      "tags": [
+        "replication",
+        "ligase"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "nucleic-acids",
+      "type": "short_answer",
+      "question_text": "Outline the process of transcription in a eukaryotic cell.",
+      "correct_answer": "RNA polymerase binds the promoter, the DNA unwinds, and the antisense strand is copied into mRNA, which is spliced and then leaves the nucleus",
+      "choices": [],
+      "marks": 3,
+      "explanation": "Transcription copies the base sequence of the antisense strand into a complementary mRNA molecule, which after processing carries the message to the ribosome in the cytoplasm.",
+      "tags": [
+        "transcription",
+        "mrna"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "nucleic-acids",
+      "type": "short_answer",
+      "question_text": "Explain why the genetic code is described as universal.",
+      "correct_answer": "The same codons code for the same amino acids in almost all organisms, so a gene transferred between species can still be translated",
+      "choices": [],
+      "marks": 1,
+      "explanation": "Universality means the code was established very early in the evolution of life and is shared by organisms as different as bacteria and humans, which makes genetic modification possible.",
+      "tags": [
+        "genetic code",
+        "universal"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "nucleic-acids",
+      "type": "short_answer",
+      "question_text": "State the function of the promoter region of a gene.",
+      "correct_answer": "It is the binding site for RNA polymerase and marks where transcription begins",
+      "choices": [],
+      "marks": 1,
+      "explanation": "Regulatory proteins and RNA polymerase assemble at the promoter, so it controls when and how often the gene is transcribed.",
+      "tags": [
+        "transcription",
+        "promoter"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "nucleic-acids",
+      "type": "short_answer",
+      "question_text": "Outline how the results of gel electrophoresis can be used to compare DNA samples.",
+      "correct_answer": "The pattern of bands is compared; samples with identical band positions are closely related, while different patterns show different base sequences",
+      "choices": [],
+      "marks": 2,
+      "explanation": "Because fragments of different length travel different distances, the banding pattern acts as a fingerprint that can be used in identification, paternity testing and forensic work.",
+      "tags": [
+        "electrophoresis",
+        "dna profiling"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "nucleic-acids",
+      "type": "short_answer",
+      "question_text": "State two differences between DNA and RNA.",
+      "correct_answer": "DNA contains deoxyribose and thymine and is double-stranded, while RNA contains ribose and uracil and is usually single-stranded",
+      "choices": [],
+      "marks": 2,
+      "explanation": "The sugar and one of the bases differ, and the double-stranded helical structure of DNA makes it a stable store of information, whereas single-stranded RNA is short-lived and functional.",
+      "tags": [
+        "dna",
+        "rna"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "nucleic-acids",
+      "type": "true_false",
+      "question_text": "During translation, the anticodon of a tRNA molecule base-pairs with the complementary codon of the mRNA.",
+      "correct_answer": "True",
+      "choices": [],
+      "marks": 1,
+      "explanation": "Complementary base pairing between codon and anticodon positions each amino acid correctly along the mRNA as the ribosome moves along it.",
+      "tags": [
+        "translation",
+        "codon"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "topic": "nucleic-acids",
+      "type": "calculation",
+      "question_text": "A double-stranded DNA molecule contains 1200 base pairs. Calculate the number of deoxyribose sugars in this molecule.",
+      "correct_answer": "2400",
+      "choices": [],
+      "marks": 2,
+      "explanation": "1200 base pairs contain 2400 nucleotides in total, and each nucleotide contains one deoxyribose sugar, so there are 2400 deoxyribose sugars.",
+      "tags": [
+        "dna structure",
+        "nucleotides"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "topic": "metabolism-cell-respiration-photosynthesis",
+      "type": "multiple_choice",
+      "question_text": "Where in a eukaryotic cell does glycolysis take place?",
+      "correct_answer": "In the cytoplasm",
+      "choices": [
+        "In the cytoplasm",
+        "In the mitochondrial matrix",
+        "On the inner mitochondrial membrane",
+        "In the nucleus"
+      ],
+      "marks": 1,
+      "explanation": "Glycolysis is the first stage of respiration and occurs in the cytoplasm, so it can happen with or without oxygen; the later stages occur in the mitochondria.",
+      "tags": [
+        "glycolysis",
+        "respiration"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "topic": "metabolism-cell-respiration-photosynthesis",
+      "type": "multiple_choice",
+      "question_text": "Which products are formed from one pyruvate molecule during the link reaction?",
+      "correct_answer": "Acetyl CoA, carbon dioxide and NADH",
+      "choices": [
+        "Acetyl CoA, carbon dioxide and NADH",
+        "Lactate and NAD+",
+        "Citrate, ATP and FADH2",
+        "Ethanol, carbon dioxide and NAD+"
+      ],
+      "marks": 1,
+      "explanation": "Pyruvate is decarboxylated and dehydrogenated in the link reaction, producing acetyl CoA, carbon dioxide and reduced NAD, which then enters the Krebs cycle.",
+      "tags": [
+        "link reaction",
+        "respiration"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "topic": "metabolism-cell-respiration-photosynthesis",
+      "type": "multiple_choice",
+      "question_text": "What is produced when water is split during the light-dependent reactions of photosynthesis?",
+      "correct_answer": "Oxygen, protons and electrons",
+      "choices": [
+        "Oxygen, protons and electrons",
+        "Glucose and oxygen",
+        "ATP and glucose",
+        "NADPH only"
+      ],
+      "marks": 1,
+      "explanation": "Photolysis of water supplies electrons to replace those lost by chlorophyll, releases oxygen as a by-product and provides protons that help build up the proton gradient.",
+      "tags": [
+        "photolysis",
+        "light reactions"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "metabolism-cell-respiration-photosynthesis",
+      "type": "multiple_choice",
+      "question_text": "Which colour of visible light is absorbed least by chlorophyll a?",
+      "correct_answer": "Green",
+      "choices": [
+        "Green",
+        "Blue",
+        "Red",
+        "Violet"
+      ],
+      "marks": 1,
+      "explanation": "Chlorophyll a absorbs mainly blue and red light and reflects or transmits green light, which is why leaves appear green.",
+      "tags": [
+        "chlorophyll",
+        "light absorption"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "topic": "metabolism-cell-respiration-photosynthesis",
+      "type": "multiple_choice",
+      "question_text": "What is the role of oxygen in aerobic respiration?",
+      "correct_answer": "It acts as the final electron acceptor at the end of the electron transport chain",
+      "choices": [
+        "It acts as the final electron acceptor at the end of the electron transport chain",
+        "It accepts electrons during glycolysis",
+        "It is a substrate of the Krebs cycle",
+        "It donates electrons to the first protein complex of the chain"
+      ],
+      "marks": 1,
+      "explanation": "Oxygen combines with electrons and protons at the end of the chain to form water, which keeps the chain running so that ATP can continue to be produced by oxidative phosphorylation.",
+      "tags": [
+        "oxidative phosphorylation",
+        "oxygen"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "metabolism-cell-respiration-photosynthesis",
+      "type": "multiple_choice",
+      "question_text": "How many carbon atoms are present in one molecule of RuBP, the molecule that combines with carbon dioxide in the Calvin cycle?",
+      "correct_answer": "5",
+      "choices": [
+        "5",
+        "3",
+        "4",
+        "6"
+      ],
+      "marks": 1,
+      "explanation": "RuBP is a five-carbon sugar phosphate; when it combines with one carbon dioxide molecule the unstable six-carbon product immediately splits into two three-carbon molecules of glycerate-3-phosphate.",
+      "tags": [
+        "calvin cycle",
+        "rubp"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "topic": "metabolism-cell-respiration-photosynthesis",
+      "type": "short_answer",
+      "question_text": "State where the Krebs cycle and the electron transport chain occur in a eukaryotic cell.",
+      "correct_answer": "The Krebs cycle occurs in the mitochondrial matrix and the electron transport chain is located on the inner mitochondrial membrane",
+      "choices": [],
+      "marks": 2,
+      "explanation": "The folded inner membrane provides a large surface area for the electron transport chain and ATP synthase, while the matrix contains the enzymes of the Krebs cycle.",
+      "tags": [
+        "mitochondria",
+        "krebs cycle"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "metabolism-cell-respiration-photosynthesis",
+      "type": "short_answer",
+      "question_text": "Explain why the rate of photosynthesis increases with light intensity at first but then levels off.",
+      "correct_answer": "Light is the limiting factor at low intensity, but above a certain intensity another factor such as carbon dioxide concentration or temperature becomes limiting",
+      "choices": [],
+      "marks": 2,
+      "explanation": "When light is no longer limiting, increasing it further cannot raise the rate because the light-independent reactions are limited by carbon dioxide supply or enzyme activity.",
+      "tags": [
+        "limiting factors",
+        "photosynthesis"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "metabolism-cell-respiration-photosynthesis",
+      "type": "short_answer",
+      "question_text": "Outline the role of NADH in aerobic respiration.",
+      "correct_answer": "It carries electrons and protons from glycolysis and the Krebs cycle to the electron transport chain, where they are used to generate ATP",
+      "choices": [],
+      "marks": 2,
+      "explanation": "Reduced NAD is an electron carrier, and the energy released as its electrons pass along the chain is used to pump protons and drive ATP synthesis by chemiosmosis.",
+      "tags": [
+        "nadh",
+        "electron transport"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "metabolism-cell-respiration-photosynthesis",
+      "type": "short_answer",
+      "question_text": "State the products of anaerobic respiration of glucose in human muscle cells and in yeast.",
+      "correct_answer": "In muscle cells, lactate is produced; in yeast, ethanol and carbon dioxide are produced; both regenerate NAD+ so glycolysis can continue",
+      "choices": [],
+      "marks": 2,
+      "explanation": "Without oxygen the electron transport chain cannot reoxidise NADH, so pyruvate is reduced instead, which regenerates the NAD+ needed for glycolysis to keep producing ATP.",
+      "tags": [
+        "anaerobic respiration",
+        "fermentation"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "metabolism-cell-respiration-photosynthesis",
+      "type": "short_answer",
+      "question_text": "Explain why most leaves appear green in white light.",
+      "correct_answer": "Chlorophyll absorbs mainly red and blue light and reflects or transmits green light, which reaches the eye",
+      "choices": [],
+      "marks": 1,
+      "explanation": "The light that is not absorbed by the photosynthetic pigments is reflected or transmitted, so the wavelengths that reach an observer are predominantly green.",
+      "tags": [
+        "chlorophyll",
+        "pigments"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "topic": "metabolism-cell-respiration-photosynthesis",
+      "type": "short_answer",
+      "question_text": "State the net number of ATP molecules produced per glucose molecule during glycolysis.",
+      "correct_answer": "Two ATP molecules net, because four are produced and two are used",
+      "choices": [],
+      "marks": 1,
+      "explanation": "Glycolysis uses two ATP to phosphorylate glucose and produces four ATP by substrate-level phosphorylation, giving a net gain of two ATP per glucose.",
+      "tags": [
+        "glycolysis",
+        "atp"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "topic": "metabolism-cell-respiration-photosynthesis",
+      "type": "true_false",
+      "question_text": "The light-independent reactions of photosynthesis depend on ATP and NADPH produced by the light-dependent reactions.",
+      "correct_answer": "True",
+      "choices": [],
+      "marks": 1,
+      "explanation": "ATP provides the energy and NADPH the reducing power needed to convert glycerate-3-phosphate into triose phosphate in the Calvin cycle, so the two stages are linked.",
+      "tags": [
+        "calvin cycle",
+        "light reactions"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "topic": "metabolism-cell-respiration-photosynthesis",
+      "type": "true_false",
+      "question_text": "Glycolysis cannot occur unless oxygen is present.",
+      "correct_answer": "False",
+      "choices": [],
+      "marks": 1,
+      "explanation": "Glycolysis takes place in the cytoplasm and does not require oxygen; it is followed by anaerobic or aerobic pathways depending on oxygen availability.",
+      "tags": [
+        "glycolysis",
+        "anaerobic"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "topic": "metabolism-cell-respiration-photosynthesis",
+      "type": "calculation",
+      "question_text": "A pondweed releases 3.6 g of oxygen in 30 minutes. Calculate the rate of oxygen production in grams per hour.",
+      "correct_answer": "7.2 g h^-1",
+      "choices": [],
+      "marks": 2,
+      "explanation": "Thirty minutes is half an hour, so doubling 3.6 g gives 7.2 g of oxygen per hour.",
+      "tags": [
+        "photosynthesis",
+        "rate"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "topic": "metabolism-cell-respiration-photosynthesis",
+      "type": "calculation",
+      "question_text": "In an experiment 0.50 mol of glucose was completely oxidised in aerobic respiration and 15 mol of ATP was produced. Calculate the ATP yield per mole of glucose.",
+      "correct_answer": "30 mol ATP per mol glucose",
+      "choices": [],
+      "marks": 2,
+      "explanation": "Dividing 15 mol of ATP by 0.50 mol of glucose gives a yield of 30 mol of ATP per mole of glucose, which is close to the theoretical maximum for aerobic respiration.",
+      "tags": [
+        "atp yield",
+        "respiration"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "plant-biology",
+      "type": "multiple_choice",
+      "question_text": "Which tissue transports water and dissolved mineral ions from the roots to the leaves?",
+      "correct_answer": "Xylem",
+      "choices": [
+        "Xylem",
+        "Phloem",
+        "Cambium",
+        "Epidermis"
+      ],
+      "marks": 1,
+      "explanation": "Xylem vessels are dead, hollow tubes that carry water and minerals upwards, while phloem transports organic solutes such as sucrose.",
+      "tags": [
+        "xylem",
+        "transport"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "topic": "plant-biology",
+      "type": "multiple_choice",
+      "question_text": "Which process is mainly responsible for pulling water up the xylem of a tall tree on a warm, windy day?",
+      "correct_answer": "Transpiration pull caused by evaporation of water from the leaves",
+      "choices": [
+        "Transpiration pull caused by evaporation of water from the leaves",
+        "Root pressure pushing water upwards from the root cortex",
+        "Active transport of water molecules by xylem vessel cells",
+        "Translocation of water in the phloem towards the leaves"
+      ],
+      "marks": 1,
+      "explanation": "Evaporation from the leaf creates tension in the continuous water columns of the xylem, and the cohesion between water molecules transmits this pull all the way to the roots.",
+      "tags": [
+        "transpiration",
+        "cohesion"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "plant-biology",
+      "type": "multiple_choice",
+      "question_text": "Which plant hormone is redistributed in a shoot and causes it to bend towards a light source?",
+      "correct_answer": "Auxin",
+      "choices": [
+        "Auxin",
+        "Abscisic acid",
+        "Gibberellin",
+        "Ethylene"
+      ],
+      "marks": 1,
+      "explanation": "Auxin moves to the shaded side of the shoot, where it stimulates greater cell elongation, so the shoot grows and bends towards the light.",
+      "tags": [
+        "auxin",
+        "phototropism"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "topic": "plant-biology",
+      "type": "multiple_choice",
+      "question_text": "What is the main role of abscisic acid in plants?",
+      "correct_answer": "It promotes seed dormancy and causes stomatal closure when water is scarce",
+      "choices": [
+        "It promotes seed dormancy and causes stomatal closure when water is scarce",
+        "It stimulates stem elongation and cell division",
+        "It promotes the ripening of fruit",
+        "It causes the breakdown of chlorophyll in ageing leaves"
+      ],
+      "marks": 1,
+      "explanation": "Abscisic acid is a stress hormone: it keeps seeds dormant until conditions are suitable and reduces water loss by closing stomata during drought.",
+      "tags": [
+        "abscisic acid",
+        "hormones"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "topic": "plant-biology",
+      "type": "multiple_choice",
+      "question_text": "After fertilisation in a flowering plant, which structure develops into the seed?",
+      "correct_answer": "The ovule",
+      "choices": [
+        "The ovule",
+        "The ovary",
+        "The anther",
+        "The stigma"
+      ],
+      "marks": 1,
+      "explanation": "The fertilised ovule becomes the seed, while the surrounding ovary develops into the fruit that protects and helps disperse the seeds.",
+      "tags": [
+        "reproduction",
+        "seed"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "topic": "plant-biology",
+      "type": "short_answer",
+      "question_text": "Explain how the structure of xylem vessels is adapted for the transport of water.",
+      "correct_answer": "They are dead and hollow with no end walls, forming continuous tubes; lignified walls prevent collapse and narrow lumens help water rise by capillary action",
+      "choices": [],
+      "marks": 2,
+      "explanation": "The loss of cytoplasm and cross walls reduces resistance to flow, and lignification allows the vessels to withstand the tension created by transpiration.",
+      "tags": [
+        "xylem",
+        "adaptation"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "plant-biology",
+      "type": "short_answer",
+      "question_text": "State the function of phloem tissue in a plant.",
+      "correct_answer": "It translocates organic solutes such as sucrose and amino acids from sources to sinks",
+      "choices": [],
+      "marks": 1,
+      "explanation": "Sugars made in photosynthesising leaves are loaded into the phloem and carried to growing or storage regions that need them.",
+      "tags": [
+        "phloem",
+        "translocation"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "topic": "plant-biology",
+      "type": "short_answer",
+      "question_text": "Outline how auxin causes a shoot to bend towards light coming from one side.",
+      "correct_answer": "Auxin moves to the shaded side, where it stimulates greater cell elongation, so that side grows faster and the shoot bends towards the light",
+      "choices": [],
+      "marks": 2,
+      "explanation": "Because elongation happens on the shaded side, the shoot curves towards the light source, which increases the amount of light the leaves can absorb.",
+      "tags": [
+        "auxin",
+        "phototropism"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "plant-biology",
+      "type": "short_answer",
+      "question_text": "Describe how guard cells control the opening and closing of a stoma.",
+      "correct_answer": "When guard cells take up water they become turgid and the stoma opens; when they lose water they become flaccid and the stoma closes",
+      "choices": [],
+      "marks": 2,
+      "explanation": "The unevenly thickened cell walls of the guard cells cause them to curve apart as they swell, creating a pore for gas exchange and water loss.",
+      "tags": [
+        "stomata",
+        "guard cells"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "plant-biology",
+      "type": "short_answer",
+      "question_text": "State two environmental factors that affect the rate of transpiration in a plant.",
+      "correct_answer": "Light intensity, temperature, humidity and wind speed all affect the rate, since they change the rate of evaporation from the leaf",
+      "choices": [],
+      "marks": 1,
+      "explanation": "Higher temperature and wind speed and lower humidity increase the water potential gradient between the leaf and the air, so water evaporates faster and transpiration increases.",
+      "tags": [
+        "transpiration",
+        "factors"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "topic": "plant-biology",
+      "type": "true_false",
+      "question_text": "In the phloem, translocation moves sucrose from a sink towards a source.",
+      "correct_answer": "False",
+      "choices": [],
+      "marks": 1,
+      "explanation": "Translocation moves solutes from a source, where they are produced or released, to a sink, where they are used or stored, so the direction stated is reversed.",
+      "tags": [
+        "translocation",
+        "phloem"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "plant-biology",
+      "type": "calculation",
+      "question_text": "A potometer shows that a leafy shoot takes up 6.0 cm^3 of water in 20 minutes. Calculate the rate of transpiration in cm^3 per hour.",
+      "correct_answer": "18 cm^3 h^-1",
+      "choices": [],
+      "marks": 2,
+      "explanation": "The uptake is 0.3 cm^3 per minute, and multiplying by 60 minutes gives 18 cm^3 per hour, which is used as an estimate of the transpiration rate.",
+      "tags": [
+        "potometer",
+        "transpiration"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "data-analysis",
+      "type": "multiple_choice",
+      "question_text": "The rate of an enzyme-controlled reaction was measured at four pH values and gave the following results in arbitrary units per minute: pH 3, 12 units; pH 5, 30 units; pH 7, 45 units; pH 9, 20 units. Which conclusion is best supported by these data?",
+      "correct_answer": "The optimum pH for this enzyme is near pH 7",
+      "choices": [
+        "The optimum pH for this enzyme is near pH 7",
+        "The enzyme is completely denatured at pH 9",
+        "The rate of reaction increases steadily as pH increases",
+        "This enzyme works best in strongly acidic conditions"
+      ],
+      "marks": 1,
+      "explanation": "The highest rate occurs at pH 7, so the optimum lies near that value; the data show a fall at pH 9 but do not by themselves prove irreversible denaturation.",
+      "tags": [
+        "enzymes",
+        "optimum ph"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "data-analysis",
+      "type": "multiple_choice",
+      "question_text": "Potato tissue pieces were soaked in sucrose solutions and their percentage change in mass recorded: 0.2 mol dm^-3 gave +6%, 0.3 mol dm^-3 gave +2%, 0.4 mol dm^-3 gave -2% and 0.5 mol dm^-3 gave -6%. Which sucrose concentration is closest to the water potential of the potato tissue?",
+      "correct_answer": "0.35 mol dm^-3",
+      "choices": [
+        "0.35 mol dm^-3",
+        "0.15 mol dm^-3",
+        "0.25 mol dm^-3",
+        "0.45 mol dm^-3"
+      ],
+      "marks": 1,
+      "explanation": "The change in mass becomes zero between 0.3 and 0.4 mol dm^-3, and interpolating between +2% and -2% places the point of no net water movement at about 0.35 mol dm^-3.",
+      "tags": [
+        "osmosis",
+        "interpolation"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "topic": "data-analysis",
+      "type": "multiple_choice",
+      "question_text": "The rate of photosynthesis of an aquatic plant was measured at four light intensities and gave the following bubble counts per minute: 10 units, 8 bubbles; 20 units, 15 bubbles; 40 units, 24 bubbles; 80 units, 26 bubbles. Which statement best explains these results?",
+      "correct_answer": "Light is limiting up to about 40 units, after which another factor such as carbon dioxide concentration becomes limiting",
+      "choices": [
+        "Light is limiting up to about 40 units, after which another factor such as carbon dioxide concentration becomes limiting",
+        "Light stops being absorbed by the plant above 40 units",
+        "The plant stops photosynthesising completely above 40 units",
+        "The rate of photosynthesis is inversely proportional to light intensity"
+      ],
+      "marks": 1,
+      "explanation": "The rate rises steeply at first and then almost plateaus, which is the classic pattern of a limiting factor changing from light to something else such as carbon dioxide or temperature.",
+      "tags": [
+        "limiting factors",
+        "photosynthesis"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "topic": "data-analysis",
+      "type": "multiple_choice",
+      "question_text": "The rate of an enzyme-controlled reaction was measured at five temperatures and gave: 10 degrees Celsius, 5 units; 20 degrees Celsius, 18 units; 30 degrees Celsius, 32 units; 40 degrees Celsius, 34 units; 60 degrees Celsius, 6 units. Which conclusion is best supported by these data?",
+      "correct_answer": "The optimum temperature for the enzyme is near 40 degrees Celsius",
+      "choices": [
+        "The optimum temperature for the enzyme is near 40 degrees Celsius",
+        "The optimum temperature for the enzyme is 60 degrees Celsius",
+        "The rate increases steadily at every temperature tested",
+        "The enzyme is unaffected by temperatures above 40 degrees Celsius"
+      ],
+      "marks": 1,
+      "explanation": "The highest rate is recorded at 40 degrees Celsius, and the sharp fall at 60 degrees Celsius shows denaturation, so the optimum lies close to 40 degrees Celsius.",
+      "tags": [
+        "enzymes",
+        "temperature"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "data-analysis",
+      "type": "multiple_choice",
+      "question_text": "The number of daisy plants was counted in ten randomly placed 1 m^2 quadrats in a field of 5000 m^2. The counts were 3, 5, 4, 6, 5, 4, 5, 7, 4 and 7. Which is the best estimate of the total daisy population in the field?",
+      "correct_answer": "25000",
+      "choices": [
+        "25000",
+        "2500",
+        "5000",
+        "50000"
+      ],
+      "marks": 1,
+      "explanation": "The ten counts total 50, giving a mean density of 5 plants per m^2, and multiplying by the field area of 5000 m^2 gives an estimated population of 25000.",
+      "tags": [
+        "quadrat",
+        "population estimate"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "data-analysis",
+      "type": "short_answer",
+      "question_text": "A respirometer recorded that germinating seeds used 0.45 cm^3 of oxygen per minute and released 0.45 cm^3 of carbon dioxide per minute. State the respiratory quotient and what substrate it suggests is being respired.",
+      "correct_answer": "The respiratory quotient is 1.0, which suggests that carbohydrate is being respired",
+      "choices": [],
+      "marks": 2,
+      "explanation": "The respiratory quotient is the volume of carbon dioxide released divided by the volume of oxygen used, and a value of 1.0 is characteristic of carbohydrate respiration.",
+      "tags": [
+        "respiratory quotient",
+        "respirometer"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "topic": "data-analysis",
+      "type": "calculation",
+      "question_text": "During an enzyme assay the absorbance of the reaction mixture fell from 0.80 to 0.20 absorbance units over 30 minutes. Calculate the mean rate of decrease in absorbance units per minute.",
+      "correct_answer": "0.02 absorbance units min^-1",
+      "choices": [],
+      "marks": 2,
+      "explanation": "The total decrease is 0.60 absorbance units, and dividing this by 30 minutes gives a rate of 0.02 absorbance units per minute.",
+      "tags": [
+        "rates",
+        "colorimetry"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "topic": "data-analysis",
+      "type": "calculation",
+      "question_text": "In a mark-release-recapture study, 80 snails were caught, marked and released. The next day 100 snails were caught and 20 of them carried a mark. Estimate the size of the snail population.",
+      "correct_answer": "400 snails",
+      "choices": [],
+      "marks": 2,
+      "explanation": "Using the Lincoln index, the population estimate is (80 times 100) divided by 20, which equals 400 snails.",
+      "tags": [
+        "mark-recapture",
+        "population size"
+      ],
+      "difficulty": "hard"
+    }
+  ]
+}

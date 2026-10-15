@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% from "_macros.html" import stat_card, accuracy_bar %}
+
+{% block title %}Dashboard · {{ site_name }}{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div>
+    <h1>IB Biology revision, properly organised</h1>
+    <p class="lede">
+      Work through topic questions, get instant marking against the mark scheme, and see exactly
+      which parts of the syllabus are still shaky.
+    </p>
+    <div class="hero-actions">
+      <a class="btn btn-primary btn-large" href="{{ url_for('main.quiz', mode='practice', count=10) }}">Start a 10-question quiz</a>
+      <a class="btn btn-ghost btn-large" href="{{ url_for('main.quiz', mode='weak', count=10) }}">Focus on my weak topics</a>
+    </div>
+  </div>
+  <div class="hero-panel">
+    <h2>Quick start</h2>
+    <form class="quick-form" action="{{ url_for('main.quiz') }}" method="get">
+      <label>
+        <span>Topic</span>
+        <select name="topic">
+          <option value="">All topics</option>
+          {% for topic in topics %}
+            <option value="{{ topic.slug }}">{{ topic.title }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>
+        <span>Mode</span>
+        <select name="mode">
+          {% for value, label in modes.items() %}
+            <option value="{{ value }}">{{ label }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>
+        <span>Questions</span>
+        <select name="count">
+          {% for n in [5, 10, 15, 20, 30] %}
+            <option value="{{ n }}" {% if n == 10 %}selected{% endif %}>{{ n }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>
+        <span>Difficulty</span>
+        <select name="difficulty">
+          <option value="">Any</option>
+          <option value="easy">Easy</option>
+          <option value="medium">Medium</option>
+          <option value="hard">Hard</option>
+        </select>
+      </label>
+      <button class="btn btn-primary" type="submit">Start</button>
+    </form>
+  </div>
+</section>
+
+{% if stats.total_questions == 0 %}
+  <div class="notice notice-warning">
+    <strong>No questions yet.</strong>
+    Load the question bank with <code>flask quiz seed</code>, or import your own file with
+    <code>flask quiz import questions.json</code>.
+  </div>
+{% endif %}
+
+<section class="stats-row">
+  {{ stat_card('Questions available', stats.total_questions) }}
+  {{ stat_card('Questions seen', stats.questions_seen, stats.coverage ~ '% of the bank') }}
+  {{ stat_card('Answers recorded', stats.total_attempts) }}
+  {{ stat_card('Overall accuracy', stats.accuracy|percent) }}
+</section>
+
+<section class="section">
+  <div class="section-head">
+    <h2>Modes</h2>
+    <p class="muted">Pick the kind of practice you need right now.</p>
+  </div>
+  <div class="mode-grid">
+    {% set mode_blurbs = {
+      'practice': 'Instant marking and explanations after every question.',
+      'timed': 'One minute per mark against the clock.',
+      'exam': 'Answers stay hidden until you finish, like the real thing.',
+      'weak': 'Draws from the topics you score lowest on.',
+      'unseen': 'Only questions you have never attempted.',
+      'random': 'A shuffled mixture across the whole syllabus.'
+    } %}
+    {% for value, label in modes.items() %}
+      <a class="mode-card" href="{{ url_for('main.quiz', mode=value, count=10) }}">
+        <strong>{{ label }}</strong>
+        <span class="muted small">{{ mode_blurbs.get(value, '') }}</span>
+      </a>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-head">
+    <h2>Topics</h2>
+    <a class="btn btn-ghost btn-small" href="{{ url_for('main.topics') }}">All topics</a>
+  </div>
+  {% if topics %}
+    <div class="topic-grid">
+      {% for topic in topics %}
+        {% set row = progress.get(topic.slug) %}
+        <a class="topic-tile" href="{{ url_for('main.topic_detail', slug=topic.slug) }}">
+          <span class="topic-tile-head">
+            <strong>{{ topic.short_title or topic.title }}</strong>
+            <span class="muted small">{{ topic.question_count }} questions</span>
+          </span>
+          {{ accuracy_bar(row.accuracy if row else None) }}
+          <span class="muted small">
+            {% if row and row.attempts %}{{ row.accuracy|percent }} accuracy{% else %}Not attempted{% endif %}
+          </span>
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="muted">No topics have questions yet.</p>
+  {% endif %}
+</section>
+{% endblock %}

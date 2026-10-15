@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}{{ code }} · {{ site_name }}{% endblock %}
+
+{% block content %}
+<section class="error-page">
+  <p class="error-code">{{ code }}</p>
+  <h1>{{ message }}</h1>
+  <p class="muted">
+    {% if code == 404 %}That page or question does not exist.{% else %}Please try again.{% endif %}
+  </p>
+  <div class="hero-actions">
+    <a class="btn btn-primary" href="{{ url_for('main.index') }}">Back to dashboard</a>
+    <a class="btn btn-ghost" href="{{ url_for('main.topics') }}">Browse topics</a>
+  </div>
+</section>
+{% endblock %}

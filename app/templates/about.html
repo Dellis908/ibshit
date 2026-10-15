@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}About · {{ site_name }}{% endblock %}
+
+{% block content %}
+<section class="section-head">
+  <div>
+    <h1>About this app</h1>
+    <p class="muted">What it does, how marking works, and how to add your own questions.</p>
+  </div>
+</section>
+
+<section class="section prose">
+  <h2>What it is</h2>
+  <p>
+    A self-hosted IB Biology revision tool. It serves topic questions, marks your answers against a
+    mark scheme, records every attempt, and reports which topics need more work.
+    Questions are original study material written for this app — they are not official IB exam questions.
+  </p>
+
+  <h2>Study modes</h2>
+  <dl class="definition-list">
+    {% set mode_blurbs = {
+      'practice': 'Instant marking and a short explanation after each question.',
+      'timed': 'One minute per mark, with a server-checked time limit.',
+      'exam': 'Answers and explanations stay hidden until you finish.',
+      'weak': 'Pulls questions from the topics where your accuracy is lowest.',
+      'unseen': 'Only questions you have never attempted, for full coverage.',
+      'random': 'A shuffled, topic-balanced mixture.'
+    } %}
+    {% for value, label in modes.items() %}
+      <dt>{{ label }}</dt>
+      <dd>{{ mode_blurbs.get(value, '') }}</dd>
+    {% endfor %}
+  </dl>
+
+  <h2>How marking works</h2>
+  <ul>
+    <li><strong>Multiple choice and true/false</strong> — exact match. You can also answer with a letter.</li>
+    <li><strong>Calculations</strong> — the number is compared with a 1% tolerance and SI prefixes are
+      converted, so <code>25 cm3</code> matches <code>0.000025 m3</code>. Right number, wrong unit earns partial credit.</li>
+    <li><strong>Written answers</strong> — your response is compared with the model answer and its individual
+      marking points. You earn partial credit for each point you cover, and the feedback shows which points
+      you missed.</li>
+  </ul>
+  <p class="muted small">
+    Automated marking of prose is a study aid, not an examiner. On longer answers, use the
+    "mark yourself" panel to check your wording against the mark scheme.
+  </p>
+
+  <h2>Adding your own questions</h2>
+  <p>Import a JSON or JSON Lines file from the command line:</p>
+  <pre><code>flask quiz import questions.json --topic cell-biology
+flask quiz check questions.json      # validate without writing
+flask quiz export backup.json        # export what you have</code></pre>
+  <p>The same import is available over HTTP:</p>
+  <pre><code>curl -X POST http://localhost:5000/api/import \
+  -H "Content-Type: application/json" \
+  -d '{"questions": [{"topic": "genetics", "type": "short_answer",
+       "question_text": "State the role of helicase.",
+       "correct_answer": "Unwinds/unzips the DNA double helix",
+       "marks": 1, "explanation": "It breaks hydrogen bonds between bases.",
+       "difficulty": "easy", "tags": ["replication"]}]}'</code></pre>
+  <p class="muted small">
+    Set the <code>API_KEY</code> environment variable to require an <code>X-API-Key</code> header on
+    import and export.
+  </p>
+
+  <h2>Scraping your own material</h2>
+  <p>
+    The <code>scraper/</code> directory contains an optional pipeline that downloads topic-question PDFs,
+    extracts their text and converts it into the import format above. Use it only on material you are
+    entitled to access, and check the terms of any site before automating against it.
+  </p>
+
+  <h2>Credits and licensing</h2>
+  <p>
+    Flask, SQLAlchemy and the rest of the stack are used under their own licences. The question content
+    is original to this project. See <code>LICENSE</code> in the repository.
+  </p>
+</section>
+{% endblock %}

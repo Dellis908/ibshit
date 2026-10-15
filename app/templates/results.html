@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% from "_macros.html" import accuracy_bar, stat_card %}
+
+{% block title %}Quiz results · {{ site_name }}{% endblock %}
+
+{% block content %}
+<section class="results-hero">
+  <div>
+    <p class="muted">Quiz complete</p>
+    <h1>
+      {% set pct = summary.percentage %}
+      {% if pct is none %}—{% else %}{{ pct }}%{% endif %}
+    </h1>
+    <p class="lede">
+      {{ summary.correct }} of {{ summary.total }} answers correct ·
+      {{ summary.marks_awarded }} of {{ summary.marks_available }} marks
+    </p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="{{ url_for('main.quiz', mode='weak', count=10) }}">Retry my weak areas</a>
+      <a class="btn btn-ghost" href="{{ url_for('main.quiz', mode='unseen', count=10) }}">Try unseen questions</a>
+      <a class="btn btn-ghost" href="{{ url_for('main.index') }}">Dashboard</a>
+    </div>
+  </div>
+  <div class="results-ring" style="--pct: {{ pct or 0 }}">
+    <span class="ring-value">{{ summary.correct }}/{{ summary.total }}</span>
+    <span class="muted small">{{ summary.accuracy|percent }} accuracy</span>
+  </div>
+</section>
+
+<section class="stats-row">
+  {{ stat_card('Correct', summary.correct) }}
+  {{ stat_card('Incorrect', summary.incorrect) }}
+  {{ stat_card('Marks', summary.marks_awarded ~ '/' ~ summary.marks_available) }}
+  {{ stat_card('Accuracy', summary.accuracy|percent) }}
+</section>
+
+{% if summary.per_topic %}
+<section class="section">
+  <h2>By topic</h2>
+  <table class="data-table">
+    <thead>
+      <tr><th scope="col">Topic</th><th scope="col">Correct</th><th scope="col">Accuracy</th><th scope="col"></th></tr>
+    </thead>
+    <tbody>
+      {% for row in summary.per_topic %}
+        <tr>
+          <td>{{ row.title }}</td>
+          <td>{{ row.correct }}/{{ row.attempts }}</td>
+          <td>{{ row.accuracy|percent }}</td>
+          <td class="cell-meter">{{ accuracy_bar(row.accuracy) }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endif %}
+
+<section class="section">
+  <h2>Review every question</h2>
+  <ol class="review-list">
+    {% for attempt in summary.attempts %}
+      {% set question = attempt.question %}
+      <li class="review-item {{ 'is-correct' if attempt.is_correct else 'is-wrong' }}">
+        <header>
+          <span class="pill {{ 'pill-correct' if attempt.is_correct else 'pill-wrong' }}">
+            {{ 'Correct' if attempt.is_correct else 'Incorrect' }}
+          </span>
+          <span class="muted small">
+            {{ attempt.marks_awarded or 0 }}/{{ question.marks if question else 1 }} marks
+            {% if question %} · {{ question.topic.short_title or question.topic.title }}{% endif %}
+          </span>
+        </header>
+
+        {% if question %}
+          <div class="question-text">{{ question.question_text | safe }}</div>
+        {% endif %}
+
+        <dl class="answer-compare">
+          <dt>Your answer</dt>
+          <dd class="{{ 'good' if attempt.is_correct else 'bad' }}">
+            {{ attempt.user_response or '—' }}
+          </dd>
+          <dt>Mark scheme</dt>
+          <dd class="good">{{ question.correct_answer if question else '—' }}</dd>
+        </dl>
+
+        {% if question and question.explanation %}
+          <p class="explanation"><strong>Why:</strong> {{ question.explanation }}</p>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ol>
+</section>
+{% endblock %}

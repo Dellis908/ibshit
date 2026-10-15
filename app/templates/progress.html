@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% from "_macros.html" import stat_card, accuracy_bar %}
+
+{% block title %}Progress · {{ site_name }}{% endblock %}
+
+{% block content %}
+<section class="section-head">
+  <div>
+    <h1>Your progress</h1>
+    <p class="muted">Coverage and accuracy across the syllabus, plus your most recent answers.</p>
+  </div>
+</section>
+
+<section class="stats-row">
+  {{ stat_card('Questions seen', stats.questions_seen, stats.coverage ~ '% of bank') }}
+  {{ stat_card('Answers recorded', stats.total_attempts) }}
+  {{ stat_card('Overall accuracy', stats.accuracy|percent) }}
+  {{ stat_card('Correct answers', stats.correct_attempts) }}
+</section>
+
+<section class="section">
+  <h2>Topic breakdown</h2>
+  {% if progress %}
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th scope="col">Topic</th>
+          <th scope="col">Seen</th>
+          <th scope="col">Accuracy</th>
+          <th scope="col"></th>
+          <th scope="col"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in progress %}
+          <tr>
+            <td>
+              {% if row.syllabus_ref %}<span class="badge badge-soft">{{ row.syllabus_ref }}</span>{% endif %}
+              {{ row.title }}
+            </td>
+            <td>{{ row.attempted }}/{{ row.question_count }}</td>
+            <td>{{ row.accuracy|percent }}</td>
+            <td class="cell-meter">{{ accuracy_bar(row.accuracy) }}</td>
+            <td class="cell-action">
+              <a class="btn btn-small btn-ghost" href="{{ url_for('main.quiz', topic=row.slug, mode='practice', count=10) }}">Practise</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="muted">No topics with questions yet.</p>
+  {% endif %}
+</section>
+
+<section class="section">
+  <h2>Recent answers</h2>
+  {% if attempts %}
+    <ul class="attempt-list">
+      {% for attempt in attempts %}
+        <li>
+          <span class="pill {{ 'pill-correct' if attempt.is_correct else 'pill-wrong' }}">
+            {{ '✓' if attempt.is_correct else '✗' }}
+          </span>
+          <span class="attempt-text">
+            {% if attempt.question %}
+              {{ attempt.question.question_text | striptags | truncate(110) }}
+            {% else %}
+              Question removed
+            {% endif %}
+          </span>
+          <span class="muted small">
+            {{ attempt.topic.short_title if attempt.topic and attempt.topic.short_title else (attempt.topic.title if attempt.topic else '—') }}
+            · {{ attempt.answered_at.strftime('%d %b %H:%M') if attempt.answered_at else '' }}
+          </span>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="muted">Nothing answered yet. <a href="{{ url_for('main.quiz', mode='practice', count=10) }}">Start a quiz</a>.</p>
+  {% endif %}
+</section>
+
+<section class="section danger-zone">
+  <h2>Reset progress</h2>
+  <p class="muted small">
+    Deletes every recorded answer. Your question bank and topics are untouched. This cannot be undone.
+  </p>
+  <button class="btn btn-danger" id="reset-progress" data-confirm="RESET">Delete all my answers</button>
+  <span class="muted small" id="reset-status"></span>
+</section>
+{% endblock %}

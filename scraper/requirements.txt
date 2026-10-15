@@ -1,5 +1,7 @@
-selenium==4.16.0
-webdriver-manager==4.0.1
-pdfplumber==0.10.3
-PyMuPDF==1.23.8
-fuzzywuzzy==0.18.0
+# Only needed for the optional PDF scraping pipeline (scraper/).
+# The web app runs without any of these.
+selenium==4.25.0
+webdriver-manager==4.0.2
+requests==2.32.3
+pdfplumber==0.11.4
+PyMuPDF==1.24.11

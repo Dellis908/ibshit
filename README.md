@@ -1,2 +1,288 @@
-idk what im doing, deepseek save me.
-PURELY FOR EDUCATIONAL AND PERSONAL PURPOSES
+# IB Biology Revision
+
+A self-hosted revision app for IB Biology (HL & SL). It serves syllabus topic
+questions, marks your answers automatically against a mark scheme, records every
+attempt, and shows you exactly which topics are still shaky.
+
+Originally a small Flask experiment; rebuilt into a complete application with a
+real question bank, a marking engine with partial credit, progress tracking and
+a working UI.
+
+![Python](https://img.shields.io/badge/python-3.11%2B-blue)
+![Flask](https://img.shields.io/badge/flask-3.0-black)
+
+---
+
+## Quick start
+
+```bash
+git clone https://github.com/Dellis908/ibshit.git
+cd ibshit
+
+python3 -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+
+flask quiz seed                    # load the bundled question bank
+flask run                          # http://127.0.0.1:5000
+```
+
+That is all that is needed — no database server, no configuration file. The app
+creates `instance/quiz.db` (SQLite) on first run and loads 154 questions across
+10 syllabus topics.
+
+### Docker
+
+```bash
+docker compose up --build          # http://localhost:8000
+```
+
+---
+
+## What's in it
+
+| Area | What you get |
+| --- | --- |
+| **Question bank** | 154 questions across 10 topics — cell biology, molecular biology, genetics, ecology, evolution & biodiversity, human physiology, nucleic acids, metabolism/respiration/photosynthesis, plant biology, data analysis |
+| **Question types** | Multiple choice, true/false, calculation, and written answers with multi-point mark schemes |
+| **Six study modes** | Practice, Timed, Exam simulation, Weak topics, Never attempted, Random mix |
+| **Marking** | Instant marking, partial credit, per-marking-point feedback, and a self-marking panel for longer prose |
+| **Progress** | Per-topic accuracy and coverage, recent answers, resettable history |
+| **API** | JSON endpoints for every page, plus import/export of the whole bank |
+| **Optional scraper** | A pipeline that turns PDFs you are entitled to use into importable questions |
+
+### Study modes
+
+| Mode | Behaviour |
+| --- | --- |
+| **Practice** | Instant marking with an explanation after every question. |
+| **Timed** | One minute per mark against a countdown. |
+| **Exam simulation** | Answers and explanations stay hidden until you finish. |
+| **Weak topics** | Draws from the topics where your accuracy is lowest. |
+| **Never attempted** | Only questions you have never seen, for full coverage. |
+| **Random mix** | A shuffled, topic-balanced selection. |
+
+---
+
+## How marking works
+
+Marking lives in `app/grading.py` and is deliberately conservative: it would
+rather flag an answer as "close" than award a mark it is not sure about.
+
+- **Multiple choice / true-false** — exact match after normalisation. You may
+  also answer with a letter (`B`).
+- **Calculations** — compared with a 1% relative tolerance, with SI prefixes
+  converted, so `25 cm3` matches `0.000025 m3` and `0.0025 mol s-1` matches
+  `0.0025 mol s⁻¹` despite spacing or Unicode differences. The right number with
+  the wrong unit earns partial credit; a bare number with no unit earns nothing.
+- **Written answers** — the model answer is split into marking points (on `;`),
+  and each point is credited only when its distinctive vocabulary is present.
+  Tokens are consumed as they are matched, so one phrase cannot earn marks for
+  two different points, and partial keyword matches are not credited ("increases
+  then drops" does not earn the mark that "increases then decreases" earns). You
+  get partial credit per point covered, a list of the points you missed, and a
+  self-marking panel.
+
+Automated prose marking is a study aid, not an examiner. For long answers, check
+your wording against the mark scheme with the self-marking panel.
+
+---
+
+## Commands
+
+```bash
+flask quiz init                  # create tables and syllabus topics
+flask quiz seed                  # load seed/questions.json
+flask quiz check [FILE]          # validate a question file (default: the seed)
+flask quiz import FILE.json      # import questions (--dry-run to validate only)
+flask quiz export out.json       # export the bank (--topic, --no-answers, --stats)
+flask quiz stats                 # print bank and progress statistics
+flask quiz reset [--yes]         # delete recorded attempts (--questions too)
+```
+
+Tests and verification:
+
+```bash
+python -m pytest tests -q        # unit and integration tests
+python scripts/smoke_test.py     # boots the app and exercises every route
+```
+
+---
+
+## API
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/topics` | Topics with your progress |
+| `GET` | `/api/questions` | Filter the bank (`topic`, `difficulty`, `type`, `limit`, `offset`, `include_answers`) |
+| `GET` | `/api/stats` | Overall and per-topic statistics |
+| `POST` | `/api/answer` | Submit one answer and get it marked |
+| `POST` | `/api/attempts/<id>/override` | Apply a self-marking decision |
+| `GET` | `/api/result` | Summary of the current quiz run |
+| `POST` | `/api/reset` | Delete recorded attempts (`confirm: "RESET"`) |
+| `GET` | `/api/export` | Export the bank as JSON |
+| `POST` | `/api/import` | Import questions (`?dry_run=true` to validate) |
+| `GET` | `/healthz` | Liveness probe |
+
+State-changing endpoints require the CSRF token issued in the page's
+`<meta name="csrf-token">` tag, sent as the `X-CSRF-Token` header. Set the
+`API_KEY` environment variable to additionally require `X-API-Key` on
+import/export.
+
+```bash
+curl -X POST http://localhost:5000/api/import \
+  -H "Content-Type: application/json" \
+  -H "X-CSRF-Token: <token from the page>" \
+  -d '{"questions": [{
+        "topic": "genetics",
+        "type": "short_answer",
+        "question_text": "State the role of helicase in DNA replication.",
+        "correct_answer": "Unwinds the DNA double helix",
+        "marks": 1,
+        "explanation": "Helicase breaks the hydrogen bonds between base pairs.",
+        "difficulty": "easy",
+        "tags": ["replication"]
+      }]}'
+```
+
+---
+
+## Adding your own questions
+
+`seed/questions.json` is the source of truth for the shipped bank, and imports
+accept plain JSON or JSON Lines:
+
+```json
+{
+  "meta": { "syllabus": "IB Biology", "version": 1 },
+  "questions": [
+    {
+      "topic": "cell-biology",
+      "type": "multiple_choice",
+      "question_text": "Which organelle is the site of aerobic respiration?",
+      "correct_answer": "Mitochondrion",
+      "choices": ["Mitochondrion", "Ribosome", "Golgi apparatus", "Nucleus"],
+      "marks": 1,
+      "explanation": "The mitochondrion carries out oxidative phosphorylation.",
+      "tags": ["organelles"],
+      "difficulty": "easy"
+    }
+  ]
+}
+```
+
+Rules the importer enforces (all covered by tests):
+
+- `question_text` and `correct_answer` are required and must be non-empty.
+- `type` is one of `multiple_choice`, `short_answer`, `true_false`, `calculation`.
+- `difficulty` is one of `easy`, `medium`, `hard`.
+- `marks` is an integer from 1 to 20.
+- `multiple_choice` needs at least 2 distinct choices, one of which is the
+  correct answer.
+- `true_false` answers must be exactly `True` or `False`.
+- HTML is sanitised on import: formatting (`<sub>`, `<sup>`, `<table>`, …)
+  survives; scripts, event handlers, styles and `javascript:` URLs are removed.
+- Questions whose text already exists are skipped, so re-importing is safe.
+
+Unknown topic names are mapped onto the nearest syllabus topic where possible,
+otherwise stored as their own topic rather than being discarded.
+
+---
+
+## Project layout
+
+```
+app/
+  __init__.py      application factory, error handlers, template filters
+  api.py           JSON API blueprint (marking, import/export, stats)
+  routes.py        HTML pages (dashboard, topics, quiz, results, progress)
+  models.py        Topic, Question, Attempt
+  grading.py       the marking engine (pure, standard library only)
+  content.py       validation, sanitising, import/export, topic mapping
+  quiz.py          quiz assembly, session summaries, progress statistics
+  sanitize.py      allow-list HTML sanitiser for question content
+  topics.py        the syllabus topic catalogue
+  cli.py           the `flask quiz` command group
+  templates/       Jinja templates
+  static/          stylesheet, quiz runner, shared JS
+scraper/           optional PDF -> JSON pipeline (see below)
+seed/              questions.json — the bundled question bank
+scripts/           smoke_test.py — end-to-end route check
+tests/             pytest suite
+```
+
+---
+
+## Optional: scraping your own material
+
+The `scraper/` package turns topic-question PDFs into the JSON format above. It
+is **not needed to run the app** and its dependencies are kept separate.
+
+```bash
+pip install -r scraper/requirements.txt
+
+python -m scraper.scrape links       # list PDFs found on the source page
+python -m scraper.scrape download    # download them (cached)
+python -m scraper.scrape parse       # extract text (needs pdfplumber or PyMuPDF)
+python -m scraper.scrape build       # text -> seed/scraped.json + review file
+python -m scraper.scrape all         # the whole pipeline
+```
+
+Already have text? Skip the network entirely:
+
+```bash
+python -m scraper.scrape build --from-text data/extracted/cell_biology.txt --topic cell-biology
+flask quiz check seed/scraped.importable.json
+flask quiz import seed/scraped.importable.json
+```
+
+Each stage caches its output and is resumable. Every generated question carries a
+`_confidence` score and a `_warnings` list, and the pipeline writes a
+`*.review.md` file listing the low-confidence ones — review before trusting
+them, because PDF question extraction is inherently messy.
+
+> **Use it responsibly.** Automated access may breach a site's terms of service,
+> and topic-question PDFs are usually copyrighted. The pipeline only reads pages
+> the way a browser would; what you point it at and what you do with the output
+> is your responsibility. The bundled bank is original material written for this
+> project precisely so the app is useful without scraping anything.
+
+---
+
+## Configuration
+
+Copy `.env.example` to `.env` and adjust as needed; every value is optional.
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `SECRET_KEY` | dev value | Session signing. **Set a real value in production.** |
+| `DATABASE_URL` | `sqlite:///instance/quiz.db` | Any SQLAlchemy URL (Postgres, MySQL, …) |
+| `QUIZ_DEFAULT_COUNT` | `10` | Questions per quiz |
+| `QUIZ_MAX_COUNT` | `60` | Upper bound on a quiz request |
+| `QUIZ_FUZZY_THRESHOLD` | `72` | Similarity above which a written answer is flagged "close" |
+| `QUIZ_NUMERIC_TOLERANCE` | `0.01` | Relative tolerance for calculations |
+| `API_KEY` | unset | When set, required on import/export |
+
+---
+
+## Deployment
+
+```bash
+gunicorn --workers 4 --bind 0.0.0.0:8000 wsgi:app
+```
+
+`wsgi.py` creates missing tables and syllabus topics on boot, so a fresh
+deployment needs no migration step. Behind a reverse proxy, terminate TLS there
+and set `SECRET_KEY` plus (ideally) a Postgres `DATABASE_URL`.
+
+---
+
+## Credits and licensing
+
+Question content is original study material written for this project, not
+official IB exam questions, and is not endorsed by the IB. Built with Flask,
+Flask-SQLAlchemy and SQLAlchemy. See `LICENSE` for the project licence.
+
+The original scraper targeted a third-party archive. That behaviour is retained
+only as the optional, off-by-default pipeline described above, pointed at
+whatever source you configure.

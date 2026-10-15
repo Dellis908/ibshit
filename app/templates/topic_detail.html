@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% from "_macros.html" import stat_card, accuracy_bar %}
+
+{% block title %}{{ topic.title }} · {{ site_name }}{% endblock %}
+
+{% block content %}
+<nav class="breadcrumb"><a href="{{ url_for('main.topics') }}">Topics</a> <span aria-hidden="true">/</span> {{ topic.title }}</nav>
+
+<section class="section-head">
+  <div>
+    <h1>
+      {% if topic.syllabus_ref %}<span class="badge">{{ topic.syllabus_ref }}</span>{% endif %}
+      {{ topic.title }}
+    </h1>
+    <p class="muted">{{ topic.description }}</p>
+  </div>
+</section>
+
+<section class="stats-row">
+  {{ stat_card('Questions', topic.question_count) }}
+  {{ stat_card('Total marks', topic.total_marks()) }}
+  {{ stat_card('Attempted', progress.attempted if progress else 0) }}
+  {{ stat_card('Accuracy', (progress.accuracy if progress else None)|percent) }}
+</section>
+
+<section class="section">
+  <h2>Start practising</h2>
+  <div class="topic-actions topic-actions-wide">
+    {% for value, label in modes.items() %}
+      <a class="btn {{ 'btn-primary' if value == 'practice' else 'btn-ghost' }}"
+         href="{{ url_for('main.quiz', topic=topic.slug, mode=value, count=10) }}">{{ label }}</a>
+    {% endfor %}
+  </div>
+  <p class="muted small">
+    Timed and exam runs give you one minute per mark. Exam mode hides the answers until the end.
+  </p>
+</section>
+
+{% if progress %}
+<section class="section">
+  <h2>Your progress here</h2>
+  {{ accuracy_bar(progress.accuracy) }}
+  <p class="muted small">
+    {{ progress.attempted }} of {{ progress.question_count }} questions seen ·
+    {{ progress.correct }} of {{ progress.attempts }} answers correct
+  </p>
+</section>
+{% endif %}
+
+<section class="section">
+  <h2>Question preview</h2>
+  <p class="muted small">First few questions in this topic, with answers. Handy for a quick skim before a test.</p>
+  <ol class="preview-list">
+    {% for q in topic.questions[:5] %}
+      <li class="preview-item">
+        <div class="question-text">{{ q.question_text | safe }}</div>
+        <p class="preview-answer"><strong>Answer:</strong> {{ q.correct_answer }}</p>
+        {% if q.explanation %}<p class="muted small">{{ q.explanation }}</p>{% endif %}
+      </li>
+    {% endfor %}
+  </ol>
+  {% if topic.question_count > 5 %}
+    <p class="muted small">…and {{ topic.question_count - 5 }} more in the quiz.</p>
+  {% endif %}
+</section>
+{% endblock %}

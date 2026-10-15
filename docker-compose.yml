@@ -1,0 +1,29 @@
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      FLASK_ENV: production
+      SECRET_KEY: ${SECRET_KEY:-change-me-in-production}
+      PORT: "8000"
+      # Postgres example (uncomment the db service below too):
+      # DATABASE_URL: postgresql://quiz:quiz@db:5432/quiz
+    volumes:
+      # Persist the SQLite database and any imported files between restarts.
+      - quiz-data:/app/instance
+    restart: unless-stopped
+
+  # db:
+  #   image: postgres:16-alpine
+  #   environment:
+  #     POSTGRES_USER: quiz
+  #     POSTGRES_PASSWORD: quiz
+  #     POSTGRES_DB: quiz
+  #   volumes:
+  #     - quiz-db:/var/lib/postgresql/data
+  #   restart: unless-stopped
+
+volumes:
+  quiz-data:
+  # quiz-db:
