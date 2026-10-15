@@ -413,6 +413,28 @@ you set `API_KEY` you would need to redistribute it.
 
 ## 13. Updating
 
+There are two ways, and both are safe.
+
+### The bootstrap script (simplest)
+
+```bash
+sudo bash /srv/ibshit/deploy/bootstrap-debian.sh
+```
+
+It handles all four states the code directory can be in:
+
+| State of `/srv/ibshit` | What it does |
+| --- | --- |
+| A git checkout | `git fetch` + `git reset --hard origin/main`, then restarts |
+| Empty, or absent | clones it |
+| Has files but no `.git` (interrupted run) | moves it to `/srv/ibshit.bak.<timestamp>`, clones fresh, and **restores your `instance/` database** |
+| Already running the latest | no changes; reinstalls deps and restarts |
+
+It never prompts for git credentials (`GIT_TERMINAL_PROMPT=0`), so it cannot hang
+waiting for a password.
+
+### Manually
+
 ```bash
 cd /srv/ibshit
 sudo -u ibshit git pull
@@ -421,22 +443,18 @@ sudo systemctl restart ibshit
 ```
 
 There are no migrations to run: `wsgi.py` creates missing tables on startup and
-`sync_topics()` keeps the topic list current. If a release ever adds a column to
-an existing table, the simplest fix on a single-user install is to export and
-re-import:
+`sync_topics()` keeps the topic list current.
+
+If a release ever adds a column to an existing table, export and re-import rather
+than trying to migrate by hand:
 
 ```bash
 sudo -u ibshit /usr/local/sbin/ibshit-flask quiz export /tmp/bank.json
-# then stop the service, move instance/quiz.db aside, restart, and import
+sudo systemctl stop ibshit
+sudo mv /srv/ibshit/instance/quiz.db /srv/ibshit/instance/quiz.db.old
+sudo systemctl start ibshit
+sudo -u ibshit /usr/local/sbin/ibshit-flask quiz import /tmp/bank.json
 ```
-
-Or use the bootstrap script, which updates in place:
-
-```bash
-sudo bash /srv/ibshit/deploy/bootstrap-debian.sh
-```
-
----
 
 ## 14. Monitoring the image cache
 
@@ -465,6 +483,20 @@ export it: `export FLASK_APP=/srv/ibshit/wsgi.py`.
 **502 Bad Gateway from nginx**
 gunicorn is not running or the socket path is wrong. Check
 `sudo systemctl status ibshit`, then `sudo ls -l /run/ibshit/`.
+
+**`fatal: destination path '/srv/ibshit' already exists and is not an empty directory`**
+A previous run created the directory but did not finish (often because it stopped
+at the permission error below), so there is no `.git` for the installer to update.
+Re-running the fixed installer handles this: it moves the old directory to
+`/srv/ibshit.bak.<timestamp>`, clones fresh and puts your `instance/` database
+back. To do it by hand:
+
+```bash
+sudo mv /srv/ibshit /srv/ibshit.bak
+sudo -u ibshit git clone https://github.com/Dellis908/ibshit.git /srv/ibshit
+sudo cp -a /srv/ibshit.bak/instance /srv/ibshit/ 2>/dev/null || true
+sudo chown -R ibshit:ibshit /srv/ibshit
+```
 
 **`PermissionError: [Errno 13] Permission denied: '/srv/ibshit/instance'`**
 `flask` was run as root, and `/srv/ibshit` belongs to `ibshit`, so root cannot
@@ -511,6 +543,8 @@ it, then stop and disable that service.
 | Add questions | `flask --app /srv/ibshit/wsgi.py quiz import FILE.json` |
 | Export bank | `flask --app /srv/ibshit/wsgi.py quiz export /tmp/bank.json` |
 | Health check | `curl -s localhost/healthz` |
+| Update | `sudo bash /srv/ibshit/deploy/bootstrap-debian.sh` |
+| Run CLI as the app | `sudo -u ibshit /usr/local/sbin/ibshit-flask quiz stats` |
 | nginx config test | `sudo nginx -t` |
 | Code location | `/srv/ibshit` |
 | Database | `/srv/ibshit/instance/quiz.db` |

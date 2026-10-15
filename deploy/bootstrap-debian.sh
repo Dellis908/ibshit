@@ -32,13 +32,64 @@ if ! id -u "$APP_USER" >/dev/null 2>&1; then
 fi
 
 # --- application code ------------------------------------------------------
+# Three situations are possible, and all must work:
+#   1. $APP_DIR is a git checkout            -> update it in place
+#   2. $APP_DIR does not exist or is empty   -> clone into it
+#   3. $APP_DIR exists with files but no .git-> recover, since `git clone` refuses
+#      a non-empty target and would abort the whole installer
+git config --global --add safe.directory "$APP_DIR" 2>/dev/null || true
+
 if [[ -d "$APP_DIR/.git" ]]; then
-    log "Updating existing checkout"
-    git -C "$APP_DIR" fetch --quiet origin
-    git -C "$APP_DIR" reset --hard --quiet origin/main
+    log "Updating existing checkout in $APP_DIR"
+    # Never prompt: the installer must not hang waiting for credentials.
+    GIT_TERMINAL_PROMPT=0 git -C "$APP_DIR" fetch --quiet origin
+    if ! git -C "$APP_DIR" reset --hard --quiet origin/main; then
+        die "could not update $APP_DIR to origin/main.
+  Check the remote and your access:
+    git -C $APP_DIR remote -v
+    GIT_TERMINAL_PROMPT=0 git -C $APP_DIR fetch origin"
+    fi
+    # Keep the checked-out files owned by the service account.
+    chown -R "$APP_USER:$APP_USER" "$APP_DIR"
+elif [[ -n "$(ls -A "$APP_DIR" 2>/dev/null)" ]]; then
+    # A previous interrupted run left a partial tree. Move it aside rather than
+    # deleting anything, then start clean.
+    BACKUP="${APP_DIR}.bak.$(date +%Y%m%d%H%M%S)"
+    warn "$APP_DIR exists but is not a git checkout; moving it to $BACKUP"
+
+    # The database lives in instance/, so carry it across: resetting the code
+    # must never discard a user's answers.
+    KEEP_INSTANCE=""
+    if [[ -d "$APP_DIR/instance" ]]; then
+        KEEP_INSTANCE="$(mktemp -d)"
+        cp -a "$APP_DIR/instance/." "$KEEP_INSTANCE/" 2>/dev/null || true
+        log "Preserving the existing instance/ directory (database and image cache)"
+    fi
+
+    mv "$APP_DIR" "$BACKUP"
+    log "Cloning $REPO"
+    git clone --quiet "$REPO" "$APP_DIR"
+
+    if [[ -n "$KEEP_INSTANCE" ]]; then
+        # Creating this directory must never abort the restore below, or the
+        # preserved database would be stranded in the temporary directory.
+        install -d -o "$APP_USER" -g "$APP_USER" -m 0755 "$APP_DIR/instance" 2>/dev/null \
+            || mkdir -p "$APP_DIR/instance"
+
+        if cp -a "$KEEP_INSTANCE/." "$APP_DIR/instance/" 2>/dev/null; then
+            chown -R "$APP_USER:$APP_USER" "$APP_DIR/instance" 2>/dev/null || true
+            log "Restored instance/ (your existing database has been kept)"
+        else
+            warn "Could not restore instance/ automatically."
+            warn "Your previous database is still intact at: $KEEP_INSTANCE"
+            warn "Copy it into place with: cp -a $KEEP_INSTANCE/. $APP_DIR/instance/"
+        fi
+        rm -rf "$KEEP_INSTANCE" 2>/dev/null || true
+    fi
+
+    log "The previous contents are still in $BACKUP (remove it once you are happy)"
 else
     log "Cloning $REPO"
-    mkdir -p "$APP_DIR"
     git clone --quiet "$REPO" "$APP_DIR"
 fi
 
