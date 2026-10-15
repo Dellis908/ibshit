@@ -19,9 +19,10 @@ instance/
 data/pdfs/
 data/extracted/
 
-# Content fetched from git.pirateib.sh (third-party, no licence granted).
-# Regenerate locally with: python -m scraper.rdojo_import fetch --check-images
-seed/rdojo.json
+# Content fetched from git.pirateib.sh.
+# seed/rdojo.json is committed (it is the usable question bank); only the raw
+# upstream download cache is ignored, since it can be rebuilt with:
+#   python -m scraper.rdojo_import fetch --check-images
 data/rdojo/
 instance/images/
 

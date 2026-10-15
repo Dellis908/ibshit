@@ -43,7 +43,7 @@ docker compose up --build          # http://localhost:8000
 
 | Area | What you get |
 | --- | --- |
-| **Question bank** | 154 built-in questions across 10 topics, plus an importer that pulls the complete 2025 syllabus (A1.1 → D4.3) from the rdojo bank |
+| **Question bank** | 154 built-in questions plus 2,239 imported from the rdojo bank, covering the complete 2025 syllabus (A1.1 → D4.3) across 40 subtopics |
 | **Question types** | Multiple choice, true/false, calculation, and written answers with multi-point mark schemes |
 | **Six study modes** | Practice, Timed, Exam simulation, Weak topics, Never attempted, Random mix |
 | **Marking** | Instant marking, partial credit, per-marking-point feedback, and a self-marking panel for longer prose |
@@ -236,6 +236,13 @@ A full run converts roughly **2,240 questions across 40 subtopics** and takes a
 couple of minutes. Everything is cached under `data/rdojo/`, so re-running only
 re-does what changed.
 
+**The converted bank is committed** as `seed/rdojo.json`, so you can skip the
+fetch entirely and go straight to importing it:
+
+```bash
+flask quiz import seed/rdojo.json
+```
+
 What the converter does:
 
 | Upstream | Here |
@@ -261,11 +268,11 @@ has them:
 
 Two things to know about this source:
 
-- **It is third-party content with no licence granted.** `seed/rdojo.json` is
-  therefore **gitignored by default** — the fetch command rebuilds it locally in
-  a couple of minutes, but it is not redistributed through this repository. If
-  you own the rights or have permission, remove that line from `.gitignore` to
-  commit it.
+- This is third-party content, imported with the repository owner's permission.
+  The converted output is committed, so check you are happy with the licensing
+  position before publishing this repository publicly. The importer itself is
+  independent of that: delete `seed/rdojo.json` and the app still runs on the
+  154 built-in questions.
 - The upstream bank is a snapshot. Re-running `fetch --refresh` picks up changes,
   and `--check-images` re-verifies the images each time.
 
