@@ -26,6 +26,11 @@ data/extracted/
 data/rdojo/
 instance/images/
 
+# Node (only used by the optional JS test)
+node_modules/
+package-lock.json
+package.json
+
 # OS / editors
 .DS_Store
 .idea/

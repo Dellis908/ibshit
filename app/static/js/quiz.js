@@ -414,19 +414,60 @@
 
   /* ------------------------------------------------------------- keyboard */
 
+  /* Letters are only shortcuts when they are not being typed.
+   *
+   * Without this, pressing "k" while writing an answer jumped to the previous
+   * question, because the handler below listened globally and a textarea does
+   * not stop keydown from reaching document.
+   */
+  function isTyping(target) {
+    if (!target || !target.tagName) return false;
+    if (target.isContentEditable) return true;
+    const tag = target.tagName.toLowerCase();
+    if (tag === "textarea" || tag === "select") return true;
+    if (tag === "input") {
+      // Checkboxes and radio buttons do not consume letters, so shortcuts may
+      // still work while one of those has focus.
+      const type = (target.getAttribute("type") || "text").toLowerCase();
+      return type !== "checkbox" && type !== "radio" && type !== "button";
+    }
+    return false;
+  }
+
+  /* The question nearest the top of the viewport, which is the one being read.
+   * Using focus instead would break as soon as the user clicked a blank area. */
+  function currentCardIndex() {
+    let best = 0;
+    let bestDistance = Infinity;
+    cards.forEach((card, index) => {
+      const distance = Math.abs(card.getBoundingClientRect().top);
+      if (distance < bestDistance) {
+        bestDistance = distance;
+        best = index;
+      }
+    });
+    return best;
+  }
+
+  function goToCard(index) {
+    if (index < 0 || index >= cards.length) return;
+    cards[index].scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") return;
-    if (event.key.toLowerCase() === "j" || event.key.toLowerCase() === "k") {
-      const current = document.activeElement.closest
-        ? document.activeElement.closest(".question-card")
-        : null;
-      const index = current ? cards.indexOf(current) : -1;
-      const nextIndex = event.key.toLowerCase() === "j" ? index + 1 : index - 1;
-      if (cards[nextIndex]) {
-        event.preventDefault();
-        cards[nextIndex].scrollIntoView({ behavior: "smooth", block: "center" });
-      }
-    }
+    if (event.ctrlKey || event.metaKey) return;
+
+    const key = event.key.toLowerCase();
+    if (key !== "j" && key !== "k") return;
+
+    // Alt+J / Alt+K always navigate, which is the escape hatch for someone who
+    // is typing and still wants to move between questions.
+    if (isTyping(event.target) && !event.altKey) return;
+
+    event.preventDefault();
+    const index = currentCardIndex();
+    goToCard(key === "j" ? index + 1 : index - 1);
   });
 
   /* ----------------------------------------------------------------- init */

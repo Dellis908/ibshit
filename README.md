@@ -148,6 +148,28 @@ curl -X POST http://localhost:5000/api/import \
 
 ---
 
+## Keyboard shortcuts
+
+While taking a quiz:
+
+| Key | Action |
+| --- | --- |
+| `J` / `K` | next / previous question |
+| `Alt`+`J` / `Alt`+`K` | the same, but still works while typing in an answer |
+| `Ctrl`/`Cmd`+`Enter` | check the answer you are writing |
+
+Plain `J` and `K` are deliberately ignored while a text field has focus, so
+typing an answer that contains those letters cannot jump you to another question.
+`Alt` is the escape hatch for moving between questions mid-sentence.
+
+The shortcut handling is covered by `scripts/test_keyboard.mjs`, which drives the
+real `quiz.js` in a DOM and fails if a typed letter navigates:
+
+```bash
+npm install --no-save jsdom
+node scripts/test_keyboard.mjs
+```
+
 ## Accounts and access
 
 Everything is per account: two people using the same server cannot see each
