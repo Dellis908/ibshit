@@ -53,7 +53,7 @@
   <ol class="preview-list">
     {% for q in topic.questions[:5] %}
       <li class="preview-item">
-        <div class="question-text">{{ q.question_text | safe }}</div>
+        <div class="question-text">{{ q.question_text | mirror_images | safe }}</div>
         <p class="preview-answer"><strong>Answer:</strong> {{ q.correct_answer }}</p>
         {% if q.explanation %}<p class="muted small">{{ q.explanation }}</p>{% endif %}
       </li>

@@ -12,6 +12,7 @@ here from :mod:`app.extensions`.
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 from flask import Flask, jsonify, render_template
@@ -83,6 +84,33 @@ def _register_template_helpers(app: Flask) -> None:
         if not value:
             return ""
         return Markup("<br>".join(escape(value).split("\n")))
+
+    @app.template_filter("mirror_images")
+    def mirror_images(value: str) -> str:
+        """Route remote <img> tags through the local mirror endpoint.
+
+        Question content is rendered with ``|safe``, so image sources are
+        rewritten here rather than in the browser, and only on allow-listed
+        hosts. Anything else is left untouched for the sanitiser to reject.
+        """
+        from urllib.parse import quote
+
+        from markupsafe import Markup
+
+        from app.sanitize import _image_src_allowed
+
+        if not value:
+            return ""
+
+        def replace(match):
+            url = match.group(1)
+            if not _image_src_allowed(url):
+                return match.group(0)
+            return f'<img src="/api/image?url={quote(url, safe="")}"'
+
+        # Match only the opening of the tag so other attributes are preserved.
+        rewritten = re.sub(r'<img\s+src="([^"]+)"', replace, str(value), flags=re.IGNORECASE)
+        return Markup(rewritten)
 
     @app.template_filter("percent")
     def percent(value, default: str = "—") -> str:

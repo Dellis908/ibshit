@@ -662,3 +662,15 @@ textarea { resize: vertical; min-height: 84px; line-height: 1.5; }
 }
 .self-mark-toggle input { accent-color: var(--accent); }
 .self-mark-toggle:hover { border-color: var(--accent); color: var(--text); }
+
+/* Placeholder shown when a question image cannot be loaded. */
+.img-missing {
+  display: inline-block;
+  padding: var(--space-2) var(--space-3);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg-sunken);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-style: italic;
+}

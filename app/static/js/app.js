@@ -61,5 +61,24 @@
     });
   }
 
+  /* ------------------------------------------------- broken question images */
+  // Question images live on a third-party CDN and can disappear. When one fails
+  // to load, replace it with a note so the question is not silently unanswerable.
+  document.addEventListener(
+    "error",
+    (event) => {
+      const img = event.target;
+      if (!img || img.tagName !== "IMG") return;
+      if (!img.closest(".question-text, .choice-text, .question-figure")) return;
+      if (img.dataset.fallbackApplied) return;
+      img.dataset.fallbackApplied = "1";
+
+      const note = el("span", "img-missing", "Diagram unavailable");
+      note.title = "This image could not be loaded from the question source.";
+      img.replaceWith(note);
+    },
+    true // capture: image load errors do not bubble
+  );
+
   window.QuizApp = { apiFetch, el };
 })();

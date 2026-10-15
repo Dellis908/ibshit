@@ -206,3 +206,80 @@ def normalize_topic(value: str | None) -> str | None:
         if score > best_score:
             best_slug, best_score = spec.slug, score
     return best_slug if best_score > 0 else None
+
+
+# ---------------------------------------------------------------------------
+# IB Biology 2025 syllabus (first assessment 2025)
+#
+# The catalogue above follows the legacy "topic" naming used by the original
+# app. The 2025 guide restructures the same biology into four themes (A-D);
+# these entries map the revisiondojo-style question banks onto that structure
+# so imported questions get real titles instead of raw slugs.
+# ---------------------------------------------------------------------------
+
+@dataclass(frozen=True)
+class SyllabusTopic:
+    """One 2025-syllabus subtopic."""
+
+    slug: str
+    ref: str
+    title: str
+    theme: str
+    description: str = ""
+
+    @property
+    def full_title(self) -> str:
+        return f"{self.ref} {self.title}"
+
+
+#: Every subtopic in the 2025 guide, in syllabus order.
+NEW_SYLLABUS_TOPICS: tuple[SyllabusTopic, ...] = (
+    # A — Unity and Diversity
+    SyllabusTopic("bio-a11-water", "A1.1", "Water", 'A — Unity and Diversity', 'Molecules, cells, organisms and the diversity of life.'),
+    SyllabusTopic("bio-a12-nucleic-acids", "A1.2", "Nucleic Acids", 'A — Unity and Diversity', 'Molecules, cells, organisms and the diversity of life.'),
+    SyllabusTopic("bio-a21-origins-of-cells-hl", "A2.1", "Origins of Cells", 'A — Unity and Diversity', 'Molecules, cells, organisms and the diversity of life.'),
+    SyllabusTopic("bio-a22-cell-structure", "A2.2", "Cell Structure", 'A — Unity and Diversity', 'Molecules, cells, organisms and the diversity of life.'),
+    SyllabusTopic("bio-a23-viruses-hl", "A2.3", "Viruses", 'A — Unity and Diversity', 'Molecules, cells, organisms and the diversity of life.'),
+    SyllabusTopic("bio-a31-diversity-of-organisms", "A3.1", "Diversity of Organisms", 'A — Unity and Diversity', 'Molecules, cells, organisms and the diversity of life.'),
+    SyllabusTopic("bio-a32-classification-and-cladistics-hl", "A3.2", "Classification and Cladistics", 'A — Unity and Diversity', 'Molecules, cells, organisms and the diversity of life.'),
+    SyllabusTopic("bio-a41-evolution-and-speciation", "A4.1", "Evolution and Speciation", 'A — Unity and Diversity', 'Molecules, cells, organisms and the diversity of life.'),
+    SyllabusTopic("bio-a42-conservation-of-biodiversity", "A4.2", "Conservation of Biodiversity", 'A — Unity and Diversity', 'Molecules, cells, organisms and the diversity of life.'),
+    # B — Form and Function
+    SyllabusTopic("bio-b11-carbohydrates-and-lipids", "B1.1", "Carbohydrates and Lipids", 'B — Form and Function', 'How biological structures carry out their functions.'),
+    SyllabusTopic("bio-b12-proteins", "B1.2", "Proteins", 'B — Form and Function', 'How biological structures carry out their functions.'),
+    SyllabusTopic("bio-b21-membranes-and-membrane-transport", "B2.1", "Membranes and Membrane Transport", 'B — Form and Function', 'How biological structures carry out their functions.'),
+    SyllabusTopic("bio-b22-organelles-and-compartmentalization", "B2.2", "Organelles and Compartmentalization", 'B — Form and Function', 'How biological structures carry out their functions.'),
+    SyllabusTopic("bio-b23-cell-specialization", "B2.3", "Cell Specialization", 'B — Form and Function', 'How biological structures carry out their functions.'),
+    SyllabusTopic("bio-b31-gas-exchange", "B3.1", "Gas Exchange", 'B — Form and Function', 'How biological structures carry out their functions.'),
+    SyllabusTopic("bio-b32-transport", "B3.2", "Transport", 'B — Form and Function', 'How biological structures carry out their functions.'),
+    SyllabusTopic("bio-b33-muscle-and-motility-hl", "B3.3", "Muscle and Motility", 'B — Form and Function', 'How biological structures carry out their functions.'),
+    SyllabusTopic("bio-b41-adaptation-to-environment", "B4.1", "Adaptation to Environment", 'B — Form and Function', 'How biological structures carry out their functions.'),
+    SyllabusTopic("bio-b42-ecological-niches", "B4.2", "Ecological Niches", 'B — Form and Function', 'How biological structures carry out their functions.'),
+    # C — Interaction and Interdependence
+    SyllabusTopic("bio-c11-enzymes-and-metabolism", "C1.1", "Enzymes and Metabolism", 'C — Interaction and Interdependence', 'How organisms interact with each other and their environment.'),
+    SyllabusTopic("bio-c12-cell-respiration", "C1.2", "Cell Respiration", 'C — Interaction and Interdependence', 'How organisms interact with each other and their environment.'),
+    SyllabusTopic("bio-c13-photosynthesis", "C1.3", "Photosynthesis", 'C — Interaction and Interdependence', 'How organisms interact with each other and their environment.'),
+    SyllabusTopic("bio-c21-chemical-signalling-hl", "C2.1", "Chemical Signalling", 'C — Interaction and Interdependence', 'How organisms interact with each other and their environment.'),
+    SyllabusTopic("bio-c22-neural-signalling", "C2.2", "Neural Signalling", 'C — Interaction and Interdependence', 'How organisms interact with each other and their environment.'),
+    SyllabusTopic("bio-c31-integration-of-body-systems", "C3.1", "Integration of Body Systems", 'C — Interaction and Interdependence', 'How organisms interact with each other and their environment.'),
+    SyllabusTopic("bio-c32-defense-against-disease", "C3.2", "Defence against Disease", 'C — Interaction and Interdependence', 'How organisms interact with each other and their environment.'),
+    SyllabusTopic("bio-c41-populations-and-communities", "C4.1", "Populations and Communities", 'C — Interaction and Interdependence', 'How organisms interact with each other and their environment.'),
+    SyllabusTopic("bio-c42-transfer-of-energy-and-matter", "C4.2", "Transfer of Energy and Matter", 'C — Interaction and Interdependence', 'How organisms interact with each other and their environment.'),
+    # D — Continuity and Change
+    SyllabusTopic("bio-d11-dna-replication", "D1.1", "DNA Replication", 'D — Continuity and Change', 'Reproduction, inheritance, evolution and change over time.'),
+    SyllabusTopic("bio-d12-protein-synthesis", "D1.2", "Protein Synthesis", 'D — Continuity and Change', 'Reproduction, inheritance, evolution and change over time.'),
+    SyllabusTopic("bio-d13-mutations-and-gene-editing", "D1.3", "Mutations and Gene Editing", 'D — Continuity and Change', 'Reproduction, inheritance, evolution and change over time.'),
+    SyllabusTopic("bio-d21-cell-and-nuclear-division", "D2.1", "Cell and Nuclear Division", 'D — Continuity and Change', 'Reproduction, inheritance, evolution and change over time.'),
+    SyllabusTopic("bio-d22-gene-expression-hl", "D2.2", "Gene Expression", 'D — Continuity and Change', 'Reproduction, inheritance, evolution and change over time.'),
+    SyllabusTopic("bio-d23-water-potential", "D2.3", "Water Potential", 'D — Continuity and Change', 'Reproduction, inheritance, evolution and change over time.'),
+    SyllabusTopic("bio-d31-reproduction", "D3.1", "Reproduction", 'D — Continuity and Change', 'Reproduction, inheritance, evolution and change over time.'),
+    SyllabusTopic("bio-d32-inheritance", "D3.2", "Inheritance", 'D — Continuity and Change', 'Reproduction, inheritance, evolution and change over time.'),
+    SyllabusTopic("bio-d33-homeostasis", "D3.3", "Homeostasis", 'D — Continuity and Change', 'Reproduction, inheritance, evolution and change over time.'),
+    SyllabusTopic("bio-d41-natural-selection", "D4.1", "Natural Selection", 'D — Continuity and Change', 'Reproduction, inheritance, evolution and change over time.'),
+    SyllabusTopic("bio-d42-sustainability-and-change", "D4.2", "Sustainability and Change", 'D — Continuity and Change', 'Reproduction, inheritance, evolution and change over time.'),
+    SyllabusTopic("bio-d43-climate-change", "D4.3", "Climate Change", 'D — Continuity and Change', 'Reproduction, inheritance, evolution and change over time.'),
+)
+
+
+NEW_SYLLABUS_BY_SLUG: dict[str, SyllabusTopic] = {t.slug: t for t in NEW_SYLLABUS_TOPICS}
+

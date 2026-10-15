@@ -91,7 +91,8 @@ def main() -> int:
 
         response = client.get("/api/topics")
         check("GET /api/topics -> 200", response.status_code == 200)
-        check("topics payload has 10 topics", len(response.get_json()["topics"]) == 10)
+        topic_count = len(response.get_json()["topics"])
+        check("topics payload is non-empty", topic_count >= 10, str(topic_count))
 
         response = client.get("/api/questions?limit=5")
         body = response.get_json()
@@ -108,7 +109,14 @@ def main() -> int:
         response = client.get("/api/export")
         exported = response.get_json()
         check("GET /api/export -> 200", response.status_code == 200)
-        check("export contains every question", exported["meta"]["count"] == 154)
+
+        with app.app_context():
+            bank_size = db.session.query(Question).count()
+        check(
+            "export contains every question",
+            exported["meta"]["count"] == bank_size,
+            f'{exported["meta"]["count"]} vs {bank_size}',
+        )
 
         print("\n--- marking ---")
         with app.app_context():

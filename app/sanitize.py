@@ -24,6 +24,7 @@ ALLOWED_TAGS: frozenset[str] = frozenset(
     {
         "sub", "sup", "b", "strong", "i", "em", "u", "br", "p", "span",
         "ul", "ol", "li", "table", "tr", "td", "th", "thead", "tbody",
+        "img",
     }
 )
 
@@ -39,7 +40,14 @@ ALLOWED_GLOBAL_ATTRS: frozenset[str] = frozenset({"class"})
 ALLOWED_TAG_ATTRS: dict[str, frozenset[str]] = {
     "td": frozenset({"colspan", "rowspan"}),
     "th": frozenset({"colspan", "rowspan", "scope"}),
+    "img": frozenset({"src", "alt"}),
 }
+
+#: Hosts an <img> in question content may point at. Anything else (including
+#: protocol-relative and data: URLs) is dropped.
+ALLOWED_IMAGE_HOSTS: frozenset[str] = frozenset(
+    {"pub-images.revisiondojo.com", "localhost", "127.0.0.1"}
+)
 
 _DANGEROUS_URL_RE = re.compile(r"^\s*(javascript|vbscript|data|file)\s*:", re.IGNORECASE)
 _WS_RE = re.compile(r"[ \t\r\f\v]+")
@@ -120,6 +128,8 @@ class _Sanitizer(HTMLParser):
                 continue
             if _DANGEROUS_URL_RE.match(value):
                 continue
+            if name == "src" and not _image_src_allowed(value):
+                continue
             parts.append(f' {name}="{html.escape(value, quote=True)}"')
         return "".join(parts)
 
@@ -128,6 +138,39 @@ class _Sanitizer(HTMLParser):
         while self._open:
             self._out.append(f"</{self._open.pop()}>")
         return "".join(self._out)
+
+
+def _image_src_allowed(value: str) -> bool:
+    """Whether an image URL is safe and on an allowed host."""
+    from urllib.parse import urlparse
+
+    try:
+        parsed = urlparse(value.strip())
+    except ValueError:
+        return False
+    if parsed.scheme not in {"http", "https"}:
+        return False
+    host = (parsed.hostname or "").lower()
+    if not host:
+        return False
+    return any(host == allowed or host.endswith("." + allowed) for allowed in ALLOWED_IMAGE_HOSTS)
+
+
+def text_with_images(value: str | None) -> str:
+    """Plain text, but with image URLs preserved.
+
+    Used when deciding whether two options are genuinely different: image-based
+    choices carry no words, so their URLs are the only distinguishing feature.
+    """
+    if not value:
+        return ""
+    expanded = re.sub(
+        r"<img[^>]*src=['\"]([^'\"]+)['\"][^>]*>",
+        lambda m: f" [image:{m.group(1)}] ",
+        str(value),
+        flags=re.IGNORECASE,
+    )
+    return re.sub(r"\s+", " ", _strip_tags(expanded)).strip()
 
 
 def sanitize_html(value: str | None) -> str:

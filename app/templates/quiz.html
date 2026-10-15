@@ -61,7 +61,7 @@
         </span>
       </header>
 
-      <div class="question-text">{{ q.question_text | safe }}</div>
+      <div class="question-text">{{ q.question_text | mirror_images | safe }}</div>
 
       {% if q.image_path %}
         <figure class="question-figure">
@@ -77,7 +77,7 @@
               <label class="choice">
                 <input type="radio" name="q{{ q.id }}" value="{{ choice }}" data-answer>
                 <span class="choice-marker" aria-hidden="true">{{ 'ABCDEFGH'[loop.index0] }}</span>
-                <span class="choice-text">{{ choice }}</span>
+                <span class="choice-text">{{ choice | mirror_images | safe }}</span>
               </label>
             {% endfor %}
           </fieldset>

@@ -22,6 +22,9 @@ from __future__ import annotations
 import hmac
 import secrets
 
+from pathlib import Path
+from urllib.parse import urlparse
+
 from flask import Blueprint, current_app, jsonify, request, session
 
 from app import grading
@@ -401,3 +404,91 @@ def import_bank():
             "per_topic": report.per_topic,
         }
     )
+
+# ---------------------------------------------------------------- image proxy
+
+#: Content types we are willing to mirror, and a hard size ceiling.
+IMAGE_CONTENT_TYPES = {
+    "image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif", "image/svg+xml"
+}
+MAX_IMAGE_BYTES = 6 * 1024 * 1024
+
+
+def _image_cache_dir() -> Path:
+    directory = Path(current_app.config["BASE_DIR"]) / "instance" / "images"
+    directory.mkdir(parents=True, exist_ok=True)
+    return directory
+
+
+def _is_allowed_image_url(url: str) -> bool:
+    """Only mirror https images from hosts we recognise."""
+    from urllib.parse import urlparse
+
+    from app.sanitize import _image_src_allowed
+
+    if not _image_src_allowed(url):
+        return False
+    return urlparse(url).scheme == "https"
+
+
+@api.get("/image")
+def proxy_image():
+    """Serve a question image, mirroring it locally on first use.
+
+    Question banks host their diagrams on a third-party CDN. Proxying them keeps
+    quizzes working when that CDN is slow or unreachable, avoids leaking the
+    reader's IP to a third party, and lets the browser cache them. Only hosts on
+    the allow-list are fetched, so this cannot be used as an open proxy.
+    """
+    import hashlib
+    import mimetypes
+    import urllib.error
+    import urllib.request
+
+    from flask import Response, abort
+
+    url = (request.args.get("url") or "").strip()
+    if not url:
+        abort(400, "url is required")
+    if not _is_allowed_image_url(url):
+        abort(403, "image host is not allowed")
+
+    digest = hashlib.sha256(url.encode("utf-8")).hexdigest()[:32]
+    suffix = Path(urlparse(url).path).suffix.lower()
+    if suffix not in {".jpg", ".jpeg", ".png", ".webp", ".gif", ".svg"}:
+        suffix = ".img"
+    cached = _image_cache_dir() / f"{digest}{suffix}"
+
+    content_type = None
+    if cached.exists() and cached.stat().st_size > 0:
+        payload = cached.read_bytes()
+        content_type = mimetypes.guess_type(str(cached))[0]
+    else:
+        upstream = urllib.request.Request(
+            url,
+            headers={
+                "User-Agent": "Mozilla/5.0 (compatible; ib-biology-revision/1.0)",
+                "Accept": "image/*,*/*;q=0.8",
+            },
+        )
+        try:
+            with urllib.request.urlopen(upstream, timeout=15) as response:
+                content_type = (response.headers.get("Content-Type") or "").split(";")[0].strip()
+                if content_type and content_type not in IMAGE_CONTENT_TYPES:
+                    abort(415, "upstream did not return an image")
+                payload = response.read(MAX_IMAGE_BYTES + 1)
+        except urllib.error.HTTPError:
+            abort(502, "image is unavailable upstream")
+        except Exception:
+            abort(502, "image could not be fetched")
+
+        if len(payload) > MAX_IMAGE_BYTES:
+            abort(413, "image is too large to mirror")
+        try:
+            cached.write_bytes(payload)
+        except OSError:  # pragma: no cover - read-only filesystem
+            pass
+
+    response = Response(payload, mimetype=content_type or "application/octet-stream")
+    response.headers["Cache-Control"] = "public, max-age=604800, immutable"
+    return response

@@ -72,7 +72,7 @@
         </header>
 
         {% if question %}
-          <div class="question-text">{{ question.question_text | safe }}</div>
+          <div class="question-text">{{ question.question_text | mirror_images | safe }}</div>
         {% endif %}
 
         <dl class="answer-compare">

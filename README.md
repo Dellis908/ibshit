@@ -43,13 +43,13 @@ docker compose up --build          # http://localhost:8000
 
 | Area | What you get |
 | --- | --- |
-| **Question bank** | 154 questions across 10 topics — cell biology, molecular biology, genetics, ecology, evolution & biodiversity, human physiology, nucleic acids, metabolism/respiration/photosynthesis, plant biology, data analysis |
+| **Question bank** | 154 built-in questions across 10 topics, plus an importer that pulls the complete 2025 syllabus (A1.1 → D4.3) from the rdojo bank |
 | **Question types** | Multiple choice, true/false, calculation, and written answers with multi-point mark schemes |
 | **Six study modes** | Practice, Timed, Exam simulation, Weak topics, Never attempted, Random mix |
 | **Marking** | Instant marking, partial credit, per-marking-point feedback, and a self-marking panel for longer prose |
 | **Progress** | Per-topic accuracy and coverage, recent answers, resettable history |
 | **API** | JSON endpoints for every page, plus import/export of the whole bank |
-| **Optional scraper** | A pipeline that turns PDFs you are entitled to use into importable questions |
+| **Optional importers** | Turn the rdojo question bank (JSON + Git LFS) or your own PDFs into importable questions |
 
 ### Study modes
 
@@ -205,7 +205,7 @@ app/
   cli.py           the `flask quiz` command group
   templates/       Jinja templates
   static/          stylesheet, quiz runner, shared JS
-scraper/           optional PDF -> JSON pipeline (see below)
+scraper/           optional importers: rdojo bank + PDF pipeline (see below)
 seed/              questions.json — the bundled question bank
 scripts/           smoke_test.py — end-to-end route check
 tests/             pytest suite
@@ -213,17 +213,73 @@ tests/             pytest suite
 
 ---
 
-## Optional: scraping your own material
+## Importing more questions
 
-The `scraper/` package turns topic-question PDFs into the JSON format above. It
-is **not needed to run the app** and its dependencies are kept separate.
+Two importers are included. Neither is needed to run the app; the built-in 154
+questions work out of the box.
+
+### The rdojo question bank (recommended)
+
+`git.pirateib.sh/pirateIB/rdojo` publishes a complete IB Biology bank for the
+2025 syllabus as JSON stored in Git LFS. `scraper/rdojo_import.py` resolves the
+LFS pointers, downloads the banks and converts them into the import format:
+
+```bash
+python -m scraper.rdojo_import list                     # the 40 subtopics
+python -m scraper.rdojo_import fetch --limit 3          # try a few topics
+python -m scraper.rdojo_import fetch --check-images     # the full bank
+flask quiz check seed/rdojo.json
+flask quiz import seed/rdojo.json
+```
+
+A full run converts roughly **2,240 questions across 40 subtopics** and takes a
+couple of minutes. Everything is cached under `data/rdojo/`, so re-running only
+re-does what changed.
+
+What the converter does:
+
+| Upstream | Here |
+| --- | --- |
+| `questionType: MC` (4 options, one marked correct) | a `multiple_choice` question |
+| `questionType: LA` (multi-part, `markscheme` with `<marks>n marks</marks>`) | one `short_answer` per part, one marking point per `;` so partial credit works |
+| LaTeX (`$CO_2$`, `\frac`, `\rightarrow`) and Markdown | HTML the templates render |
+| `difficulty` 1–8 | easy / medium / hard |
+| `labeledSubSubTopics` (`A1.1.4`) | tags plus a real syllabus topic |
+
+Three data-quality problems are handled automatically, because the upstream data
+has them:
+
+- **Cross-topic duplicates.** The same question is listed under several related
+  subtopics. Duplicates are dropped so a mixed quiz never shows one twice.
+- **Dead images.** Around 96% of the referenced image URLs now return 404. With
+  `--check-images` every URL is probed first: broken tags are stripped, and
+  questions that genuinely needed the diagram are dropped rather than shipped
+  unanswerable. The result contains **no reference to a missing figure or table**.
+- **Same stem, different question.** Two entries can share a stem with different
+  options or marks. The deduplication key includes the answer, the options and
+  the mark allocation, so a legitimate question is never dropped.
+
+Two things to know about this source:
+
+- **It is third-party content with no licence granted.** `seed/rdojo.json` is
+  therefore **gitignored by default** — the fetch command rebuilds it locally in
+  a couple of minutes, but it is not redistributed through this repository. If
+  you own the rights or have permission, remove that line from `.gitignore` to
+  commit it.
+- The upstream bank is a snapshot. Re-running `fetch --refresh` picks up changes,
+  and `--check-images` re-verifies the images each time.
+
+### Your own PDFs
+
+The `scraper/` package also turns topic-question PDFs into the same format. Its
+dependencies are deliberately separate:
 
 ```bash
 pip install -r scraper/requirements.txt
 
 python -m scraper.scrape links       # list PDFs found on the source page
 python -m scraper.scrape download    # download them (cached)
-python -m scraper.scrape parse       # extract text (needs pdfplumber or PyMuPDF)
+python -m scraper.scrape parse       # extract text (pdfplumber or PyMuPDF)
 python -m scraper.scrape build       # text -> seed/scraped.json + review file
 python -m scraper.scrape all         # the whole pipeline
 ```
@@ -241,13 +297,10 @@ Each stage caches its output and is resumable. Every generated question carries 
 `*.review.md` file listing the low-confidence ones — review before trusting
 them, because PDF question extraction is inherently messy.
 
-> **Use it responsibly.** Automated access may breach a site's terms of service,
-> and topic-question PDFs are usually copyrighted. The pipeline only reads pages
-> the way a browser would; what you point it at and what you do with the output
-> is your responsibility. The bundled bank is original material written for this
-> project precisely so the app is useful without scraping anything.
-
----
+> **Use these responsibly.** Automated access may breach a site's terms of
+> service, and question banks are usually copyrighted. The importers only read
+> public sources the way a browser would; what you point them at and what you do
+> with the output is your responsibility.
 
 ## Configuration
 

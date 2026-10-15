@@ -19,6 +19,12 @@ instance/
 data/pdfs/
 data/extracted/
 
+# Content fetched from git.pirateib.sh (third-party, no licence granted).
+# Regenerate locally with: python -m scraper.rdojo_import fetch --check-images
+seed/rdojo.json
+data/rdojo/
+instance/images/
+
 # OS / editors
 .DS_Store
 .idea/

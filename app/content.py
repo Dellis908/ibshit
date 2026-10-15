@@ -36,8 +36,13 @@ from pathlib import Path
 
 from app.extensions import db
 from app.models import DIFFICULTIES, QUESTION_TYPES, Question, Topic
-from app.sanitize import sanitize_html, sanitize_plain, to_plain_text
-from app.topics import TOPIC_CATALOGUE, TOPICS_BY_SLUG, normalize_topic
+from app.sanitize import sanitize_html, sanitize_plain, text_with_images, to_plain_text
+from app.topics import (
+    NEW_SYLLABUS_BY_SLUG,
+    TOPIC_CATALOGUE,
+    TOPICS_BY_SLUG,
+    normalize_topic,
+)
 
 #: Characters that survive normalisation when fingerprinting question text.
 _FINGERPRINT_RE = re.compile(r"[^a-z0-9 ]+")
@@ -99,8 +104,59 @@ def sync_topics() -> int:
         topic.description = spec.description
         topic.syllabus_ref = spec.syllabus_ref
         topic.position = position
+
+    # The 2025-syllabus subtopics are created up front as well, so imported
+    # questions attach to a topic that already has its proper title.
+    for offset, spec in enumerate(NEW_SYLLABUS_BY_SLUG.values()):
+        existing = db.session.query(Topic).filter_by(slug=spec.slug).one_or_none()
+        if existing is None:
+            db.session.add(
+                Topic(
+                    slug=spec.slug,
+                    title=spec.full_title,
+                    short_title=spec.ref,
+                    description=f"{spec.title} — {spec.theme}.",
+                    syllabus_ref=spec.ref,
+                    position=len(TOPIC_CATALOGUE) + offset,
+                )
+            )
+            created += 1
+
     db.session.flush()
     return created
+
+
+def _syllabus_topic(slug: str) -> tuple[Topic, bool] | None:
+    """Return the 2025-syllabus topic for an exact catalogue slug.
+
+    This runs before fuzzy matching: a slug such as ``bio-b32-transport``
+    contains the word "transport", and keyword scoring would otherwise file it
+    under the legacy "cell-biology" topic.
+    """
+    spec = NEW_SYLLABUS_BY_SLUG.get(slug)
+    if spec is None:
+        return None
+
+    topic = db.session.query(Topic).filter_by(slug=spec.slug).one_or_none()
+    if topic is None:
+        position = len(TOPIC_CATALOGUE) + list(NEW_SYLLABUS_BY_SLUG).index(spec.slug)
+        topic = Topic(
+            slug=spec.slug,
+            title=spec.full_title,
+            short_title=spec.ref,
+            description=f"{spec.title} — {spec.theme}.",
+            syllabus_ref=spec.ref,
+            position=position,
+        )
+        db.session.add(topic)
+        db.session.flush()
+        return topic, True
+
+    # Keep catalogue metadata authoritative for existing rows.
+    topic.title = spec.full_title
+    topic.short_title = topic.short_title or spec.ref
+    topic.syllabus_ref = spec.ref
+    return topic, False
 
 
 def get_or_create_topic(slug_or_text: str) -> tuple[Topic, bool]:
@@ -109,6 +165,11 @@ def get_or_create_topic(slug_or_text: str) -> tuple[Topic, bool]:
     Unknown text is mapped onto a catalogue slug when possible; otherwise it is
     stored as an ad-hoc topic so that scraped material is never silently lost.
     """
+    # Exact 2025-syllabus slugs win over fuzzy matching.
+    exact = _syllabus_topic(str(slug_or_text or "").strip())
+    if exact is not None:
+        return exact
+
     slug = normalize_topic(slug_or_text)
     if slug:
         topic = db.session.query(Topic).filter_by(slug=slug).one_or_none()
@@ -142,10 +203,33 @@ def get_or_create_topic(slug_or_text: str) -> tuple[Topic, bool]:
 
 # ----------------------------------------------------------------- fingerprint
 
-def fingerprint(text: str) -> str:
-    """A stable hash of normalised question text, used to detect duplicates."""
-    normalised = _WS_RE.sub(" ", _FINGERPRINT_RE.sub(" ", (text or "").lower())).strip()
+def fingerprint(
+    text: str,
+    *,
+    answer: str | None = None,
+    choices: list[str] | None = None,
+    marks: int | None = None,
+) -> str:
+    """A stable hash used to detect duplicate questions.
+
+    The stem alone is not enough: two questions can share a stem while having
+    different options or mark allocations (which happens in real banks), and
+    treating those as duplicates would silently drop a legitimate question. The
+    answer, the options and the mark allocation are therefore part of the hash.
+    """
+    parts = [_normalise_for_hash(text)]
+    if answer is not None:
+        parts.append(_normalise_for_hash(answer))
+    if choices:
+        parts.append("|".join(sorted(_normalise_for_hash(c) for c in choices)))
+    if marks is not None:
+        parts.append(str(marks))
+    normalised = "\u0000".join(parts)
     return hashlib.sha256(normalised.encode("utf-8")).hexdigest()
+
+
+def _normalise_for_hash(value: str | None) -> str:
+    return _WS_RE.sub(" ", _FINGERPRINT_RE.sub(" ", (value or "").lower())).strip()
 
 
 # ------------------------------------------------------------------ validation
@@ -162,7 +246,7 @@ def validate_question(raw: dict, index: int) -> list[str]:
     if len(text) < 5:
         problems.append(f"{label}: question_text is missing or too short")
 
-    correct = to_plain_text(raw.get("correct_answer") or raw.get("answer") or "")
+    correct = text_with_images(raw.get("correct_answer") or raw.get("answer") or "")
     if not correct:
         problems.append(f"{label}: correct_answer is missing")
 
@@ -187,7 +271,9 @@ def validate_question(raw: dict, index: int) -> list[str]:
         if not isinstance(choices, list) or len(choices) < 2:
             problems.append(f"{label}: multiple_choice needs at least 2 choices")
         else:
-            cleaned = [to_plain_text(c) for c in choices]
+            # Image-based options carry no words, so their URLs must survive the
+            # comparison or four distinct images would look like duplicates.
+            cleaned = [text_with_images(c) for c in choices]
             if len(set(cleaned)) != len(cleaned):
                 problems.append(f"{label}: duplicate choices")
             if correct and correct not in cleaned:
@@ -249,7 +335,9 @@ def build_question(raw: dict, *, topic_slug: str | None = None, source: str | No
         "tags_json": json.dumps(tags, ensure_ascii=False),
         "image_path": sanitize_plain(raw.get("image_path") or "") or None,
         "source": source or sanitize_plain(raw.get("source") or "") or None,
-        "fingerprint": fingerprint(question_text),
+        "fingerprint": fingerprint(
+            question_text, answer=correct_answer, choices=choices, marks=marks
+        ),
         "topic_slug": topic_slug or raw.get("topic"),
     }
 
