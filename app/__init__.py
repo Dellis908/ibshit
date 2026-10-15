@@ -17,7 +17,7 @@ from pathlib import Path
 
 from flask import Flask, jsonify, render_template
 
-from app.config import get_config
+from app.config import apply_environment, get_config
 from app.extensions import db
 
 __all__ = ["create_app", "db"]
@@ -28,10 +28,16 @@ def create_app(config_name: str | None = None) -> Flask:
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_object(get_config(config_name))
 
+    # Resolve environment-dependent settings now, so the same process can create
+    # differently configured apps (and tests can change the environment).
+    apply_environment(app, testing=app.config.get("TESTING", False))
+
     # The instance folder holds the local SQLite database.
     Path(app.instance_path).mkdir(parents=True, exist_ok=True)
 
+    _check_configuration(app)
     _init_extensions(app)
+    _init_proxy_support(app)
     _register_blueprints(app)
     _register_template_helpers(app)
     _register_cli(app)
@@ -42,8 +48,50 @@ def create_app(config_name: str | None = None) -> Flask:
     return app
 
 
+def _check_configuration(app: Flask) -> None:
+    """Fail fast, and legibly, on a misconfigured deployment.
+
+    A missing SECRET_KEY otherwise surfaces as a stack trace on the first
+    request that touches the session, which is a confusing way to learn that an
+    environment file is wrong. Production deliberately rejects the development
+    placeholder.
+    """
+    if app.config.get("TESTING"):
+        return
+
+    secret = app.config.get("SECRET_KEY")
+    if not secret:
+        raise RuntimeError(
+            "SECRET_KEY is not set. Generate one and make it available to the "
+            "app, e.g.\n"
+            "  echo \"SECRET_KEY=$(openssl rand -hex 32)\" >> /etc/ibshit.env\n"
+            "then restart the service. See DEPLOY.md step 4."
+        )
+
+    if not app.config.get("DEBUG") and secret == "dev-secret-change-me":
+        raise RuntimeError(
+            "SECRET_KEY is still the development placeholder. Set a real value "
+            "before running in production. See DEPLOY.md step 4."
+        )
+
+
 def _init_extensions(app: Flask) -> None:
     db.init_app(app)
+
+
+def _init_proxy_support(app: Flask) -> None:
+    """Trust ``X-Forwarded-*`` headers when explicitly configured.
+
+    This is off by default: if the app is reachable directly, trusting a client
+    supplied ``X-Forwarded-Proto`` would let anyone claim their request is HTTPS.
+    Turn it on with ``TRUST_PROXY_HEADERS=1`` only when a reverse proxy you
+    control sets those headers.
+    """
+    if not app.config.get("TRUST_PROXY_HEADERS"):
+        return
+    from werkzeug.middleware.proxy_fix import ProxyFix
+
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
 
 
 def _register_blueprints(app: Flask) -> None:

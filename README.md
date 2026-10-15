@@ -335,6 +335,11 @@ gunicorn --workers 4 --bind 0.0.0.0:8000 wsgi:app
 deployment needs no migration step. Behind a reverse proxy, terminate TLS there
 and set `SECRET_KEY` plus (ideally) a Postgres `DATABASE_URL`.
 
+**Full walkthrough:** see [DEPLOY.md](DEPLOY.md) for a step-by-step Debian 13
+setup (systemd, nginx, HTTPS, PostgreSQL, backups, troubleshooting). Ready-made
+config files live in [`deploy/`](deploy), and
+`sudo bash deploy/bootstrap-debian.sh your.domain` automates the whole thing.
+
 ---
 
 ## Credits and licensing

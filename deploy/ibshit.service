@@ -1,0 +1,63 @@
+# systemd unit for the IB Biology revision app.
+#
+# Install to /etc/systemd/system/ibshit.service, then:
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now ibshit
+#
+# Assumes the app lives in /srv/ibshit with a virtualenv at /srv/ibshit/.venv
+# and secrets in /etc/ibshit.env (see deploy/ibshit.env.example).
+
+[Unit]
+Description=IB Biology revision app (gunicorn)
+Documentation=https://github.com/Dellis908/ibshit
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=notify
+User=ibshit
+Group=ibshit
+WorkingDirectory=/srv/ibshit
+
+# Secrets and configuration live outside the repo, readable only by the service
+# account and root.
+EnvironmentFile=/etc/ibshit.env
+
+# Bind to a unix socket; nginx proxies to it. Avoids exposing a TCP port.
+ExecStart=/srv/ibshit/.venv/bin/gunicorn \
+    --bind unix:/run/ibshit/gunicorn.sock \
+    --workers 3 \
+    --threads 2 \
+    --timeout 60 \
+    --graceful-timeout 30 \
+    --access-logfile - \
+    --error-logfile - \
+    wsgi:app
+
+# The runtime directory (for the socket) is created and removed by systemd.
+RuntimeDirectory=ibshit
+RuntimeDirectoryMode=0750
+
+Restart=on-failure
+RestartSec=3
+KillMode=mixed
+TimeoutStopSec=30
+
+# --- hardening -------------------------------------------------------------
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictRealtime=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+# The app must be able to write its SQLite database and the image cache.
+ReadWritePaths=/srv/ibshit/instance
+
+[Install]
+WantedBy=multi-user.target

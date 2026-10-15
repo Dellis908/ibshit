@@ -38,29 +38,46 @@ def _database_uri() -> str:
 
 
 class Config:
-    """Base configuration shared by every environment."""
+    """Base configuration shared by every environment.
+
+    Environment-dependent values are resolved by :func:`apply_environment` when
+    the app is created, not when this module is imported. Reading them at import
+    time would freeze configuration for the whole process, which makes the
+    settings untestable and ignores changes made later.
+
+    The attributes below are the defaults; the environment overrides them.
+    """
 
     BASE_DIR = BASE_DIR
 
-    SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-change-me")
+    #: Overridden by SECRET_KEY; production refuses to start without it.
+    SECRET_KEY = "dev-secret-change-me"
 
-    SQLALCHEMY_DATABASE_URI = _database_uri()
+    SQLALCHEMY_DATABASE_URI = f"sqlite:///{BASE_DIR / 'instance' / 'quiz.db'}"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ENGINE_OPTIONS = {"pool_pre_ping": True}
 
-    # Paths
-    DATA_DIR = Path(os.getenv("QUIZ_DATA_DIR", BASE_DIR / "data"))
-    SEED_FILE = Path(os.getenv("QUIZ_SEED_FILE", BASE_DIR / "seed" / "questions.json"))
+    DATA_DIR = BASE_DIR / "data"
+    SEED_FILE = BASE_DIR / "seed" / "questions.json"
 
-    # Grading / quiz behaviour
-    FUZZY_THRESHOLD = float(os.getenv("QUIZ_FUZZY_THRESHOLD", 72))
-    NUMERIC_TOLERANCE = float(os.getenv("QUIZ_NUMERIC_TOLERANCE", 0.01))
-    DEFAULT_QUESTION_COUNT = int(os.getenv("QUIZ_DEFAULT_COUNT", 10))
-    MAX_QUESTION_COUNT = int(os.getenv("QUIZ_MAX_COUNT", 60))
+    FUZZY_THRESHOLD = 72.0
+    NUMERIC_TOLERANCE = 0.01
+    DEFAULT_QUESTION_COUNT = 10
+    MAX_QUESTION_COUNT = 60
+    QUIZ_SECONDS_PER_MARK = 60
 
-    # Uploads / imports
-    MAX_CONTENT_LENGTH = int(os.getenv("QUIZ_MAX_UPLOAD_BYTES", 8 * 1024 * 1024))
+    MAX_CONTENT_LENGTH = 8 * 1024 * 1024
     JSON_SORT_KEYS = False
+
+    # Session cookie hardening; SECURE is opt-in for HTTPS deployments.
+    SESSION_COOKIE_SECURE = False
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = "Lax"
+    PREFERRED_URL_SCHEME = "http"
+    TRUST_PROXY_HEADERS = False
+
+    #: When set, /api/import and /api/export require an X-API-Key header.
+    API_KEY = None
 
 
 class DevelopmentConfig(Config):
@@ -71,15 +88,15 @@ class DevelopmentConfig(Config):
 class TestingConfig(Config):
     TESTING = True
     DEBUG = False
-    WTF_CSRF_ENABLED = False
     SQLALCHEMY_DATABASE_URI = "sqlite://"  # in-memory
     SQLALCHEMY_ENGINE_OPTIONS = {}
 
 
 class ProductionConfig(Config):
     DEBUG = False
-    # Fail loudly in production if the operator forgot to set a real secret.
-    SECRET_KEY = os.getenv("SECRET_KEY") or ""
+    # Deliberately empty: _check_configuration turns this into a clear error
+    # rather than letting the app run with a guessable session key.
+    SECRET_KEY = ""
 
 
 CONFIGS = {
@@ -95,3 +112,63 @@ def get_config(name: str | None = None):
     if name is None:
         name = os.getenv("FLASK_ENV", "default")
     return CONFIGS.get(name, DevelopmentConfig)
+
+
+def _flag(name: str, default: bool = False) -> bool:
+    value = os.getenv(name)
+    if value is None:
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _number(name: str, default):
+    value = os.getenv(name)
+    if value is None or not str(value).strip():
+        return default
+    try:
+        return type(default)(value)
+    except (TypeError, ValueError):
+        return default
+
+
+def apply_environment(app, *, testing: bool = False) -> None:
+    """Overlay environment variables onto an app's configuration.
+
+    Called by the app factory so that settings are read at creation time. In
+    testing mode a fixed secret is supplied, because session-based behaviour is
+    exercised constantly and a real key would be noise.
+    """
+    if testing:
+        app.config["SECRET_KEY"] = app.config.get("SECRET_KEY") or "testing-secret"
+        return
+
+    app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", app.config.get("SECRET_KEY", ""))
+
+    if "DATABASE_URL" in os.environ:
+        app.config["SQLALCHEMY_DATABASE_URI"] = _database_uri()
+
+    app.config["FUZZY_THRESHOLD"] = _number("QUIZ_FUZZY_THRESHOLD", app.config["FUZZY_THRESHOLD"])
+    app.config["NUMERIC_TOLERANCE"] = _number("QUIZ_NUMERIC_TOLERANCE", app.config["NUMERIC_TOLERANCE"])
+    app.config["DEFAULT_QUESTION_COUNT"] = _number(
+        "QUIZ_DEFAULT_COUNT", app.config["DEFAULT_QUESTION_COUNT"]
+    )
+    app.config["MAX_QUESTION_COUNT"] = _number("QUIZ_MAX_COUNT", app.config["MAX_QUESTION_COUNT"])
+    app.config["QUIZ_SECONDS_PER_MARK"] = _number(
+        "QUIZ_SECONDS_PER_MARK", app.config["QUIZ_SECONDS_PER_MARK"]
+    )
+    app.config["MAX_CONTENT_LENGTH"] = _number(
+        "QUIZ_MAX_UPLOAD_BYTES", app.config["MAX_CONTENT_LENGTH"]
+    )
+
+    app.config["SESSION_COOKIE_SECURE"] = _flag("SESSION_COOKIE_SECURE")
+    app.config["TRUST_PROXY_HEADERS"] = _flag("TRUST_PROXY_HEADERS")
+    app.config["PREFERRED_URL_SCHEME"] = os.getenv(
+        "PREFERRED_URL_SCHEME", app.config.get("PREFERRED_URL_SCHEME", "http")
+    )
+
+    app.config["API_KEY"] = os.getenv("API_KEY") or None
+
+    if os.getenv("QUIZ_DATA_DIR"):
+        app.config["DATA_DIR"] = Path(os.environ["QUIZ_DATA_DIR"])
+    if os.getenv("QUIZ_SEED_FILE"):
+        app.config["SEED_FILE"] = Path(os.environ["QUIZ_SEED_FILE"])
