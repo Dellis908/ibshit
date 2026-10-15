@@ -1,0 +1,5 @@
+selenium==4.16.0
+webdriver-manager==4.0.1
+pdfplumber==0.10.3
+PyMuPDF==1.23.8
+fuzzywuzzy==0.18.0
