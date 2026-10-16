@@ -80,6 +80,11 @@ def _uid(user) -> int | None:
 
 def _base_query(topics: tuple[str, ...] = (), difficulty: str | None = None):
     query = db.session.query(Question).join(Topic)
+    # A question with no answer cannot be marked: every attempt would be scored
+    # wrong, which is worse than leaving it out of the rotation. Two such rows
+    # exist in the imported bank (the answer lived in a figure that was never
+    # published), so this is a real filter, not a theoretical one.
+    query = query.filter(Question.correct_answer != "")
     if topics:
         query = query.filter(Topic.slug.in_(list(topics)))
     if difficulty:

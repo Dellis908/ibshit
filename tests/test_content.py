@@ -118,6 +118,15 @@ def test_validate_question_accepts_a_good_question():
         (
             {
                 "question_text": "A long enough question about cells.",
+                "correct_answer": "",
+                "type": "multiple_choice",
+                "choices": ["a", "b", "c", "d"],
+            },
+            "needs an answer among its choices",
+        ),
+        (
+            {
+                "question_text": "A long enough question about cells.",
                 "correct_answer": "sometimes",
                 "type": "true_false",
             },

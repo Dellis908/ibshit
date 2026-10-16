@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+
 
 from app.extensions import db
 from app.models import Attempt, Question
@@ -88,6 +90,45 @@ def test_quiz_filters_by_difficulty(client):
     body = client.get("/quiz?count=20&difficulty=easy").get_data(as_text=True)
     assert "badge-easy" in body
     assert "badge-hard" not in body
+
+
+def test_quiz_never_serves_a_question_without_an_answer(client, app):
+    """An unmarkable question must not reach a learner.
+
+    The imported bank still contains two rows whose answer lived in a figure
+    that was never published — imported before validation caught this. Serving
+    one scores every attempt wrong, so the quiz query filters them out.
+    """
+    from app.extensions import db
+    from app.models import Question, Topic
+    from app.quiz import QuizRequest, build_quiz
+
+    with app.app_context():
+        # Inserted directly: validation now refuses such a payload, but the row
+        # is already in production, so the query has to protect the quiz itself.
+        topic = Topic.query.filter_by(slug="cell-biology").one()
+        broken = Question(
+            topic_id=topic.id,
+            question_text="A question whose answer was never published?",
+            question_type="multiple_choice",
+            correct_answer="",
+            choices_json=json.dumps(["a", "b", "c", "d"]),
+            marks=1,
+            difficulty="easy",
+            explanation="",
+            tags_json="[]",
+            source="test-unanswerable",
+            fingerprint="test-unanswerable-fingerprint",
+        )
+        db.session.add(broken)
+        db.session.commit()
+        broken_id = broken.id
+
+        assert Question.query.filter_by(source="test-unanswerable").count() == 1
+
+        served = [q.id for q in build_quiz(QuizRequest(count=60), user=None)]
+        assert served, "the bank should still return questions"
+        assert broken_id not in served
 
 
 def test_quiz_by_topic_redirects_to_query_form(client):

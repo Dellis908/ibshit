@@ -276,7 +276,12 @@ def validate_question(raw: dict, index: int) -> list[str]:
             cleaned = [text_with_images(c) for c in choices]
             if len(set(cleaned)) != len(cleaned):
                 problems.append(f"{label}: duplicate choices")
-            if correct and correct not in cleaned:
+            if not correct:
+                # Already reported as missing; say here why it matters, because a
+                # multiple choice question with no answer is unmarkable and every
+                # attempt against it would be scored wrong.
+                problems.append(f"{label}: multiple_choice needs an answer among its choices")
+            elif correct not in cleaned:
                 problems.append(f"{label}: correct_answer is not one of the choices")
     elif qtype == "true_false":
         if correct.lower() not in {"true", "false"}:
