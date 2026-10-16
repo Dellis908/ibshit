@@ -39,7 +39,17 @@
   }
 
   const selfMarkToggle = document.getElementById("self-mark-toggle");
-  const selfMarkEnabled = Boolean(selfMarkToggle && selfMarkToggle.checked);
+
+  /**
+   * Whether the user wants to self-mark right now.
+   *
+   * Read on demand rather than captured at load: this script is deferred and
+   * the box starts unchecked, so a captured value would pin it to false for the
+   * whole session and the toggle would silently do nothing.
+   */
+  function selfMarkChosen() {
+    return Boolean(selfMarkToggle && selfMarkToggle.checked);
+  }
 
   function getAnswer(card) {
     const type = card.dataset.type;
@@ -210,8 +220,10 @@
       box.appendChild(reveal);
     }
 
-    // Self-marking panel for multi-mark written answers.
-    if (data.self_mark_available && data.attempt_id) {
+    // Self-marking panel for multi-mark written answers. Also offered when the
+    // toggle is switched on after answering, which is when most people reach
+    // for it.
+    if (data.attempt_id && data.marks_available > 1 && selfMarkChosen()) {
       buildSelfMark(card, data);
     }
   }
@@ -291,7 +303,7 @@
         question_id: Number(card.dataset.questionId),
         answer: answer,
         mode: config.mode,
-        self_mark: selfMarkEnabled && card.dataset.type === "short_answer",
+        self_mark: selfMarkChosen() && card.dataset.type === "short_answer",
       }),
     })
       .then((data) => {

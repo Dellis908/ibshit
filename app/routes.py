@@ -18,6 +18,8 @@ from flask import (
 from flask_login import current_user, login_required
 
 from app.extensions import db
+from sqlalchemy import func
+
 from app.models import Question, Topic, overall_stats
 from app.quiz import (
     MODE_LABELS,
@@ -28,7 +30,7 @@ from app.quiz import (
     session_summary,
     topic_progress,
 )
-from app.topics import TOPIC_CATALOGUE, TOPICS_BY_SLUG
+from app.topics import TOPICS_BY_SLUG, topic_groups
 
 bp = Blueprint("main", __name__)
 
@@ -61,7 +63,44 @@ def available_topics() -> list[Topic]:
     )
 
 
-# ----------------------------------------------------------------------- pages
+def grouped_topics() -> tuple[dict, ...]:
+    """The whole catalogue as display groups, each with its own heading.
+
+    The 2025 syllabus reads as four themes (A–D) numbered ``1.1`` upwards; the
+    2024 material is one block after them. Every catalogue entry is listed, even
+    with no questions yet, so the page doubles as a syllabus map and gaps are
+    visible instead of silently missing.
+    """
+    # Count in SQL: len(topic.questions) would load every question row of every
+    # topic just to produce a number for the heading.
+    counts = dict(
+        db.session.query(Question.topic_id, func.count(Question.id))
+        .group_by(Question.topic_id)
+        .all()
+    )
+    rows = {topic.slug: topic for topic in db.session.query(Topic).all()}
+
+    groups = []
+    for heading, specs in topic_groups():
+        entries = []
+        for spec in specs:
+            topic = rows.get(spec.slug)
+            if topic is None:
+                continue
+            entries.append((topic, counts.get(topic.id, 0)))
+        if not entries:
+            continue
+        groups.append(
+            {
+                "heading": heading,
+                "letter": heading.split(" ")[0] if heading[:1].isalpha() else "",
+                "topics": [topic for topic, _count in entries],
+                "counts": {topic.slug: count for topic, count in entries},
+                "questions": sum(count for _topic, count in entries),
+            }
+        )
+    return tuple(groups)
+
 
 @bp.route("/")
 def index():
@@ -88,9 +127,8 @@ def topics():
     progress = {row["slug"]: row for row in topic_progress(current_user)}
     return render_template(
         "topics.html",
-        topics=available_topics(),
+        groups=grouped_topics(),
         progress=progress,
-        catalogue=TOPIC_CATALOGUE,
     )
 
 

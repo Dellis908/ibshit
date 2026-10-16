@@ -37,7 +37,12 @@ from app.topics import TOPIC_CATALOGUE, TOPICS_BY_SLUG
         ("genetics", "genetics"),
         ("human physiology", "human-physiology"),
         ("nucleic acids", "nucleic-acids"),
-        ("A2", "cell-biology"),
+        # 2025 subtopic slugs map to themselves, via the exact-slug path.
+        ("bio-a11-water", "bio-a11-water"),
+        ("bio-b32-transport", "bio-b32-transport"),
+        # The 2024 topics carry no syllabus reference, so a bare code matches
+        # nothing rather than guessing a topic.
+        ("A2", None),
         ("", None),
         (None, None),
     ],

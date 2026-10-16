@@ -726,3 +726,26 @@ textarea { resize: vertical; min-height: 84px; line-height: 1.5; }
   cursor: pointer; padding: var(--space-2); border-radius: var(--radius-sm);
 }
 .link-button:hover { color: var(--accent); background: var(--bg-sunken); }
+
+/* ----------------------------------------------------------------- topics page
+   The catalogue mixes the 2025 syllabus (A–D) with the 2024 topics. Grouping
+   them gives the page a spine: a heading per theme, then that theme's cards. */
+
+.topic-group { margin-top: var(--space-5); }
+.topic-group:first-of-type { margin-top: var(--space-4); }
+.topic-group-head {
+  display: flex; align-items: center; gap: var(--space-3);
+  margin-bottom: var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--border);
+}
+.topic-group-head h2 { margin: 0; font-size: 1.15rem; }
+
+.theme-badge {
+  flex: none;
+  display: grid; place-items: center;
+  width: 2.25rem; height: 2.25rem;
+  border-radius: var(--radius-sm);
+  background: var(--accent-soft); color: var(--accent-strong);
+  font-weight: 700; font-size: 1.05rem;
+}

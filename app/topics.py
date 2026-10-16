@@ -7,6 +7,7 @@ the scraper can map scraped material onto topics consistently.
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 
 
@@ -32,7 +33,6 @@ TOPIC_CATALOGUE: tuple[TopicSpec, ...] = (
         title="Cell Biology",
         short_title="Cells",
         description="Cell structure, membranes, transport, division and the origin of cells.",
-        syllabus_ref="A2",
         keywords=(
             "cell", "organelle", "mitosis", "membrane", "osmosis", "diffusion",
             "microscope", "eukaryote", "prokaryote", "vesicle", "endosymbiosis",
@@ -45,7 +45,6 @@ TOPIC_CATALOGUE: tuple[TopicSpec, ...] = (
         title="Molecular Biology",
         short_title="Molecules",
         description="Water, carbohydrates, lipids, proteins, enzymes and DNA structure.",
-        syllabus_ref="B1",
         keywords=(
             "water", "carbohydrate", "lipid", "protein", "enzyme", "amino acid",
             "condensation", "hydrolysis", "dna", "rna", "nucleotide", "monomer",
@@ -58,7 +57,6 @@ TOPIC_CATALOGUE: tuple[TopicSpec, ...] = (
         title="Genetics",
         short_title="Genetics",
         description="Mendelian inheritance, chromosomes, mutations, gene technology and pedigrees.",
-        syllabus_ref="D1",
         keywords=(
             "gene", "allele", "genotype", "phenotype", "mendel", "pedigree",
             "punnett", "heterozyg", "homozyg", "dominant", "recessive", "mutation",
@@ -72,7 +70,6 @@ TOPIC_CATALOGUE: tuple[TopicSpec, ...] = (
         title="Ecology",
         short_title="Ecology",
         description="Species and communities, energy flow, nutrient cycles, climate change and conservation.",
-        syllabus_ref="C1",
         keywords=(
             "ecosystem", "habitat", "population", "community", "food chain",
             "food web", "energy", "pyramid", "biomass", "nutrient cycle",
@@ -86,7 +83,6 @@ TOPIC_CATALOGUE: tuple[TopicSpec, ...] = (
         title="Evolution and Biodiversity",
         short_title="Evolution",
         description="Evidence for evolution, natural selection, speciation and classification.",
-        syllabus_ref="C2",
         keywords=(
             "evolution", "natural selection", "speciation", "darwin", "fossil",
             "homologous", "analogous", "clade", "phylogen", "taxonom",
@@ -99,7 +95,6 @@ TOPIC_CATALOGUE: tuple[TopicSpec, ...] = (
         title="Human Physiology",
         short_title="Physiology",
         description="Digestion, circulation, gas exchange, defence, nervous and endocrine systems, homeostasis.",
-        syllabus_ref="D2",
         keywords=(
             "digest", "absorption", "blood", "heart", "circulation", "ventilation",
             "lung", "alveol", "haemoglobin", "immun", "antibody", "pathogen",
@@ -113,7 +108,6 @@ TOPIC_CATALOGUE: tuple[TopicSpec, ...] = (
         title="Nucleic Acids and Protein Synthesis",
         short_title="Nucleic Acids",
         description="DNA replication, transcription, translation, the genetic code and biotechnology.",
-        syllabus_ref="D1.1",
         keywords=(
             "replication", "transcription", "translation", "protein synthesis",
             "genetic code", "codon", "anticodon", "ribosome", "polymerase",
@@ -126,7 +120,6 @@ TOPIC_CATALOGUE: tuple[TopicSpec, ...] = (
         title="Metabolism, Cell Respiration and Photosynthesis",
         short_title="Metabolism",
         description="Enzymes and metabolism, glycolysis, the Krebs cycle, the electron transport chain and photosynthesis.",
-        syllabus_ref="C3",
         keywords=(
             "metabolism", "respiration", "glycolysis", "krebs", "oxidative",
             "electron transport", "atp", "photosynthesis", "light",
@@ -140,7 +133,6 @@ TOPIC_CATALOGUE: tuple[TopicSpec, ...] = (
         title="Plant Biology",
         short_title="Plants",
         description="Plant transport, reproduction, growth, hormones and responses.",
-        syllabus_ref="D3",
         keywords=(
             "plant", "xylem", "phloem", "transpiration", "stomata", "root",
             "leaf", "meristem", "auxin", "hormone", "tropism", "flower",
@@ -153,7 +145,6 @@ TOPIC_CATALOGUE: tuple[TopicSpec, ...] = (
         title="Data Analysis and Experimental Skills",
         short_title="Data Skills",
         description="Graphing, statistics, experimental design, error and uncertainty.",
-        syllabus_ref="Skills",
         keywords=(
             "data", "graph", "statistic", "mean", "median", "standard deviation",
             "t-test", "chi-squared", "correlation", "uncertainty", "error",
@@ -193,6 +184,15 @@ def normalize_topic(value: str | None) -> str | None:
     dashed = text.replace("_", "-").replace(" ", "-")
     for spec in TOPIC_CATALOGUE:
         if dashed == spec.slug:
+            return spec.slug
+
+    # A 2025 subtopic slug is already canonical: return it unchanged instead of
+    # letting keyword scoring pull it into a 2024 topic ("bio-b32-transport"
+    # contains "transport", which is a cell-biology keyword).
+    if dashed in NEW_SYLLABUS_BY_SLUG:
+        return dashed
+    for spec in NEW_SYLLABUS_TOPICS:
+        if text in {spec.ref.lower(), spec.title.lower(), spec.full_title.lower()}:
             return spec.slug
 
     # Keyword scoring over the free text.
@@ -283,3 +283,68 @@ NEW_SYLLABUS_TOPICS: tuple[SyllabusTopic, ...] = (
 
 NEW_SYLLABUS_BY_SLUG: dict[str, SyllabusTopic] = {t.slug: t for t in NEW_SYLLABUS_TOPICS}
 
+
+
+# ---------------------------------------------------------------------------
+# Presentation order
+#
+# The bank mixes two programmes: the 2025 guide (40 subtopics, A1.1 → D4.3) and
+# the 2024 topics that arrived with the older import, which carry no real
+# syllabus reference. Both are worth reading, but a flat list of them is
+# unreadable — so the 2025 subtopics are grouped under their theme and the 2024
+# topics are kept together, after them, labelled for what they actually are.
+# ---------------------------------------------------------------------------
+
+#: Heading shown for the pre-2025 topics, which have no A–D theme of their own.
+LEGACY_GROUP = "IB Biology (2024 programme)"
+
+
+def syllabus_sort_key(ref: str) -> tuple:
+    """Sort ``"B3.2"`` style references by theme, then numerically.
+
+    A plain string sort puts ``A1.10`` before ``A1.2``; splitting on the dot
+    keeps the numeric order the syllabus uses.
+    """
+    theme = ""
+    section = 0
+    point = 0
+    match = re.match(r"([A-Za-z]+)(\d+)(?:\.(\d+))?", str(ref or ""))
+    if match:
+        theme = match.group(1).upper()
+        section = int(match.group(2))
+        point = int(match.group(3) or 0)
+    return (theme, section, point)
+
+
+def topic_groups() -> tuple[tuple[str, tuple], ...]:
+    """The catalogue as display groups: ``(heading, (spec, ...))``.
+
+    Whitespace is squeezed out of the theme name so the heading reads
+    ``A — Unity and Diversity`` rather than inheriting the guide's line breaks.
+    """
+    groups: list[tuple[str, list]] = []
+    for spec in NEW_SYLLABUS_TOPICS:
+        heading = re.sub(r"\s+", " ", spec.theme).strip()
+        if not groups or groups[-1][0] != heading:
+            groups.append((heading, []))
+        groups[-1][1].append(spec)
+
+    ordered = [
+        (heading, tuple(sorted(items, key=lambda item: syllabus_sort_key(item.ref))))
+        for heading, items in groups
+    ]
+    if TOPIC_CATALOGUE:
+        ordered.append((LEGACY_GROUP, tuple(TOPIC_CATALOGUE)))
+    return tuple(ordered)
+
+
+def ordered_specs() -> tuple:
+    """Every catalogue entry in display order: 2025 subtopics, then 2024 topics.
+
+    Used to assign ``Topic.position`` so a database query and the grouped page
+    agree on the order.
+    """
+    specs = []
+    for _heading, items in topic_groups():
+        specs.extend(items)
+    return tuple(specs)

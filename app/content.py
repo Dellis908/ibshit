@@ -42,6 +42,7 @@ from app.topics import (
     TOPIC_CATALOGUE,
     TOPICS_BY_SLUG,
     normalize_topic,
+    ordered_specs,
 )
 
 #: Characters that survive normalisation when fingerprinting question text.
@@ -93,37 +94,38 @@ def sync_topics() -> int:
     the catalogue so metadata changes in code take effect.
     """
     created = 0
-    for position, spec in enumerate(TOPIC_CATALOGUE):
+    # One canonical order for the whole catalogue — 2025 subtopics by A→D, then
+    # the 2024 topics — so the stored position agrees with what the topics page
+    # renders and a plain query already returns a browsable list.
+    for position, spec in enumerate(ordered_specs()):
         topic = db.session.query(Topic).filter_by(slug=spec.slug).one_or_none()
         if topic is None:
             topic = Topic(slug=spec.slug)
             db.session.add(topic)
             created += 1
-        topic.title = spec.title
-        topic.short_title = spec.short_title
-        topic.description = spec.description
-        topic.syllabus_ref = spec.syllabus_ref
+        # Refresh the presentation fields every time. Topics created by an
+        # earlier release kept a stale position, which is what made the list
+        # look shuffled once the 2025 subtopics were added next to them.
+        topic.title = getattr(spec, "title", topic.title)
+        topic.short_title = getattr(spec, "short_title", None) or getattr(spec, "ref", None)
+        topic.description = getattr(spec, "description", None)
+        topic.syllabus_ref = getattr(spec, "syllabus_ref", None) or getattr(spec, "ref", None)
         topic.position = position
-
-    # The 2025-syllabus subtopics are created up front as well, so imported
-    # questions attach to a topic that already has its proper title.
-    for offset, spec in enumerate(NEW_SYLLABUS_BY_SLUG.values()):
-        existing = db.session.query(Topic).filter_by(slug=spec.slug).one_or_none()
-        if existing is None:
-            db.session.add(
-                Topic(
-                    slug=spec.slug,
-                    title=spec.full_title,
-                    short_title=spec.ref,
-                    description=f"{spec.title} — {spec.theme}.",
-                    syllabus_ref=spec.ref,
-                    position=len(TOPIC_CATALOGUE) + offset,
-                )
-            )
-            created += 1
 
     db.session.flush()
     return created
+
+
+def _canonical_position(slug: str) -> int:
+    """Display position of ``slug`` in the canonical catalogue order.
+
+    Topics are created from three places (the seed, an import, and a migration),
+    so the position comes from one function to keep them consistent.
+    """
+    for position, spec in enumerate(ordered_specs()):
+        if spec.slug == slug:
+            return position
+    return len(ordered_specs())
 
 
 def _syllabus_topic(slug: str) -> tuple[Topic, bool] | None:
@@ -139,7 +141,7 @@ def _syllabus_topic(slug: str) -> tuple[Topic, bool] | None:
 
     topic = db.session.query(Topic).filter_by(slug=spec.slug).one_or_none()
     if topic is None:
-        position = len(TOPIC_CATALOGUE) + list(NEW_SYLLABUS_BY_SLUG).index(spec.slug)
+        position = _canonical_position(spec.slug)
         topic = Topic(
             slug=spec.slug,
             title=spec.full_title,

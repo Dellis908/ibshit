@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 
 
 from app.extensions import db
@@ -23,6 +24,26 @@ def test_topics_page_lists_loaded_topics(client):
     response = client.get("/topics")
     assert response.status_code == 200
     assert "Cell Biology" in response.get_data(as_text=True)
+
+
+def test_topics_page_groups_the_syllabus(client):
+    """The page reads as themes A–D, then the 2024 block — not one flat list."""
+    body = client.get("/topics").get_data(as_text=True)
+    for heading in (
+        "A — Unity and Diversity",
+        "B — Form and Function",
+        "C — Interaction and Interdependence",
+        "D — Continuity and Change",
+        "IB Biology (2024 programme)",
+    ):
+        assert heading in body, heading
+
+    # A numbered reference appears before any 2024 topic, so the order is the
+    # guide's, not the database's insertion order.
+    assert body.index("A1.1") < body.index("IB Biology (2024 programme)")
+    # The old flat checklist with its invented references is gone.
+    assert "Syllabus checklist" not in body
+    assert "badge-soft" not in body
 
 
 def test_topic_detail_page(client, app):
@@ -157,9 +178,30 @@ def test_exam_mode_hides_immediate_reveal_notice(client):
 
 def test_topics_endpoint(client):
     payload = client.get("/api/topics").get_json()
-    slugs = {topic["slug"] for topic in payload["topics"]}
+    topics = payload["topics"]
+    slugs = {topic["slug"] for topic in topics}
     assert "cell-biology" in slugs
-    assert payload["topics"][0]["question_count"] >= 1
+    # Every catalogue topic is listed, so gaps are visible; the ones with
+    # questions carry a count.
+    assert any(topic["question_count"] >= 1 for topic in topics)
+    assert all("question_count" in topic for topic in topics)
+
+
+def test_topics_endpoint_lists_the_syllabus_in_order(client):
+    """The API order is the order the topics page renders."""
+    topics = client.get("/api/topics").get_json()["topics"]
+    refs = [topic.get("syllabus_ref") for topic in topics]
+
+    # The 2025 subtopics come first, numbered from A1.1 upwards.
+    assert refs[0] == "A1.1"
+    numbered = [ref for ref in refs if ref and "." in ref]
+    assert numbered == sorted(numbered, key=lambda ref: (
+        ref[0], int(re.match(r"[A-Z](\d+)", ref).group(1)), int(ref.split(".")[1])
+    )), numbered[:8]
+
+    # The 2024 topics follow, and carry no invented syllabus reference.
+    legacy = [topic for topic in topics if topic["slug"] == "cell-biology"]
+    assert legacy and not legacy[0].get("syllabus_ref")
 
 
 def test_questions_endpoint_paginates_and_hides_answers(client):

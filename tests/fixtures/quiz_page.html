@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="5cFGH66wLM3PbTwctMSEK-_Vy6ZRrPQy8pv956SWbFM">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="Free IB Biology revision: practice questions, mark schemes and progress tracking across the whole syllabus.">
+  <title>Practice quiz · IB Biology Revision</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="icon" href="/static/img/favicon.svg" type="image/svg+xml">
+  
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/">
+      <span class="brand-mark" aria-hidden="true">IB</span>
+      <span class="brand-text">
+        <strong>Biology Revision</strong>
+        <small>HL &amp; SL topic questions</small>
+      </span>
+    </a>
+
+    <nav class="site-nav" aria-label="Main">
+      
+        
+        
+          <a href="/"
+             >Dashboard</a>
+        
+          <a href="/topics"
+             >Topics</a>
+        
+          <a href="/progress"
+             >Progress</a>
+        
+          <a href="/about"
+             >About</a>
+        
+        <a class="nav-cta" href="/quiz?mode=practice&amp;count=10">Start quiz</a>
+        <div class="user-menu">
+          <a href="/auth/account" title="Your account">T</a>
+          <form method="post" action="/auth/logout">
+            <input type="hidden" name="csrf_token" value="5cFGH66wLM3PbTwctMSEK-_Vy6ZRrPQy8pv956SWbFM">
+            <button class="link-button" type="submit">Sign out</button>
+          </form>
+        </div>
+      
+    </nav>
+  </div>
+</header>
+
+
+  
+
+
+<main id="main" class="wrap">
+  
+<section class="quiz-header">
+  <div>
+    <h1>Practice quiz</h1>
+    <p class="muted">
+      
+        All topics ·
+      
+      2 questions ·
+      4 marks
+      
+    </p>
+  </div>
+
+  <div class="quiz-status">
+    
+    <label class="self-mark-toggle" title="After checking, compare your wording with the mark scheme and award yourself marks.">
+      <input type="checkbox" id="self-mark-toggle">
+      <span class="small">Self-mark</span>
+    </label>
+    <div class="score-pill" id="score-pill">
+      <span class="muted small">Score</span>
+      <strong><span id="score-correct">0</span>/<span id="score-total">2</span></strong>
+    </div>
+  </div>
+</section>
+
+<div class="progress-track" aria-hidden="true">
+  <div class="progress-fill" id="quiz-progress" style="width: 0%"></div>
+</div>
+<p class="muted small" id="quiz-progress-label">0 of 2 answered</p>
+
+
+
+<ol class="question-list" id="question-list">
+  
+    <li class="question-card" data-question-id="2" data-type="short_answer" data-marks="3">
+      <header class="question-head">
+        <span class="question-number">Question 1</span>
+        <span class="question-meta">
+          <span class="badge badge-soft">short answer</span>
+          <span class="badge badge-soft">3 marks</span>
+          <span class="badge badge-soft badge-medium">medium</span>
+        </span>
+      </header>
+
+      <div class="question-text">State the three stages of aerobic respiration in order.</div>
+
+      
+
+      <div class="answer-area">
+        
+          <label class="sr-only" for="answer-2">Your answer</label>
+          <textarea id="answer-2" rows="4"
+                    data-answer
+                    placeholder="Write your answer…"></textarea>
+        
+      </div>
+
+      <div class="question-actions">
+        <button type="button" class="btn btn-primary" data-submit>Check answer</button>
+        <button type="button" class="btn btn-ghost btn-small" data-skip>Skip</button>
+        <span class="muted small" data-hint></span>
+      </div>
+
+      <div class="feedback" data-feedback hidden aria-live="polite"></div>
+
+      
+        <details class="self-mark" data-self-mark hidden>
+          <summary>Mark yourself against the mark scheme</summary>
+          <div data-self-mark-body></div>
+        </details>
+      
+    </li>
+  
+    <li class="question-card" data-question-id="1" data-type="multiple_choice" data-marks="1">
+      <header class="question-head">
+        <span class="question-number">Question 2</span>
+        <span class="question-meta">
+          <span class="badge badge-soft">multiple choice</span>
+          <span class="badge badge-soft">1 mark</span>
+          <span class="badge badge-soft badge-easy">easy</span>
+        </span>
+      </header>
+
+      <div class="question-text">Which organelle carries out aerobic respiration?</div>
+
+      
+
+      <div class="answer-area">
+        
+          <fieldset class="choice-grid">
+            <legend class="sr-only">Choose one option</legend>
+            
+              <label class="choice">
+                <input type="radio" name="q1" value="Mitochondrion" data-answer>
+                <span class="choice-marker" aria-hidden="true">A</span>
+                <span class="choice-text">Mitochondrion</span>
+              </label>
+            
+              <label class="choice">
+                <input type="radio" name="q1" value="Ribosome" data-answer>
+                <span class="choice-marker" aria-hidden="true">B</span>
+                <span class="choice-text">Ribosome</span>
+              </label>
+            
+              <label class="choice">
+                <input type="radio" name="q1" value="Golgi apparatus" data-answer>
+                <span class="choice-marker" aria-hidden="true">C</span>
+                <span class="choice-text">Golgi apparatus</span>
+              </label>
+            
+              <label class="choice">
+                <input type="radio" name="q1" value="Nucleus" data-answer>
+                <span class="choice-marker" aria-hidden="true">D</span>
+                <span class="choice-text">Nucleus</span>
+              </label>
+            
+          </fieldset>
+
+        
+      </div>
+
+      <div class="question-actions">
+        <button type="button" class="btn btn-primary" data-submit>Check answer</button>
+        <button type="button" class="btn btn-ghost btn-small" data-skip>Skip</button>
+        <span class="muted small" data-hint></span>
+      </div>
+
+      <div class="feedback" data-feedback hidden aria-live="polite"></div>
+
+      
+    </li>
+  
+</ol>
+
+<section class="quiz-footer">
+  <div>
+    <p class="muted small">Answers are saved as you go — you can leave and come back to your progress page.</p>
+  </div>
+  <div class="quiz-footer-actions">
+    <a class="btn btn-ghost" href="/">Abandon</a>
+    <a class="btn btn-primary" id="finish-btn" href="/results">Finish &amp; see results</a>
+  </div>
+</section>
+
+<script id="quiz-config" type="application/json">
+  {"count": 2, "mode": "practice", "modeLabel": "Practice", "timeLimit": null, "timed": false}
+</script>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <p>
+      <strong>2</strong> questions in the bank ·
+      <strong>0</strong> of your answers recorded
+    </p>
+    <p class="footer-note">
+      Built for personal revision. Questions are original study material, not official IB content.
+      <a href="/about">About &amp; credits</a>
+    </p>
+  </div>
+</footer>
+
+<script src="/static/js/app.js" defer></script>
+
+<script src="/static/js/quiz.js" defer></script>
+
+</body>
+</html>

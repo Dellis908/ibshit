@@ -18,14 +18,15 @@
 {% endmacro %}
 
 
-{% macro topic_card(topic, row=None) %}
+{% macro topic_card(topic, row=None, question_count=None) %}
+  {% set total = question_count if question_count is not none else topic.question_count %}
   <article class="topic-card">
     <header>
       <div>
         {% if topic.syllabus_ref %}<span class="badge">{{ topic.syllabus_ref }}</span>{% endif %}
         <h3><a href="{{ url_for('main.topic_detail', slug=topic.slug) }}">{{ topic.title }}</a></h3>
       </div>
-      <span class="count">{{ topic.question_count }} Q</span>
+      <span class="count">{{ total }} Q</span>
     </header>
     <p class="muted">{{ topic.description }}</p>
 
@@ -39,7 +40,11 @@
     {% endif %}
 
     <div class="topic-actions">
-      <a class="btn btn-small" href="{{ url_for('main.quiz', topic=topic.slug, mode='practice', count=10) }}">Practice</a>
+      {% if total %}
+        <a class="btn btn-small" href="{{ url_for('main.quiz', topic=topic.slug, mode='practice', count=10) }}">Practice</a>
+      {% else %}
+        <span class="muted small">No questions yet.</span>
+      {% endif %}
       <a class="btn btn-small btn-ghost" href="{{ url_for('main.topic_detail', slug=topic.slug) }}">Details</a>
     </div>
   </article>

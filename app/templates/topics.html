@@ -7,37 +7,38 @@
 <section class="section-head">
   <div>
     <h1>All topics</h1>
-    <p class="muted">Every part of the syllabus in the bank, with your progress on each.</p>
+    <p class="muted">
+      The 2025 syllabus grouped by its four themes, followed by the 2024 topics,
+      with your progress on each.
+    </p>
   </div>
 </section>
 
-{% if topics %}
-  <div class="topic-grid topic-grid-wide">
-    {% for topic in topics %}
-      {{ topic_card(topic, progress.get(topic.slug)) }}
-    {% endfor %}
-  </div>
+{% if groups %}
+  {% for group in groups %}
+    <section class="section topic-group">
+      <div class="topic-group-head">
+        {% if group.letter and group.letter|length == 1 %}
+          <span class="theme-badge" aria-hidden="true">{{ group.letter }}</span>
+        {% endif %}
+        <div>
+          <h2>{{ group.heading }}</h2>
+          <p class="muted small">
+            {{ group.topics|length }} topic{{ '' if group.topics|length == 1 else 's' }}
+            · {{ group.questions }} question{{ '' if group.questions == 1 else 's' }}
+          </p>
+        </div>
+      </div>
+      <div class="topic-grid topic-grid-wide">
+        {% for topic in group.topics %}
+          {{ topic_card(topic, progress.get(topic.slug), group.counts.get(topic.slug, 0)) }}
+        {% endfor %}
+      </div>
+    </section>
+  {% endfor %}
 {% else %}
   <div class="notice notice-warning">
     No questions loaded yet. Run <code>flask quiz seed</code> to add the bundled bank.
   </div>
 {% endif %}
-
-<section class="section">
-  <h2>Syllabus checklist</h2>
-  <p class="muted small">Topics with no questions yet are shown here so gaps are visible.</p>
-  <ul class="checklist">
-    {% for spec in catalogue %}
-      {% set has_questions = topics | selectattr('slug', 'equalto', spec.slug) | list | length > 0 %}
-      <li class="{{ 'done' if has_questions else 'todo' }}">
-        <span class="check" aria-hidden="true">{{ '✓' if has_questions else '○' }}</span>
-        <span>
-          <strong>{{ spec.title }}</strong>
-          {% if spec.syllabus_ref %}<span class="badge badge-soft">{{ spec.syllabus_ref }}</span>{% endif %}
-          <span class="muted small"> — {{ spec.description }}</span>
-        </span>
-      </li>
-    {% endfor %}
-  </ul>
-</section>
 {% endblock %}
