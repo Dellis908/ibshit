@@ -225,8 +225,9 @@ never drops or rewrites data.
 ## Adding your own questions
 
 The app ships two banks in `seed/`: `questions.json` (154 core questions) and
-`additional.json` (2,244 IB-style questions covering the 2025 syllabus). Imports
-accept plain JSON or JSON Lines, in the same shape:
+`additional.json` (2,857 questions — 2,244 on the 2025 syllabus plus 613 from the
+pirateIB Village archive, 153 of them with a diagram served from
+`app/static/img/`). Imports accept plain JSON or JSON Lines, in the same shape:
 
 ```json
 {
@@ -280,8 +281,9 @@ app/
   topics.py        the syllabus topic catalogue
   cli.py           the `flask quiz` command group
   templates/       Jinja templates
-  static/          stylesheet, quiz runner, shared JS
+  static/          stylesheet, quiz runner, shared JS, question diagrams
 seed/              questions.json and additional.json — the bundled question banks
+scraper/           optional importers (see docs/question-sources.md)
 scripts/           smoke_test.py — end-to-end route check
 tests/             pytest suite
 ```

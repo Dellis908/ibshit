@@ -172,7 +172,8 @@ The wrapper exists because `env $(grep -v "^#" /etc/ibshit.env | xargs)` breaks 
 values containing spaces and exposes secrets in the process list.
 
 The first command creates `instance/quiz.db` and loads the 154 built-in
-questions; the second adds the 2,244 imported ones. Check:
+questions; the second adds the 2,857 imported ones (including the 613 Village
+questions and their diagrams under `app/static/img/`). Check:
 
 ```bash
 sudo -u ibshit /usr/local/sbin/ibshit-flask quiz stats
