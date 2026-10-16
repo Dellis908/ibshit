@@ -19,6 +19,12 @@ instance/
 data/pdfs/
 data/extracted/
 
+# Topic notes: hundreds of megabytes of PDFs, installed from a local folder with
+#   python scripts/install_notes.py --source <folder>
+# The manifest IS committed — it is small and tells the app which notes exist.
+data/notes/*/
+data/notes/*.pdf
+
 # Content fetched from git.pirateib.sh.
 # seed/rdojo.json is committed (it is the usable question bank); only the raw
 # upstream download cache is ignored, since it can be rebuilt with:

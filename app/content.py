@@ -87,6 +87,33 @@ class ImportReport:
 
 # ----------------------------------------------------------------------- topic
 
+#: Slugs that were shipped under a different name and must be renamed in place.
+#: D4.2 is "Stability and Change" in the guide; "sustainability" was a mistake.
+RENAMED_TOPIC_SLUGS: dict[str, str] = {
+    "bio-d42-sustainability-and-change": "bio-d42-stability-and-change",
+}
+
+
+def _rename_legacy_topics() -> int:
+    """Move topics that were published under a corrected slug.
+
+    Questions, notes and attempts all point at the topic row, so renaming the
+    row keeps every reference intact; a new row would orphan them.
+    """
+    renamed = 0
+    for old, new in RENAMED_TOPIC_SLUGS.items():
+        if db.session.query(Topic).filter_by(slug=new).one_or_none() is not None:
+            continue
+        topic = db.session.query(Topic).filter_by(slug=old).one_or_none()
+        if topic is None:
+            continue
+        topic.slug = new
+        renamed += 1
+    if renamed:
+        db.session.flush()
+    return renamed
+
+
 def sync_topics() -> int:
     """Ensure every catalogue topic exists in the database.
 
@@ -94,6 +121,7 @@ def sync_topics() -> int:
     the catalogue so metadata changes in code take effect.
     """
     created = 0
+    _rename_legacy_topics()
     # One canonical order for the whole catalogue — 2025 subtopics by A→D, then
     # the 2024 topics — so the stored position agrees with what the topics page
     # renders and a plain query already returns a browsable list.

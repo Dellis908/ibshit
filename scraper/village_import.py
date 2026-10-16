@@ -79,7 +79,7 @@ TOPICS_2025 = {
     "bio-d22-gene-expression-hl": "Gene Expression", "bio-d23-water-potential": "Water Potential",
     "bio-d31-reproduction": "Reproduction", "bio-d32-inheritance": "Inheritance",
     "bio-d33-homeostasis": "Homeostasis", "bio-d41-natural-selection": "Natural Selection",
-    "bio-d42-sustainability-and-change": "Sustainability and Change",
+    "bio-d42-stability-and-change": "Stability and Change",
     "bio-d43-climate-change": "Climate Change",
 }
 

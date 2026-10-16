@@ -276,7 +276,7 @@ NEW_SYLLABUS_TOPICS: tuple[SyllabusTopic, ...] = (
     SyllabusTopic("bio-d32-inheritance", "D3.2", "Inheritance", 'D — Continuity and Change', 'Reproduction, inheritance, evolution and change over time.'),
     SyllabusTopic("bio-d33-homeostasis", "D3.3", "Homeostasis", 'D — Continuity and Change', 'Reproduction, inheritance, evolution and change over time.'),
     SyllabusTopic("bio-d41-natural-selection", "D4.1", "Natural Selection", 'D — Continuity and Change', 'Reproduction, inheritance, evolution and change over time.'),
-    SyllabusTopic("bio-d42-sustainability-and-change", "D4.2", "Sustainability and Change", 'D — Continuity and Change', 'Reproduction, inheritance, evolution and change over time.'),
+    SyllabusTopic("bio-d42-stability-and-change", "D4.2", "Stability and Change", 'D — Continuity and Change', 'Reproduction, inheritance, evolution and change over time.'),
     SyllabusTopic("bio-d43-climate-change", "D4.3", "Climate Change", 'D — Continuity and Change', 'Reproduction, inheritance, evolution and change over time.'),
 )
 

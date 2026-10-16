@@ -58,6 +58,9 @@ class Config:
     SQLALCHEMY_ENGINE_OPTIONS = {"pool_pre_ping": True}
 
     DATA_DIR = BASE_DIR / "data"
+    #: Topic notes live outside the repository (hundreds of megabytes), so they
+    #: can be absent; the app then simply shows no notes.
+    NOTES_DIR = BASE_DIR / "data" / "notes"
     SEED_FILE = BASE_DIR / "seed" / "questions.json"
 
     FUZZY_THRESHOLD = 72.0
@@ -188,5 +191,7 @@ def apply_environment(app, *, testing: bool = False) -> None:
 
     if os.getenv("QUIZ_DATA_DIR"):
         app.config["DATA_DIR"] = Path(os.environ["QUIZ_DATA_DIR"])
+    if os.getenv("QUIZ_NOTES_DIR"):
+        app.config["NOTES_DIR"] = Path(os.environ["QUIZ_NOTES_DIR"])
     if os.getenv("QUIZ_SEED_FILE"):
         app.config["SEED_FILE"] = Path(os.environ["QUIZ_SEED_FILE"])

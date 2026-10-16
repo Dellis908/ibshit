@@ -6,11 +6,13 @@ import uuid
 
 from flask import (
     Blueprint,
+    abort,
     current_app,
     flash,
     redirect,
     render_template,
     request,
+    send_from_directory,
     session,
     url_for,
 )
@@ -21,6 +23,7 @@ from app.extensions import db
 from sqlalchemy import func
 
 from app.models import Question, Topic, overall_stats
+from app.notes import LEVELS, load_manifest, notes_by_topic
 from app.quiz import (
     MODE_LABELS,
     QUIZ_MODES,
@@ -145,6 +148,44 @@ def topic_detail(slug: str):
         topic=topic,
         progress=progress.get(slug),
         modes=MODE_LABELS,
+        notes=notes_by_topic(current_app.config["DATA_DIR"]).get(slug, []),
+    )
+
+
+@bp.route("/notes/<topic_slug>/<level>")
+@login_required
+def note_file(topic_slug: str, level: str):
+    """Serve one topic's notes.
+
+    Inline so the browser can display the PDF; the download attributes on the
+    links in the template let the user pull it down instead. The path is built
+    from the manifest rather than from the request, so a crafted URL cannot walk
+    outside the notes directory.
+    """
+    level = level.upper()
+    if level not in LEVELS:
+        abort(404)
+    entry = next(
+        (
+            note
+            for note in load_manifest(current_app.config["DATA_DIR"])
+            if note["topic"] == topic_slug and note.get("level") == level
+        ),
+        None,
+    )
+    if entry is None:
+        abort(404)
+    directory = current_app.config["NOTES_DIR"]
+    if not (directory / entry["file"]).is_file():
+        # The manifest promises a file this deployment never installed. Say so
+        # rather than serving a broken viewer.
+        abort(404)
+    return send_from_directory(
+        directory,
+        entry["file"],
+        mimetype="application/pdf",
+        as_attachment=False,
+        download_name=entry.get("title") or entry["file"],
     )
 
 

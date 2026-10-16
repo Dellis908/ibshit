@@ -56,3 +56,18 @@
   {%- elif verdict in ('partial', 'close') -%}partial
   {%- else -%}wrong{%- endif -%}
 {% endmacro %}
+
+{% macro note_links(notes) %}
+  {% if notes %}
+    <div class="note-links">
+      {% for note in notes %}
+        <a class="btn btn-small btn-ghost note-link"
+           href="{{ url_for('main.note_file', topic_slug=note.topic, level=note.level) }}"
+           target="_blank" rel="noopener">
+          <span class="note-level">{{ note.level }}</span>
+          Notes
+        </a>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endmacro %}

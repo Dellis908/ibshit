@@ -749,3 +749,13 @@ textarea { resize: vertical; min-height: 84px; line-height: 1.5; }
   background: var(--accent-soft); color: var(--accent-strong);
   font-weight: 700; font-size: 1.05rem;
 }
+
+/* ------------------------------------------------------------------- notes */
+.note-links { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.note-link { display: inline-flex; align-items: center; gap: 0.5rem; }
+.note-level {
+  display: inline-block;
+  font-size: 0.68rem; font-weight: 700; letter-spacing: 0.04em;
+  background: var(--accent-soft); color: var(--accent-strong);
+  padding: 0.1em 0.4em; border-radius: var(--radius-sm);
+}

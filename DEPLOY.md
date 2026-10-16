@@ -504,6 +504,44 @@ sudo systemctl start ibshit
 sudo -u ibshit /usr/local/sbin/ibshit-flask quiz import /tmp/bank.json
 ```
 
+## 13a. Topic notes
+
+The revision PDFs are **not in git** — roughly 290 MB of them — so they are
+installed and shipped separately from the code. The code deploys with
+`git pull`; the notes ride alongside it over `rsync`.
+
+### Install them locally
+
+```bash
+python scripts/install_notes.py --source "/Volumes/SSD/bio" --dry-run   # check the mapping
+python scripts/install_notes.py --source "/Volumes/SSD/bio"
+```
+
+That copies the PDFs into `data/notes/<topic-slug>/` and writes
+`data/notes/manifest.json`. The manifest is small and **is** committed: it is what
+tells the app which notes exist, so a deployment whose notes were never uploaded
+shows no notes rather than broken links. Filenames are matched to catalogue slugs
+by `app/notes.py`; anything unrecognised is reported and skipped, not guessed at.
+
+### Ship them to a server
+
+```bash
+./deploy/sync-notes.sh root@your-host
+ssh root@your-host 'chown -R ibshit:ibshit /srv/ibshit/data/notes'
+```
+
+`rsync` skips unchanged files, so re-running after adding a few notes transfers
+only those. No restart is needed: the manifest is read per request. Note that the
+directory has to exist and be readable by the service account, otherwise the
+notes routes answer `404`.
+
+### Point the app somewhere else
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `QUIZ_NOTES_DIR` | `data/notes` | where the PDFs live |
+| `QUIZ_DATA_DIR` | `data` | parent of the default, and where the manifest is looked up |
+
 ## 14. Monitoring the image cache
 
 Imported questions may reference diagrams on a third-party CDN. The app mirrors

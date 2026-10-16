@@ -222,6 +222,15 @@ exist would be a guess. `flask auth adopt-attempts <email>` hands them to an
 account if that is what you want. `app/db_migrate.py` only ever adds columns; it
 never drops or rewrites data.
 
+## Topic notes
+
+Revision PDFs can be attached to each topic. They are not committed (they are
+hundreds of megabytes); install them from a folder with
+`python scripts/install_notes.py --source <folder>`, which writes
+`data/notes/manifest.json` and copies the files next to the app. A topic with
+notes shows a **Notes** section, offering the HL and SL versions separately
+because their content differs. See DEPLOY.md §13a for shipping them to a server.
+
 ## Adding your own questions
 
 The app ships two banks in `seed/`: `questions.json` (154 core questions) and
