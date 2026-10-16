@@ -1,5 +1,8 @@
 # IB Biology Revision
 
+*in deepseek we trust*
+
+
 A self-hosted revision app for IB Biology (HL & SL). It serves syllabus topic
 questions, marks your answers automatically against a mark scheme, records every
 attempt, and shows you exactly which topics are still shaky.
