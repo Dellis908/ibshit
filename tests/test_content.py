@@ -196,6 +196,40 @@ def test_sync_topics_is_idempotent(app):
         assert db.session.query(Topic).count() == before
 
 
+def test_sync_topics_refreshes_existing_rows(app):
+    """A stale row is corrected, not just left alone.
+
+    The 2024 topics carried invented syllabus references and stale positions from
+    an earlier release. ``sync_topics`` only ran on creation, so those rows were
+    never fixed — and ``wsgi`` committed only when a topic was created, so even
+    the refresh it did perform was thrown away. Both halves are asserted here.
+    """
+    from app.topics import syllabus_sort_key
+
+    with app.app_context():
+        stale = db.session.query(Topic).filter_by(slug="cell-biology").one()
+        stale.syllabus_ref = "A2"          # never a real code for this topic
+        stale.position = 999
+        stale.title = "Stale Title"
+        db.session.commit()
+
+        sync_topics()
+        db.session.commit()
+        db.session.expire_all()
+
+        fixed = db.session.query(Topic).filter_by(slug="cell-biology").one()
+        assert fixed.syllabus_ref in (None, ""), fixed.syllabus_ref
+        assert fixed.title == "Cell Biology"
+        assert fixed.position != 999
+
+        # The stored order is the syllabus order: A1.1 first, and the 2025
+        # subtopics before the 2024 block.
+        ordered = db.session.query(Topic).order_by(Topic.position).all()
+        refs = [topic.syllabus_ref for topic in ordered if topic.syllabus_ref]
+        assert refs[0] == "A1.1"
+        assert refs == sorted(refs, key=syllabus_sort_key)
+
+
 def test_get_or_create_topic_reuses_existing(app):
     with app.app_context():
         topic, created = get_or_create_topic("genetics")

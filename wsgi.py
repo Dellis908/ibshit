@@ -23,16 +23,18 @@ def _shell_context() -> dict:
 
 
 def _prepare_database() -> None:
-    """Create tables (and the syllabus topics) if they do not exist yet.
+    """Create tables and bring the syllabus topics up to date.
 
     This keeps a fresh deployment working without a manual migration step. It is
-    a no-op once the database exists.
+    cheap once the database exists, and the commit is unconditional: syncing also
+    *refreshes* existing rows (titles, syllabus references, display position), and
+    committing only when a topic was newly created silently dropped those updates
+    on every later restart.
     """
     with app.app_context():
         db.create_all()
-        created = sync_topics()
-        if created:
-            db.session.commit()
+        sync_topics()
+        db.session.commit()
 
 
 _prepare_database()
