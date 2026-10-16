@@ -36,6 +36,17 @@ def main() -> int:
     app.config.update(TESTING=True)
 
     with app.test_client() as client:
+        # The bank has to exist before anything meaningful can be exercised. CI
+        # runs this on a fresh checkout, where the database is empty.
+        with app.app_context():
+            if db.session.query(Question).first() is None:
+                from app.content import import_file
+                from flask import current_app
+
+                print(f"\nseeding {current_app.config['SEED_FILE']}")
+                import_file(current_app.config["SEED_FILE"])
+                db.session.commit()
+
         print("\n--- accounts ---")
         response = client.get("/")
         check("landing page for visitors", response.status_code == 200)
@@ -66,8 +77,8 @@ def main() -> int:
                 "/auth/signup",
                 data={
                     "email": "smoke@example.com",
-                    "password": "smoke-test-password",
-                    "password_confirm": "smoke-test-password",
+                    "password": "sturdy-lantern-42-quartz",
+                    "password_confirm": "sturdy-lantern-42-quartz",
                     "csrf_token": token,
                 },
                 follow_redirects=True,
@@ -75,15 +86,20 @@ def main() -> int:
             check("sign-up succeeds", response.status_code == 200, str(response.status_code))
             check("sign-up lands on the dashboard", b"questions in the bank" in response.data)
 
-            # A second sign-up with the same address must be refused.
-            page = client.get("/auth/signup", follow_redirects=True).get_data(as_text=True)
+            # A second sign-up with the same address must be refused. Being signed
+            # in would bounce /auth/signup to the dashboard, so sign out first.
+            # Logout is POST-only and needs the token from the current page.
+            page = client.get("/").get_data(as_text=True)
+            token = re.search(r'name="csrf-token" content="([^"]+)"', page).group(1)
+            client.post("/auth/logout", data={"csrf_token": token})
+            page = client.get("/auth/signup").get_data(as_text=True)
             token = re.search(r'name="csrf-token" content="([^"]+)"', page).group(1)
             response = client.post(
                 "/auth/signup",
                 data={
                     "email": "smoke@example.com",
-                    "password": "smoke-test-password",
-                    "password_confirm": "smoke-test-password",
+                    "password": "sturdy-lantern-42-quartz",
+                    "password_confirm": "sturdy-lantern-42-quartz",
                     "csrf_token": token,
                 },
             )
@@ -93,7 +109,7 @@ def main() -> int:
             token = re.search(r'name="csrf-token" content="([^"]+)"', page).group(1)
             client.post(
                 "/auth/login",
-                data={"email": "smoke@example.com", "password": "smoke-test-password",
+                data={"email": "smoke@example.com", "password": "sturdy-lantern-42-quartz",
                       "csrf_token": token},
                 follow_redirects=True,
             )
@@ -121,7 +137,7 @@ def main() -> int:
         token = re.search(r'name="csrf-token" content="([^"]+)"', page).group(1)
         response = client.post(
             "/auth/login",
-            data={"email": "smoke@example.com", "password": "smoke-test-password", "csrf_token": token},
+            data={"email": "smoke@example.com", "password": "sturdy-lantern-42-quartz", "csrf_token": token},
             follow_redirects=True,
         )
         check("sign-in succeeds", b"questions in the bank" in response.data)
