@@ -69,7 +69,8 @@ def main() -> int:
 
             existing = db.session.query(User).filter_by(email="smoke@example.com").one_or_none()
 
-        if existing is None:
+        created_account = existing is None
+        if created_account:
             page = client.get("/auth/signup").get_data(as_text=True)
             token = re.search(r'name="csrf-token" content="([^"]+)"', page).group(1)
 
@@ -461,6 +462,20 @@ def main() -> int:
         with app.app_context():
             db.session.delete(db.session.get(Question, injected_id))
             db.session.commit()
+
+    # Remove the account this run created, so a smoke test against a live
+    # database does not leave a user and its attempts behind. An account that
+    # was already there is left alone: it may not be ours.
+    if created_account:
+        with app.app_context():
+            from app.models import User
+
+            account = User.query.filter_by(email="smoke@example.com").one_or_none()
+            if account is not None:
+                Attempt.query.filter_by(user_id=account.id).delete()
+                db.session.delete(account)
+                db.session.commit()
+                print("\ncleaned up the smoke account and its attempts")
 
     print("\n" + "=" * 60)
     if failures:

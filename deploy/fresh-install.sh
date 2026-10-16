@@ -113,7 +113,7 @@ fi
 log "Instaluję pakiety systemowe"
 DEBIAN_FRONTEND=noninteractive apt-get update -qq
 DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-    git python3 python3-venv python3-pip nginx ca-certificates curl sqlite3
+    git python3 python3-venv python3-pip nginx ca-certificates curl sqlite3 rsync
 
 log "Tworzę użytkownika $APP_USER"
 if id -u "$APP_USER" >/dev/null 2>&1; then

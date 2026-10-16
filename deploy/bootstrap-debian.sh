@@ -25,7 +25,7 @@ die()  { printf '\033[1;31m[x]\033[0m %s\n' "$*" >&2; exit 1; }
 log "Installing system packages"
 apt-get update -qq
 apt-get install -y --no-install-recommends \
-    git python3 python3-venv python3-pip nginx ca-certificates curl
+    git python3 python3-venv python3-pip nginx ca-certificates curl rsync
 
 # --- service account -------------------------------------------------------
 if ! id -u "$APP_USER" >/dev/null 2>&1; then

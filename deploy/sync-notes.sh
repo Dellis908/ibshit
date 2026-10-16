@@ -15,6 +15,15 @@ set -eu
 HOST="${1:-}"
 REMOTE_DIR="${2:-/srv/ibshit/data/notes}"
 
+# An explicit identity, when there is one: rsync hands the transport to ssh(1),
+# which does not inherit `-i` from anywhere else. Set SSH_KEY to point at the key
+# used for the server, or leave it unset to use the agent and ~/.ssh/config.
+SSH_KEY="${SSH_KEY:-$HOME/.ssh/ibshit-vps}"
+SSH_OPTS="-o BatchMode=yes"
+if [ -f "$SSH_KEY" ]; then
+  SSH_OPTS="$SSH_OPTS -i $SSH_KEY"
+fi
+
 if [ -z "$HOST" ]; then
   echo "usage: $0 user@host [remote-dir]" >&2
   exit 2
@@ -38,16 +47,28 @@ count=$(find "$LOCAL_NOTES" -name '*.pdf' | wc -l | tr -d ' ')
 size=$(du -sh "$LOCAL_NOTES" | cut -f1)
 echo "sending $count note(s) ($size) to $HOST:$REMOTE_DIR"
 
-# --chmod keeps the service account able to read them without a chown afterwards.
-rsync -az --info=progress2 --chmod=D755,F644 \
-  --exclude '.*' \
+# macOS ships openrsync, which is not GNU rsync: it has no --info and no --chmod,
+# and it reports success even when it prints an error. So the flags stay minimal
+# and the result is verified by counting files on the far side rather than by
+# trusting the exit status.
+ssh $SSH_OPTS "$HOST" "mkdir -p '$REMOTE_DIR'"
+
+rsync -az --progress --exclude '.*' -e "ssh $SSH_OPTS" \
   "$LOCAL_NOTES/" "$HOST:$REMOTE_DIR/"
 
 echo
 echo "verifying on the server:"
-ssh "$HOST" "ls '$REMOTE_DIR' | wc -l; ls -l '$REMOTE_DIR/manifest.json'"
+remote_count=$(ssh $SSH_OPTS "$HOST" "find '$REMOTE_DIR' -name '*.pdf' | wc -l" | tr -d ' ')
+echo "  local:  $count"
+echo "  remote: $remote_count"
+if [ "$remote_count" != "$count" ]; then
+  echo "MISMATCH: the transfer is incomplete" >&2
+  exit 1
+fi
+
+# The files arrive owned by whoever ran rsync; hand them to the service account.
+ssh $SSH_OPTS "$HOST" "chown -R ibshit:ibshit '$REMOTE_DIR' && ls -l '$REMOTE_DIR/manifest.json'"
 
 echo
-echo "done. The application reads the manifest on each request, so no restart is"
-echo "needed — but make sure the service account owns $REMOTE_DIR:"
-echo "  ssh $HOST 'chown -R ibshit:ibshit $REMOTE_DIR'"
+echo "done: $remote_count notes in place, owned by ibshit. The manifest is read on"
+echo "each request, so no restart is needed."
