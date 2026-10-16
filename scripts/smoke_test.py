@@ -377,6 +377,32 @@ def main() -> int:
         check("invalid import wrote nothing", before == after, f"{before} -> {after}")
 
         print("\n--- reset ---")
+        # Plant an attempt on a second account: the reset belongs to the signed-in
+        # user only, and a server carrying real users must keep their history.
+        with app.app_context():
+            from app.models import User
+
+            bystander = User.query.filter_by(email="bystander@example.com").one_or_none()
+            if bystander is None:
+                bystander = User(email="bystander@example.com", display_name="Bystander")
+                bystander.set_password("quiet-harbour-77-reed")
+                db.session.add(bystander)
+                db.session.commit()
+            sample = Question.query.filter(Question.correct_answer != "").first()
+            db.session.add(
+                Attempt(
+                    user_id=bystander.id,
+                    question_id=sample.id,
+                    topic_id=sample.topic_id,
+                    session_id="smoke-bystander",
+                    user_response="kept",
+                    is_correct=False,
+                    marks_awarded=0,
+                )
+            )
+            db.session.commit()
+            bystander_id = bystander.id
+
         response = client.post("/api/reset", json={}, headers=headers)
         check("reset needs confirmation", response.status_code == 400)
 
@@ -384,7 +410,19 @@ def main() -> int:
         check("reset deletes attempts", response.get_json()["deleted"] >= 5, str(response.get_json()))
 
         with app.app_context():
-            check("no attempts remain", db.session.query(Attempt).count() == 0)
+            # Reset is scoped to the signed-in account, so assert on that
+            # account rather than the whole table: a server with real users has
+            # their attempts in it, and they must survive.
+            smoke_user = User.query.filter_by(email="smoke@example.com").one()
+            remaining = Attempt.query.filter_by(user_id=smoke_user.id).count()
+            check("no attempts remain for the reset account", remaining == 0, str(remaining))
+            kept = Attempt.query.filter_by(user_id=bystander_id).count()
+            check("another account keeps its attempts", kept == 1, str(kept))
+
+            # Leave no trace: this script may run against a live database.
+            Attempt.query.filter_by(user_id=bystander_id).delete()
+            User.query.filter_by(id=bystander_id).delete()
+            db.session.commit()
 
         print("\n--- security ---")
         payload = (
