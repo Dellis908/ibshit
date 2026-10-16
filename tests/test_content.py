@@ -209,6 +209,48 @@ def test_import_skips_duplicates_within_one_payload(app):
         assert report.skipped == 1
 
 
+def test_question_source_survives_the_file_level_default(app):
+    """A question's own source label must not be replaced by the file name.
+
+    The importers tag every question they emit (``rdojo:``, ``village:``); that
+    label is the only way to trace a question back to where it came from, so an
+    import must not collapse it onto ``file:<name>``.
+    """
+    from app.models import Question
+
+    with app.app_context():
+        report = import_questions(
+            [
+                {
+                    "type": "multiple_choice",
+                    "question_text": "Which pigment absorbs red and blue light?",
+                    "correct_answer": "Chlorophyll",
+                    "choices": ["Chlorophyll", "Carotene", "Xanthophyll", "Phycoerythrin"],
+                    "marks": 1,
+                    "explanation": "Chlorophyll absorbs red and blue light.",
+                    "difficulty": "easy",
+                    "source": "village:BI0001",
+                },
+                {
+                    "type": "short_answer",
+                    "question_text": "State where the light-dependent reactions occur.",
+                    "correct_answer": "Thylakoid membrane",
+                    "marks": 1,
+                    "explanation": "The thylakoid membrane.",
+                    "difficulty": "easy",
+                },
+            ],
+            source="file:additional.json",
+        )
+        assert report.created == 2
+
+        tagged = Question.query.filter_by(source="village:BI0001").one()
+        assert tagged.question_text.startswith("Which pigment")
+
+        # No source of its own: the file-level label is still the fallback.
+        assert Question.query.filter_by(source="file:additional.json").count() == 1
+
+
 def test_import_reports_rejected_count(app):
     with app.app_context():
         report = import_questions(

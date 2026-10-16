@@ -378,6 +378,17 @@ def load_payload(path: str | Path) -> tuple[list[dict], dict]:
     raise ValueError("unsupported JSON root: expected an object or a list")
 
 
+def _question_source(raw: dict, file_source: str | None) -> str | None:
+    """Pick the provenance label for one question.
+
+    A question's own ``source`` wins: the importers tag every item they emit
+    (``rdojo:``, ``village:``) and collapsing those onto the file name would
+    throw away exactly the information needed to trace a question back.
+    """
+    own = str(raw.get("source") or "").strip()
+    return own or file_source
+
+
 def import_questions(
     raw_questions: list[dict],
     *,
@@ -405,7 +416,7 @@ def import_questions(
             report.errors.extend(problems)
             continue
 
-        built = build_question(raw, source=source)
+        built = build_question(raw, source=_question_source(raw, source))
         fp = built["fingerprint"]
         if fp in existing:
             report.skipped += 1
