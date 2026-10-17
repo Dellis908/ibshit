@@ -173,7 +173,8 @@ values containing spaces and exposes secrets in the process list.
 
 The first command creates `instance/quiz.db` and loads the 154 built-in
 questions; the second adds the 2,857 imported ones (including the 613 Village
-questions and their diagrams under `app/static/img/`). Check:
+questions and their diagrams under `app/static/img/`), and the third the
+chemistry bank. Check:
 
 ```bash
 sudo -u ibshit /usr/local/sbin/ibshit-flask quiz stats

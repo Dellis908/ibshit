@@ -233,10 +233,16 @@ because their content differs. See DEPLOY.md §13a for shipping them to a server
 
 ## Adding your own questions
 
-The app ships two banks in `seed/`: `questions.json` (154 core questions) and
-`additional.json` (2,857 questions — 2,244 on the 2025 syllabus plus 613 from the
-pirateIB Village archive, 153 of them with a diagram served from
-`app/static/img/`). Imports accept plain JSON or JSON Lines, in the same shape:
+The app ships three banks in `seed/`:
+
+| File | Subject | Questions |
+| --- | --- | --- |
+| `questions.json` | Biology | 154 core |
+| `additional.json` | Biology | 2,857 (2,244 on the 2025 syllabus plus 613 from the Village archive) |
+| `chemistry.json` | Chemistry | 1,226 (363 multiple choice, 863 written) |
+
+Figures ship with the bank under `app/static/img/`. Imports accept plain JSON or
+JSON Lines, in the same shape:
 
 ```json
 {
