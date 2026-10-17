@@ -84,3 +84,21 @@ def test_topics_page_lists_chemistry(client):
     body = client.get("/topics").get_data(as_text=True)
     assert "Chemistry" in body
     assert "Structure 1" in body
+
+
+def test_known_slug_wins_over_keyword_matching(app):
+    """A chemistry slug must not be re-filed onto a biology topic.
+
+    ``chem-r12-energy-cycles-in-reactions`` contains the word "energy", which a
+    biology topic also lists as a keyword; without an exact lookup first it was
+    filed under metabolism (or ecology) instead of its own topic.
+    """
+    from app.content import get_or_create_topic, sync_topics
+
+    with app.app_context():
+        sync_topics()
+        db.session.commit()
+        topic, created = get_or_create_topic("chem-r12-energy-cycles-in-reactions")
+        assert not created
+        assert topic.slug == "chem-r12-energy-cycles-in-reactions"
+        assert topic.subject == "chemistry"

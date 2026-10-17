@@ -206,8 +206,18 @@ def get_or_create_topic(slug_or_text: str) -> tuple[Topic, bool]:
     Unknown text is mapped onto a catalogue slug when possible; otherwise it is
     stored as an ad-hoc topic so that scraped material is never silently lost.
     """
+    # An exact slug already in the table wins outright. Without this, a subject
+    # whose catalogue is not in code (chemistry) falls through to keyword
+    # matching, and "chem-r12-energy-cycles-in-reactions" lands on whichever
+    # biology topic happens to contain the word "energy".
+    requested = str(slug_or_text or "").strip()
+    if requested:
+        existing = db.session.query(Topic).filter_by(slug=requested).one_or_none()
+        if existing is not None:
+            return existing, False
+
     # Exact 2025-syllabus slugs win over fuzzy matching.
-    exact = _syllabus_topic(str(slug_or_text or "").strip())
+    exact = _syllabus_topic(requested)
     if exact is not None:
         return exact
 
