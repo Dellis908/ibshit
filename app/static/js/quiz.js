@@ -136,7 +136,8 @@
     const head = document.createElement("div");
     head.className = "feedback-head";
     const icons = { correct: "✓", partial: "◐", close: "≈", wrong: "✗" };
-    head.textContent = `${icons[verdict] || "•"} ${data.feedback || ""}`.trim();
+    const prefix = data.ai_graded ? "AI-checked · " : "";
+    head.textContent = `${icons[verdict] || "•"} ${prefix}${data.feedback || ""}`.trim();
     box.appendChild(head);
 
     const marks = document.createElement("div");

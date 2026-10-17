@@ -543,6 +543,31 @@ notes routes answer `404`.
 | `QUIZ_NOTES_DIR` | `data/notes` | where the PDFs live |
 | `QUIZ_DATA_DIR` | `data` | parent of the default, and where the manifest is looked up |
 
+## 13b. Second-opinion grading (optional)
+
+Written answers worth more than one mark that the deterministic engine could not
+fully credit are offered to an LLM for a second opinion. It is off unless a key
+is configured, and a failure always leaves the engine's result in place.
+
+```bash
+# /etc/ibshit.env
+OPENROUTER_API_KEY=sk-or-...
+OPENROUTER_MODEL=meta-llama/llama-3.3-70b-instruct:free
+AI_GRADING_ENABLED=1
+```
+
+```bash
+sudo systemctl restart ibshit
+sudo -u ibshit /usr/local/sbin/ibshit-flask quiz ai-check
+```
+
+`quiz ai-check` prints whether the feature is armed, which model it would use and
+whether OpenRouter answers. The key never reaches the browser: the call is made
+from the server, and only the resulting marks and feedback are returned.
+
+Costs: a free model is free but rate-limited; a small paid model costs a fraction
+of a cent per answer. Identical answers within one process are memoised.
+
 ## 14. Monitoring the image cache
 
 Imported questions may reference diagrams on a third-party CDN. The app mirrors

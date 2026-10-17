@@ -28,7 +28,7 @@ from urllib.parse import urlparse
 from flask import Blueprint, current_app, jsonify, request, session
 from flask_login import current_user
 
-from app import grading
+from app import ai_grading, grading
 from app.content import export_questions, import_questions
 from app.extensions import db
 from app.models import DIFFICULTIES, QUESTION_TYPES, Attempt, Question, Topic, overall_stats
@@ -199,6 +199,15 @@ def submit_answer():
         tolerance=current_app.config.get("NUMERIC_TOLERANCE", 0.01),
     )
 
+    # A second opinion on written answers the engine could not fully credit.
+    ai_verdict = None
+    if ai_grading.should_consult(question, verdict, response, current_app.config):
+        ai_verdict = ai_grading.grade(question, response, current_app.config)
+
+    final_marks = ai_verdict.marks if ai_verdict else verdict.marks_awarded
+    final_correct = ai_verdict.correct if ai_verdict else verdict.correct
+    final_feedback = ai_verdict.feedback or verdict.feedback if ai_verdict else verdict.feedback
+
     mode = str(payload.get("mode") or "practice")
     if mode not in QUIZ_MODES:
         mode = "practice"
@@ -210,10 +219,10 @@ def submit_answer():
         session_id=payload.get("session_id") or current_session_id(),
         mode=mode,
         user_response=response,
-        is_correct=verdict.correct,
+        is_correct=final_correct,
         score=verdict.score,
-        marks_awarded=verdict.marks_awarded,
-        feedback=verdict.feedback,
+        marks_awarded=final_marks,
+        feedback=final_feedback,
     )
     db.session.add(attempt)
     db.session.commit()
@@ -221,17 +230,26 @@ def submit_answer():
     body = {
         "attempt_id": attempt.id,
         "question_id": question.id,
-        "correct": verdict.correct,
+        "correct": final_correct,
         "verdict": verdict.verdict,
         "score": round(verdict.score, 1),
-        "marks_awarded": verdict.marks_awarded,
+        "marks_awarded": final_marks,
         "marks_available": verdict.marks_available,
-        "feedback": verdict.feedback,
+        "feedback": final_feedback,
         "correct_answer": question.correct_answer,
         "explanation": question.explanation,
         "keywords_matched": verdict.keywords_matched,
         "keywords_missed": verdict.keywords_missed,
     }
+
+    if ai_verdict is not None:
+        body["ai_graded"] = True
+        body["ai_feedback"] = ai_verdict.feedback
+        body["ai_points"] = {
+            "awarded": ai_verdict.awarded_points,
+            "missed": ai_verdict.missed_points,
+        }
+        body["ai_model"] = ai_verdict.model
 
     # Let the client self-mark longer written answers against the mark scheme.
     if (

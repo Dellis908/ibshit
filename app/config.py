@@ -82,6 +82,13 @@ class Config:
     #: When set, /api/import and /api/export require an X-API-Key header.
     API_KEY = None
 
+    #: Second-opinion grading for written answers (see app/ai_grading.py).
+    #: Off unless a key is provided, so a fresh install never calls out.
+    AI_GRADING_ENABLED = False
+    OPENROUTER_API_KEY = None
+    OPENROUTER_MODEL = "meta-llama/llama-3.3-70b-instruct:free"
+    AI_GRADING_TIMEOUT = 6.0
+
     # --- accounts -----------------------------------------------------------
     #: Whether new accounts can be created. Turn off once everyone who needs one
     #: has registered, and the sign-up page closes.
@@ -184,6 +191,15 @@ def apply_environment(app, *, testing: bool = False) -> None:
     )
 
     app.config["API_KEY"] = os.getenv("API_KEY") or None
+
+    app.config["OPENROUTER_API_KEY"] = os.getenv("OPENROUTER_API_KEY") or None
+    app.config["OPENROUTER_MODEL"] = os.getenv("OPENROUTER_MODEL") or app.config["OPENROUTER_MODEL"]
+    app.config["AI_GRADING_TIMEOUT"] = _number("AI_GRADING_TIMEOUT", app.config["AI_GRADING_TIMEOUT"])
+    # A key alone is not consent: the flag stays explicit, and defaults to on only
+    # when a key was provided.
+    app.config["AI_GRADING_ENABLED"] = _flag(
+        "AI_GRADING_ENABLED", bool(app.config["OPENROUTER_API_KEY"])
+    )
 
     app.config["ALLOW_REGISTRATION"] = _flag("ALLOW_REGISTRATION", True)
     app.config["REGISTRATION_CODE"] = os.getenv("REGISTRATION_CODE") or None

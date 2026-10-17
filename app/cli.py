@@ -185,6 +185,46 @@ def register_cli(app: Flask) -> None:
         click.secho(report.summary(), fg="green")
         _print_bank_size()
 
+    # -------------------------------------------------------------- ai grading
+    @quiz_group.command("ai-check")
+    def ai_check_command():
+        """Report whether second-opinion grading is configured and reachable."""
+        from app import ai_grading
+
+        config = current_app.config
+        key = config.get("OPENROUTER_API_KEY")
+        click.echo(f"enabled:  {bool(config.get('AI_GRADING_ENABLED'))}")
+        click.echo(f"model:    {config.get('OPENROUTER_MODEL') or ai_grading.DEFAULT_MODEL}")
+        click.echo(f"key:      {'set (' + key[:6] + '...)' if key else 'missing'}")
+        if not ai_grading.enabled(config):
+            click.secho("grading will not call out: set OPENROUTER_API_KEY (and AI_GRADING_ENABLED=1)", fg="yellow")
+            return
+        click.echo("contacting OpenRouter…")
+        try:
+            import urllib.request
+
+            request = urllib.request.Request(
+                ai_grading.API_URL,
+                data=json.dumps(
+                    {
+                        "model": config.get("OPENROUTER_MODEL") or ai_grading.DEFAULT_MODEL,
+                        "messages": [{"role": "user", "content": "Reply with the single word: ok"}],
+                        "max_tokens": 5,
+                    }
+                ).encode("utf-8"),
+                headers={
+                    "Authorization": f"Bearer {key}",
+                    "Content-Type": "application/json",
+                },
+                method="POST",
+            )
+            with urllib.request.urlopen(request, timeout=config.get("AI_GRADING_TIMEOUT", 6)) as response:
+                payload = json.loads(response.read().decode("utf-8"))
+            reply = payload["choices"][0]["message"]["content"].strip()
+            click.secho(f"OK — model replied: {reply[:60]!r}", fg="green")
+        except Exception as exc:  # pragma: no cover - needs the network
+            click.secho(f"FAILED: {exc}", fg="red")
+
     # ----------------------------------------------------------------- import
     @quiz_group.command("import")
     @click.argument("path", type=click.Path(exists=True, dir_okay=False, path_type=Path))
