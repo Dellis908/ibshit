@@ -14,8 +14,20 @@
   </div>
 </section>
 
+{% if subjects|length > 1 %}
+<nav class="subject-jump" aria-label="Jump to subject">
+  {% for block in subjects %}
+    <a href="#subject-{{ block.subject }}">
+      {{ block.title }}
+      <span class="subject-jump-count">{{ block.questions }}</span>
+    </a>
+  {% endfor %}
+  <a class="subject-jump-top" href="#top">Back to top ↑</a>
+</nav>
+{% endif %}
+
 {% for block in subjects %}
-  <section class="subject-block">
+  <section class="subject-block" id="subject-{{ block.subject }}">
     <header class="subject-head">
       <h2>{{ block.title }}</h2>
       <p class="muted small">

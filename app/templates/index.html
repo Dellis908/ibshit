@@ -23,8 +23,12 @@
         <span>Topic</span>
         <select name="topic">
           <option value="">All topics</option>
-          {% for topic in topics %}
-            <option value="{{ topic.slug }}">{{ topic.title }}</option>
+          {% for subject, group in topics|groupby('subject') %}
+            <optgroup label="{{ subject|capitalize }}">
+              {% for topic in group %}
+                <option value="{{ topic.slug }}">{{ topic.short_title or topic.title }}</option>
+              {% endfor %}
+            </optgroup>
           {% endfor %}
         </select>
       </label>
@@ -103,7 +107,7 @@
   </div>
   {% if topics %}
     <div class="topic-grid">
-      {% for topic in topics %}
+      {% for topic in topics[:12] %}
         {% set row = progress.get(topic.slug) %}
         <a class="topic-tile" href="{{ url_for('main.topic_detail', slug=topic.slug) }}">
           <span class="topic-tile-head">

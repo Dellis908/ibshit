@@ -4,7 +4,13 @@
 {% block title %}{{ topic.title }} · {{ site_name }}{% endblock %}
 
 {% block content %}
-<nav class="breadcrumb"><a href="{{ url_for('main.topics') }}">Topics</a> <span aria-hidden="true">/</span> {{ topic.title }}</nav>
+<nav class="breadcrumb">
+  <a href="{{ url_for('main.topics') }}">Topics</a>
+  <span aria-hidden="true">/</span>
+  <a href="{{ url_for('main.topics') }}#subject-{{ topic.subject }}">{{ topic.subject|capitalize }}</a>
+  <span aria-hidden="true">/</span>
+  <span>{{ topic.title }}</span>
+</nav>
 
 <section class="section-head">
   <div>
