@@ -93,6 +93,8 @@ class Topic(db.Model):
     short_title = db.Column(db.String(80))
     description = db.Column(db.Text)
     syllabus_ref = db.Column(db.String(40))
+    #: Which subject the topic belongs to; the bank grows past one subject now.
+    subject = db.Column(db.String(20), default="biology", nullable=False, index=True)
     position = db.Column(db.Integer, default=0, nullable=False)
 
     questions = db.relationship(
@@ -117,6 +119,7 @@ class Topic(db.Model):
             "short_title": self.short_title,
             "description": self.description,
             "syllabus_ref": self.syllabus_ref,
+            "subject": self.subject,
             "position": self.position,
         }
         if include_counts:

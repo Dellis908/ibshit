@@ -1,0 +1,258 @@
+{
+ "subject": "chemistry",
+ "syllabus": "2025",
+ "topics": [
+  {
+   "slug": "chem-s11-introduction-to-the-particulate-nature-o",
+   "ref": "Structure 1.1",
+   "title": "Introduction to the particulate nature of matter",
+   "theme": "Structure 1. Models of the particulate nature of matter",
+   "subject": "chemistry",
+   "syllabus": "2025",
+   "position": 0
+  },
+  {
+   "slug": "chem-s12-the-nuclear-atom",
+   "ref": "Structure 1.2",
+   "title": "The nuclear atom",
+   "theme": "Structure 1. Models of the particulate nature of matter",
+   "subject": "chemistry",
+   "syllabus": "2025",
+   "position": 1
+  },
+  {
+   "slug": "chem-s13-electron-configurations",
+   "ref": "Structure 1.3",
+   "title": "Electron configurations",
+   "theme": "Structure 1. Models of the particulate nature of matter",
+   "subject": "chemistry",
+   "syllabus": "2025",
+   "position": 2
+  },
+  {
+   "slug": "chem-s14-counting-particles-by-mass-the-mole",
+   "ref": "Structure 1.4",
+   "title": "Counting particles by mass: The mole",
+   "theme": "Structure 1. Models of the particulate nature of matter",
+   "subject": "chemistry",
+   "syllabus": "2025",
+   "position": 3
+  },
+  {
+   "slug": "chem-s15-ideal-gases",
+   "ref": "Structure 1.5",
+   "title": "Ideal gases",
+   "theme": "Structure 1. Models of the particulate nature of matter",
+   "subject": "chemistry",
+   "syllabus": "2025",
+   "position": 4
+  },
+  {
+   "slug": "chem-t1-tool-1-experimental-techniques",
+   "ref": "Tool 1: Experimental techniques",
+   "title": "Tool 1: Experimental techniques",
+   "theme": "Tools",
+   "subject": "chemistry",
+   "syllabus": "2025",
+   "position": 5
+  },
+  {
+   "slug": "chem-t2-tool-2-technology",
+   "ref": "Tool 2: Technology",
+   "title": "Tool 2: Technology",
+   "theme": "Tools",
+   "subject": "chemistry",
+   "syllabus": "2025",
+   "position": 6
+  },
+  {
+   "slug": "chem-t3-tool-3-mathematics",
+   "ref": "Tool 3: Mathematics",
+   "title": "Tool 3: Mathematics",
+   "theme": "Tools",
+   "subject": "chemistry",
+   "syllabus": "2025",
+   "position": 7
+  },
+  {
+   "slug": "chem-s21-the-ionic-model",
+   "ref": "Structure 2.1",
+   "title": "The ionic model",
+   "theme": "Structure 2. Models of bonding and structure",
+   "subject": "chemistry",
+   "syllabus": "2025",
+   "position": 8
+  },
+  {
+   "slug": "chem-s22-the-covalent-model",
+   "ref": "Structure 2.2",
+   "title": "The covalent model",
+   "theme": "Structure 2. Models of bonding and structure",
+   "subject": "chemistry",
+   "syllabus": "2025",
+   "position": 9
+  },
+  {
+   "slug": "chem-s23-the-metallic-model",
+   "ref": "Structure 2.3",
+   "title": "The metallic model",
+   "theme": "Structure 2. Models of bonding and structure",
+   "subject": "chemistry",
+   "syllabus": "2025",
+   "position": 10
+  },
+  {
+   "slug": "chem-s24-from-models-to-materials",
+   "ref": "Structure 2.4",
+   "title": "From models to materials",
+   "theme": "Structure 2. Models of bonding and structure",
+   "subject": "chemistry",
+   "syllabus": "2025",
+   "position": 11
+  },
+  {
+   "slug": "chem-s31-the-periodic-table-classification-of-ele",
+   "ref": "Structure 3.1",
+   "title": "The periodic table: Classification of elements",
+   "theme": "Structure 3. Classification of matter",
+   "subject": "chemistry",
+   "syllabus": "2025",
+   "position": 12
+  },
+  {
+   "slug": "chem-s32-functional-groups-classification-of-orga",
+   "ref": "Structure 3.2",
+   "title": "Functional groups: Classification of organic compounds",
+   "theme": "Structure 3. Classification of matter",
+   "subject": "chemistry",
+   "syllabus": "2025",
+   "position": 13
+  },
+  {
+   "slug": "chem-r11-measuring-enthalpy-changes",
+   "ref": "Reactivity 1.1",
+   "title": "Measuring enthalpy changes",
+   "theme": "Reactivity 1. What drives chemical reactions?",
+   "subject": "chemistry",
+   "syllabus": "2025",
+   "position": 14
+  },
+  {
+   "slug": "chem-r12-energy-cycles-in-reactions",
+   "ref": "Reactivity 1.2",
+   "title": "Energy cycles in reactions",
+   "theme": "Reactivity 1. What drives chemical reactions?",
+   "subject": "chemistry",
+   "syllabus": "2025",
+   "position": 15
+  },
+  {
+   "slug": "chem-r13-energy-from-fuels",
+   "ref": "Reactivity 1.3",
+   "title": "Energy from fuels",
+   "theme": "Reactivity 1. What drives chemical reactions?",
+   "subject": "chemistry",
+   "syllabus": "2025",
+   "position": 16
+  },
+  {
+   "slug": "chem-r14-entropy-and-spontaneity-additional-highe",
+   "ref": "Reactivity 1.4",
+   "title": "Entropy and spontaneity (Additional higher level)",
+   "theme": "Reactivity 1. What drives chemical reactions?",
+   "subject": "chemistry",
+   "syllabus": "2025",
+   "position": 17
+  },
+  {
+   "slug": "chem-r21-how-much-the-amount-of-chemical-change",
+   "ref": "Reactivity 2.1",
+   "title": "How much? The amount of chemical change",
+   "theme": "Reactivity 2. How much, how fast and how far?",
+   "subject": "chemistry",
+   "syllabus": "2025",
+   "position": 18
+  },
+  {
+   "slug": "chem-r22-how-fast-the-rate-of-chemical-change",
+   "ref": "Reactivity 2.2",
+   "title": "How fast? The rate of chemical change",
+   "theme": "Reactivity 2. How much, how fast and how far?",
+   "subject": "chemistry",
+   "syllabus": "2025",
+   "position": 19
+  },
+  {
+   "slug": "chem-r23-how-far-the-extent-of-chemical-change",
+   "ref": "Reactivity 2.3",
+   "title": "How far? The extent of chemical change",
+   "theme": "Reactivity 2. How much, how fast and how far?",
+   "subject": "chemistry",
+   "syllabus": "2025",
+   "position": 20
+  },
+  {
+   "slug": "chem-r31-proton-transfer-reactions",
+   "ref": "Reactivity 3.1",
+   "title": "Proton transfer reactions",
+   "theme": "Reactivity 3. What are the mechanisms of chemical change?",
+   "subject": "chemistry",
+   "syllabus": "2025",
+   "position": 21
+  },
+  {
+   "slug": "chem-r32-electron-transfer-reactions",
+   "ref": "Reactivity 3.2",
+   "title": "Electron transfer reactions",
+   "theme": "Reactivity 3. What are the mechanisms of chemical change?",
+   "subject": "chemistry",
+   "syllabus": "2025",
+   "position": 22
+  },
+  {
+   "slug": "chem-r33-electron-sharing-reactions",
+   "ref": "Reactivity 3.3",
+   "title": "Electron sharing reactions",
+   "theme": "Reactivity 3. What are the mechanisms of chemical change?",
+   "subject": "chemistry",
+   "syllabus": "2025",
+   "position": 23
+  },
+  {
+   "slug": "chem-r34-electron-pair-sharing-reactions",
+   "ref": "Reactivity 3.4",
+   "title": "Electron-pair sharing reactions",
+   "theme": "Reactivity 3. What are the mechanisms of chemical change?",
+   "subject": "chemistry",
+   "syllabus": "2025",
+   "position": 24
+  },
+  {
+   "slug": "chem-x1-inquiry-1-exploring-and-designing",
+   "ref": "Inquiry 1: Exploring and designing",
+   "title": "Inquiry 1: Exploring and designing",
+   "theme": "Inquiry",
+   "subject": "chemistry",
+   "syllabus": "2025",
+   "position": 25
+  },
+  {
+   "slug": "chem-x2-inquiry-2-collecting-and-processing-data",
+   "ref": "Inquiry 2: Collecting and processing data",
+   "title": "Inquiry 2: Collecting and processing data",
+   "theme": "Inquiry",
+   "subject": "chemistry",
+   "syllabus": "2025",
+   "position": 26
+  },
+  {
+   "slug": "chem-x3-inquiry-3-concluding-and-evaluating",
+   "ref": "Inquiry 3: Concluding and evaluating",
+   "title": "Inquiry 3: Concluding and evaluating",
+   "theme": "Inquiry",
+   "subject": "chemistry",
+   "syllabus": "2025",
+   "position": 27
+  }
+ ]
+}

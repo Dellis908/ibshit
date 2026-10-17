@@ -82,7 +82,7 @@ def _guard_write():
 @login_required_api
 def list_topics():
     progress = {row["slug"]: row for row in topic_progress(current_user)}
-    topics = db.session.query(Topic).order_by(Topic.position, Topic.title).all()
+    topics = db.session.query(Topic).order_by(Topic.subject, Topic.position, Topic.title).all()
     payload = []
     for topic in topics:
         data = topic.as_dict()

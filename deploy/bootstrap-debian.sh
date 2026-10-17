@@ -197,6 +197,9 @@ fi
 log "Preparing the database and importing questions"
 run_flask quiz seed
 run_flask quiz import "$APP_DIR/seed/additional.json"
+if [ -f "$APP_DIR/seed/chemistry.json" ]; then
+    run_flask quiz import "$APP_DIR/seed/chemistry.json"
+fi
 
 # The service account must own the database and image cache it just created.
 chown -R "$APP_USER:$APP_USER" "$APP_DIR/instance"

@@ -7,8 +7,10 @@ the scraper can map scraped material onto topics consistently.
 
 from __future__ import annotations
 
+import json
 import re
 from dataclasses import dataclass, field
+from pathlib import Path
 
 
 @dataclass(frozen=True)
@@ -348,3 +350,79 @@ def ordered_specs() -> tuple:
     for _heading, items in topic_groups():
         specs.extend(items)
     return tuple(specs)
+
+
+# ---------------------------------------------------------------------------
+# Subjects
+#
+# The bank started as biology and now carries chemistry. Each subject keeps its
+# own catalogue; topics are still one flat table, distinguished by ``subject``.
+# ---------------------------------------------------------------------------
+
+SUBJECTS: dict[str, str] = {"biology": "Biology", "chemistry": "Chemistry"}
+
+_SEED_DIR = Path(__file__).resolve().parent.parent / "seed"
+
+
+def _display_theme(theme: str) -> str:
+    """``"Structure 1. Models of ..."`` -> ``"Structure 1 — Models of ..."``."""
+    match = re.match(r"^([A-Za-z]+\s*\d*)\.\s*(.+)$", theme)
+    if match and match.group(1).strip():
+        return f"{match.group(1).strip()} — {match.group(2).strip()}"
+    return theme
+
+
+def load_subject_topics(subject: str) -> tuple[dict, ...]:
+    """Topic rows for a subject whose catalogue lives in ``seed/topics_<subject>.json``.
+
+    Biology's catalogue is in code (it predates the file format); chemistry's is
+    generated from the source's own syllabus tree, because forty hand-written
+    entries would drift the moment a section is renamed.
+    """
+    path = _SEED_DIR / f"topics_{subject}.json"
+    if not path.exists():
+        return ()
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return ()
+    topics = payload.get("topics") if isinstance(payload, dict) else payload
+    if not isinstance(topics, list):
+        return ()
+    return tuple(topic for topic in topics if isinstance(topic, dict) and topic.get("slug"))
+
+
+def chemistry_topics() -> tuple[dict, ...]:
+    return load_subject_topics("chemistry")
+
+
+def subject_specs(subject: str) -> tuple:
+    """Every catalogue entry for a subject, in display order."""
+    if subject == "chemistry":
+        return chemistry_topics()
+    return ordered_specs()
+
+
+def subject_groups(subject: str) -> tuple[tuple[str, tuple], ...]:
+    """Display groups for one subject: ``(heading, (spec, ...))``."""
+    if subject != "chemistry":
+        return topic_groups()
+
+    # Order themes as the guide does: Structure, then Reactivity, then the skills
+    # material. The catalogue file follows the source's section ids, which are not
+    # hierarchical.
+    order = {"structure": 0, "reactivity": 1, "tools": 2, "inquiry": 3}
+
+    def _key(topic: dict) -> tuple:
+        theme = str(topic.get("theme") or "")
+        word = (theme.split(" ")[0] or "").lower()
+        number = re.match(r"[A-Za-z]+\s*(\d+)", theme)
+        return (order.get(word, 9), int(number.group(1)) if number else 0, str(topic.get("ref") or ""))
+
+    groups: list[tuple[str, list]] = []
+    for topic in sorted(chemistry_topics(), key=_key):
+        heading = _display_theme(str(topic.get("theme") or "Chemistry"))
+        if not groups or groups[-1][0] != heading:
+            groups.append((heading, []))
+        groups[-1][1].append(topic)
+    return tuple((heading, tuple(items)) for heading, items in groups)

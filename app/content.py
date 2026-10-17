@@ -43,6 +43,7 @@ from app.topics import (
     TOPICS_BY_SLUG,
     normalize_topic,
     ordered_specs,
+    subject_specs,
 )
 
 #: Characters that survive normalisation when fingerprinting question text.
@@ -122,23 +123,33 @@ def sync_topics() -> int:
     """
     created = 0
     _rename_legacy_topics()
-    # One canonical order for the whole catalogue — 2025 subtopics by A→D, then
-    # the 2024 topics — so the stored position agrees with what the topics page
-    # renders and a plain query already returns a browsable list.
-    for position, spec in enumerate(ordered_specs()):
-        topic = db.session.query(Topic).filter_by(slug=spec.slug).one_or_none()
-        if topic is None:
-            topic = Topic(slug=spec.slug)
-            db.session.add(topic)
-            created += 1
-        # Refresh the presentation fields every time. Topics created by an
-        # earlier release kept a stale position, which is what made the list
-        # look shuffled once the 2025 subtopics were added next to them.
-        topic.title = getattr(spec, "title", topic.title)
-        topic.short_title = getattr(spec, "short_title", None) or getattr(spec, "ref", None)
-        topic.description = getattr(spec, "description", None)
-        topic.syllabus_ref = getattr(spec, "syllabus_ref", None) or getattr(spec, "ref", None)
-        topic.position = position
+
+    # One canonical order per subject — 2025 subtopics by A→D (biology) or
+    # Structure → Reactivity → Tools (chemistry), then any legacy block — so the
+    # stored position agrees with what the topics page renders.
+    for subject, specs in (
+        ("biology", ordered_specs()),
+        ("chemistry", subject_specs("chemistry")),
+    ):
+        for position, spec in enumerate(specs):
+            slug = spec["slug"] if isinstance(spec, dict) else spec.slug
+            topic = db.session.query(Topic).filter_by(slug=slug).one_or_none()
+            if topic is None:
+                topic = Topic(slug=slug)
+                db.session.add(topic)
+                created += 1
+            if isinstance(spec, dict):
+                topic.title = spec.get("title") or topic.title
+                topic.short_title = spec.get("ref")
+                topic.description = spec.get("theme")
+                topic.syllabus_ref = spec.get("ref")
+            else:
+                topic.title = getattr(spec, "title", topic.title)
+                topic.short_title = getattr(spec, "short_title", None) or getattr(spec, "ref", None)
+                topic.description = getattr(spec, "description", None)
+                topic.syllabus_ref = getattr(spec, "syllabus_ref", None) or getattr(spec, "ref", None)
+            topic.subject = subject
+            topic.position = position
 
     db.session.flush()
     return created

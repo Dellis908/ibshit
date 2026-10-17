@@ -8,37 +8,47 @@
   <div>
     <h1>All topics</h1>
     <p class="muted">
-      The 2025 syllabus grouped by its four themes, followed by the 2024 topics,
-      with your progress on each.
+      Every subject in the bank, grouped by syllabus theme, with your progress on
+      each.
     </p>
   </div>
 </section>
 
-{% if groups %}
-  {% for group in groups %}
-    <section class="section topic-group">
-      <div class="topic-group-head">
-        {% if group.letter and group.letter|length == 1 %}
-          <span class="theme-badge" aria-hidden="true">{{ group.letter }}</span>
-        {% endif %}
-        <div>
-          <h2>{{ group.heading }}</h2>
-          <p class="muted small">
-            {{ group.topics|length }} topic{{ '' if group.topics|length == 1 else 's' }}
-            · {{ group.questions }} question{{ '' if group.questions == 1 else 's' }}
-          </p>
+{% for block in subjects %}
+  <section class="subject-block">
+    <header class="subject-head">
+      <h2>{{ block.title }}</h2>
+      <p class="muted small">
+        {{ block.topics }} topic{{ '' if block.topics == 1 else 's' }}
+        · {{ block.questions }} question{{ '' if block.questions == 1 else 's' }}
+      </p>
+    </header>
+
+    {% for group in block.groups %}
+      <section class="section topic-group">
+        <div class="topic-group-head">
+          {% if group.letter and group.letter|length == 1 %}
+            <span class="theme-badge" aria-hidden="true">{{ group.letter }}</span>
+          {% endif %}
+          <div>
+            <h3>{{ group.heading }}</h3>
+            <p class="muted small">
+              {{ group.topics|length }} topic{{ '' if group.topics|length == 1 else 's' }}
+              · {{ group.questions }} question{{ '' if group.questions == 1 else 's' }}
+            </p>
+          </div>
         </div>
-      </div>
-      <div class="topic-grid topic-grid-wide">
-        {% for topic in group.topics %}
-          {{ topic_card(topic, progress.get(topic.slug), group.counts.get(topic.slug, 0)) }}
-        {% endfor %}
-      </div>
-    </section>
-  {% endfor %}
+        <div class="topic-grid topic-grid-wide">
+          {% for topic in group.topics %}
+            {{ topic_card(topic, progress.get(topic.slug), group.counts.get(topic.slug, 0)) }}
+          {% endfor %}
+        </div>
+      </section>
+    {% endfor %}
+  </section>
 {% else %}
   <div class="notice notice-warning">
     No questions loaded yet. Run <code>flask quiz seed</code> to add the bundled bank.
   </div>
-{% endif %}
+{% endfor %}
 {% endblock %}

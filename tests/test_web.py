@@ -188,19 +188,24 @@ def test_topics_endpoint(client):
 
 
 def test_topics_endpoint_lists_the_syllabus_in_order(client):
-    """The API order is the order the topics page renders."""
+    """The API order is the order the topics page renders: subject, then syllabus."""
     topics = client.get("/api/topics").get_json()["topics"]
-    refs = [topic.get("syllabus_ref") for topic in topics]
+    subjects = [topic.get("subject", "biology") for topic in topics]
+    assert subjects == sorted(subjects) or subjects[0] == "biology", subjects[:5]
 
-    # The 2025 subtopics come first, numbered from A1.1 upwards.
-    assert refs[0] == "A1.1"
-    numbered = [ref for ref in refs if ref and "." in ref]
+    biology = [t for t in topics if t.get("subject", "biology") == "biology"]
+    assert biology[0]["syllabus_ref"] == "A1.1"
+    numbered = [t["syllabus_ref"] for t in biology if t.get("syllabus_ref") and "." in t["syllabus_ref"]]
     assert numbered == sorted(numbered, key=lambda ref: (
         ref[0], int(re.match(r"[A-Z](\d+)", ref).group(1)), int(ref.split(".")[1])
     )), numbered[:8]
 
+    chemistry = [t for t in topics if t.get("subject") == "chemistry"]
+    assert chemistry, "the chemistry catalogue should be listed"
+    assert chemistry[0]["syllabus_ref"].startswith("Structure 1.1")
+
     # The 2024 topics follow, and carry no invented syllabus reference.
-    legacy = [topic for topic in topics if topic["slug"] == "cell-biology"]
+    legacy = [t for t in topics if t["slug"] == "cell-biology"]
     assert legacy and not legacy[0].get("syllabus_ref")
 
 

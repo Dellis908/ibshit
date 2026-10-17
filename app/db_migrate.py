@@ -31,7 +31,15 @@ ADDITIVE_COLUMNS: tuple[tuple[str, str, str], ...] = (
     # predate ownership. They are left with a NULL user_id (see _report_orphans)
     # rather than being attributed to an account that did not exist.
     ("attempt", "user_id", "INTEGER"),
+    # Subjects arrived with the chemistry bank; existing rows are biology, which
+    # is the column default.
+    ("topic", "subject", "VARCHAR(20)"),
 )
+
+#: Values new columns take on existing rows.
+ADDITIVE_DEFAULTS: dict[tuple[str, str], str] = {
+    ("topic", "subject"): "biology",
+}
 
 #: Indexes created after the fact: ``(index name, table, column)``.
 ADDITIVE_INDEXES: tuple[tuple[str, str, str], ...] = (
@@ -74,6 +82,13 @@ def run_migrations(engine=None) -> list[str]:
                 continue
             try:
                 connection.execute(text(f"ALTER TABLE {table} ADD COLUMN {column} {ddl_type}"))
+                if (table, column) in ADDITIVE_DEFAULTS:
+                    # A new NOT NULL column leaves existing rows NULL; backfill so
+                    # queries that filter on it keep finding the old data.
+                    connection.execute(
+                        text(f"UPDATE {table} SET {column} = :value WHERE {column} IS NULL"),
+                        {"value": ADDITIVE_DEFAULTS[(table, column)]},
+                    )
                 applied.append(f"added {table}.{column}")
                 log.info("migration: added %s.%s", table, column)
             except Exception as exc:  # pragma: no cover - depends on the live schema

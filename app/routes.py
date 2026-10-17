@@ -33,7 +33,7 @@ from app.quiz import (
     session_summary,
     topic_progress,
 )
-from app.topics import TOPICS_BY_SLUG, topic_groups
+from app.topics import SUBJECTS, TOPICS_BY_SLUG, subject_groups
 
 bp = Blueprint("main", __name__)
 
@@ -61,18 +61,17 @@ def available_topics() -> list[Topic]:
     return (
         db.session.query(Topic)
         .join(Question, Question.topic_id == Topic.id)
-        .order_by(Topic.position, Topic.title)
+        .order_by(Topic.subject, Topic.position, Topic.title)
         .all()
     )
 
 
 def grouped_topics() -> tuple[dict, ...]:
-    """The whole catalogue as display groups, each with its own heading.
+    """The whole catalogue as subject blocks, each split into display groups.
 
-    The 2025 syllabus reads as four themes (A–D) numbered ``1.1`` upwards; the
-    2024 material is one block after them. Every catalogue entry is listed, even
-    with no questions yet, so the page doubles as a syllabus map and gaps are
-    visible instead of silently missing.
+    One page now covers more than one subject, so the structure is
+    subject -> theme -> topics. Every catalogue entry is listed even without
+    questions, so the page doubles as a syllabus map and gaps stay visible.
     """
     # Count in SQL: len(topic.questions) would load every question row of every
     # topic just to produce a number for the heading.
@@ -83,34 +82,45 @@ def grouped_topics() -> tuple[dict, ...]:
     )
     rows = {topic.slug: topic for topic in db.session.query(Topic).all()}
 
-    groups = []
-    for heading, specs in topic_groups():
-        entries = []
-        for spec in specs:
-            topic = rows.get(spec.slug)
-            if topic is None:
+    blocks = []
+    for subject, subject_title in SUBJECTS.items():
+        groups = []
+        for heading, specs in subject_groups(subject):
+            entries = []
+            for spec in specs:
+                slug = spec["slug"] if isinstance(spec, dict) else spec.slug
+                topic = rows.get(slug)
+                if topic is None:
+                    continue
+                entries.append((topic, counts.get(topic.id, 0)))
+            if not entries:
                 continue
-            entries.append((topic, counts.get(topic.id, 0)))
-        if not entries:
-            continue
-        groups.append(
-            {
-                "heading": heading,
-                "letter": heading.split(" ")[0] if heading[:1].isalpha() else "",
-                "topics": [topic for topic, _count in entries],
-                "counts": {topic.slug: count for topic, count in entries},
-                "questions": sum(count for _topic, count in entries),
-            }
-        )
-    return tuple(groups)
+            groups.append(
+                {
+                    "heading": heading,
+                    "letter": heading.split(" ")[0] if heading[:1].isalpha() else "",
+                    "topics": [topic for topic, _count in entries],
+                    "counts": {topic.slug: count for topic, count in entries},
+                    "questions": sum(count for _topic, count in entries),
+                }
+            )
+        if groups:
+            blocks.append(
+                {
+                    "subject": subject,
+                    "title": subject_title,
+                    "groups": groups,
+                    "topics": sum(len(group["topics"]) for group in groups),
+                    "questions": sum(group["questions"] for group in groups),
+                }
+            )
+    return tuple(blocks)
 
 
 @bp.route("/")
 def index():
     """The dashboard, or a short landing page for visitors."""
     if not current_user.is_authenticated:
-        # Nothing here is user-specific, so this needs no login: the bank size is
-        # public information and no progress is shown.
         return render_template("landing.html", stats=overall_stats(None))
 
     stats = overall_stats(current_user)
@@ -130,7 +140,7 @@ def topics():
     progress = {row["slug"]: row for row in topic_progress(current_user)}
     return render_template(
         "topics.html",
-        groups=grouped_topics(),
+        subjects=grouped_topics(),
         progress=progress,
     )
 
