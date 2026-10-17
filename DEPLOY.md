@@ -552,7 +552,7 @@ is configured, and a failure always leaves the engine's result in place.
 ```bash
 # /etc/ibshit.env
 OPENROUTER_API_KEY=sk-or-...
-OPENROUTER_MODEL=meta-llama/llama-3.3-70b-instruct:free
+OPENROUTER_MODEL=nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free
 AI_GRADING_ENABLED=1
 ```
 

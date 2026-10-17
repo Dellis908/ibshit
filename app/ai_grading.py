@@ -35,7 +35,7 @@ API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 #: A small, currently free model. Overridable with OPENROUTER_MODEL because free
 #: endpoints come and go.
-DEFAULT_MODEL = "meta-llama/llama-3.3-70b-instruct:free"
+DEFAULT_MODEL = "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free"
 
 #: Written answers below this mark value are judged by the deterministic engine
 #: alone; a one-mark question has no partial credit to argue about.
@@ -173,7 +173,8 @@ def grade(question, answer: str, config, *, response_for_cache: str | None = Non
         "model": model,
         "messages": _prompt(question, answer),
         "temperature": 0,
-        "max_tokens": 400,
+        # Reasoning models spend tokens thinking before they answer.
+        "max_tokens": 800,
         "response_format": {"type": "json_object"},
     }
     headers = {
@@ -187,7 +188,11 @@ def grade(question, answer: str, config, *, response_for_cache: str | None = Non
 
     try:
         payload = _post_json(API_URL, body, headers, float(config.get("AI_GRADING_TIMEOUT", 6)))
-        content = payload["choices"][0]["message"]["content"]
+        message = payload["choices"][0]["message"]
+        # Some free models are reasoning models: they put the visible answer in
+        # `content` and the deliberation in `reasoning`, and content stays null
+        # when the token budget runs out first. Falling back keeps them usable.
+        content = message.get("content") or message.get("reasoning") or ""
     except (urllib.error.URLError, TimeoutError, KeyError, IndexError, ValueError) as exc:
         log.warning("ai grading: request failed (%s)", exc)
         return None
