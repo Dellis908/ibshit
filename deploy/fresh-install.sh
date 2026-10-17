@@ -202,6 +202,9 @@ as_app_user "$WRAPPER" quiz seed
 as_app_user "$WRAPPER" quiz import "$PREFIX/seed/additional.json"
 if [ -f "$PREFIX/seed/chemistry.json" ]; then
     as_app_user "$WRAPPER" quiz import "$PREFIX/seed/chemistry.json"
+if [ -f "$PREFIX/seed/biology2025.json" ]; then
+    as_app_user "$WRAPPER" quiz import "$PREFIX/seed/biology2025.json"
+fi
 fi
 # Nie używaj `| head` na poleceniach aplikacji: `head` zamyka potok, aplikacja
 # ginie od SIGPIPE, a `set -o pipefail` zgłasza to jako błąd i przerywa instalację.

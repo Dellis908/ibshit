@@ -156,7 +156,12 @@ def _save_figure(data: str, mimetype: str, images_dir: Path) -> str:
     extension = {"image/png": "png", "image/jpeg": "jpg", "image/gif": "gif", "image/svg+xml": "svg"}.get(
         mimetype, "png"
     )
-    raw = base64.b64decode(data)
+    cleaned = re.sub(r"\s+", "", data)
+    cleaned += "=" * (-len(cleaned) % 4)
+    try:
+        raw = base64.b64decode(cleaned)
+    except Exception:
+        return None
     digest = hashlib.sha256(raw).hexdigest()[:16]
     images_dir.mkdir(parents=True, exist_ok=True)
     target = images_dir / f"{digest}.{extension}"
@@ -194,7 +199,8 @@ def convert_question(
     figure = _DATA_URI.search(body_html)
     if figure:
         image_path = _save_figure(figure.group(2), figure.group(1), images_dir)
-        body_text = body_text.replace("[diagram]", " ")
+        if image_path:
+            body_text = body_text.replace("[diagram]", " ")
 
     options = _OPTION.findall(body_text)
     qtype = "short_answer"

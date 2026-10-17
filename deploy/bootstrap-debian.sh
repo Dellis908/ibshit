@@ -199,6 +199,9 @@ run_flask quiz seed
 run_flask quiz import "$APP_DIR/seed/additional.json"
 if [ -f "$APP_DIR/seed/chemistry.json" ]; then
     run_flask quiz import "$APP_DIR/seed/chemistry.json"
+if [ -f "$APP_DIR/seed/biology2025.json" ]; then
+    run_flask quiz import "$APP_DIR/seed/biology2025.json"
+fi
 fi
 
 # The service account must own the database and image cache it just created.
