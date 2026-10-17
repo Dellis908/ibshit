@@ -7,6 +7,17 @@
   <meta name="color-scheme" content="light dark">
   <meta name="description" content="Free IB revision for Biology and Chemistry: practice questions, mark schemes and progress tracking across the syllabus.">
   <title>{% block title %}{{ site_name }}{% endblock %}</title>
+  <script>
+    /* Apply the saved theme before paint, so there is no flash of the wrong one. */
+    (function () {
+      try {
+        var saved = localStorage.getItem('theme');
+        if (saved === 'light' || saved === 'dark') {
+          document.documentElement.dataset.theme = saved;
+        }
+      } catch (e) { /* private mode: fall back to the system preference */ }
+    })();
+  </script>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   <link rel="icon" href="{{ url_for('static', filename='img/favicon.svg') }}" type="image/svg+xml">
   {% block head %}{% endblock %}
@@ -37,6 +48,9 @@
              {% if request.path == prefix or (prefix != '/' and request.path.startswith(prefix)) %}aria-current="page"{% endif %}>{{ label }}</a>
         {% endfor %}
         <a class="nav-cta" href="{{ url_for('main.quiz', mode='practice', count=10) }}">Start quiz</a>
+        <button type="button" class="theme-toggle" aria-label="Switch between light and dark theme" title="Light / dark">
+          <span class="theme-toggle-icon" aria-hidden="true">◐</span>
+        </button>
         <div class="user-menu">
           <a href="{{ url_for('auth.account') }}" title="Your account">{{ current_user.name }}</a>
           <form method="post" action="{{ url_for('auth.logout') }}">
@@ -50,6 +64,9 @@
         <a href="{{ url_for('auth.login') }}"
            {% if request.path == '/auth/login' %}aria-current="page"{% endif %}>Sign in</a>
         <a class="nav-cta" href="{{ url_for('auth.signup') }}">Create account</a>
+        <button type="button" class="theme-toggle" aria-label="Switch between light and dark theme" title="Light / dark">
+          <span aria-hidden="true">◐</span>
+        </button>
       {% endif %}
     </nav>
   </div>

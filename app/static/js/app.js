@@ -82,3 +82,35 @@
 
   window.QuizApp = { apiFetch, el };
 })();
+
+/* Theme toggle: remembers the choice, otherwise follows the system setting. */
+(function () {
+  "use strict";
+  var toggles = Array.prototype.slice.call(document.querySelectorAll(".theme-toggle"));
+  if (!toggles.length) return;
+
+  function current() {
+    var explicit = document.documentElement.dataset.theme;
+    if (explicit === "light" || explicit === "dark") return explicit;
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  }
+
+  function apply(theme) {
+    document.documentElement.dataset.theme = theme;
+    toggles.forEach(function (button) {
+      button.setAttribute("aria-pressed", theme === "dark" ? "true" : "false");
+    });
+  }
+
+  apply(current());
+
+  toggles.forEach(function (button) {
+    button.addEventListener("click", function () {
+      var next = current() === "dark" ? "light" : "dark";
+      apply(next);
+      try {
+        localStorage.setItem("theme", next);
+      } catch (e) { /* ignore: the theme still applies for this page */ }
+    });
+  });
+})();
